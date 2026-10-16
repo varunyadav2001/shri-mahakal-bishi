@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "narayanbishi-cdb62"
+  },
+  "targets": {
+    "narayanbishi-cdb62": {
+      "hosting": {
+        "admin": [
+          "narayanbishi-cdb62"
+        ]
+      }
+    }
+  }
+}

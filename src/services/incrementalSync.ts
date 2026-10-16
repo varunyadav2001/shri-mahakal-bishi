@@ -1,0 +1,594 @@
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  setDoc,
+  updateDoc,
+  increment,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { Customer, CollectionEntry, Loan, LoanPayment, BishiConfig } from '../types';
+import {
+  StorageService,
+  setStoredData,
+  STORAGE_KEYS,
+  deduplicateCustomers,
+  deduplicateCollections,
+  deduplicateLoans,
+  deduplicateLoanPayments,
+} from './db';
+import { invalidateStatsCache } from './stats';
+import { queueSnapshotPublishDebounced } from './snapshotService';
+
+const LAST_SYNC_KEY = 'nb_last_synced_at';
+let isSyncInProgress = false;
+
+export interface IncrementalSyncResult {
+  updatedCount: number;
+  deletedCount: number;
+  readsCount: number;
+  isUpToDate: boolean;
+  message: string;
+}
+
+let touchSyncDebounceTimer: any = null;
+let pendingExtraFields: Record<string, any> = {};
+
+/**
+ * Updates the global sync version / lastUpdated timestamp in Firestore.
+ * Debounced by default to prevent burst writes during rapid user actions.
+ */
+export const touchSyncTimestamp = async (extraFields?: Record<string, any>, immediate: boolean = false): Promise<void> => {
+  if (extraFields) {
+    pendingExtraFields = { ...pendingExtraFields, ...extraFields };
+  }
+
+  const executeTouch = async () => {
+    try {
+      const now = new Date().toISOString();
+      const statsRef = doc(db, 'stats', 'summary');
+      const custCount = StorageService.getCustomers().length;
+      const collCount = StorageService.getCollections().filter((c) => (c.collectedAmount || 0) > 0 || c.status === 'PAID').length;
+      const loanCount = StorageService.getLoans().length;
+      const allAccs = StorageService.getCustomers().map((c) => String(c.accountNumber).trim()).filter(Boolean);
+      const updatePayload: Record<string, any> = {
+        lastUpdated: now,
+        totalCustomers: custCount,
+        totalCollections: collCount,
+        totalLoans: loanCount,
+        activeCustomerAccounts: allAccs,
+        ...pendingExtraFields,
+      };
+      pendingExtraFields = {};
+      await updateDoc(statsRef, updatePayload).catch(async () => {
+        await setDoc(statsRef, updatePayload, { merge: true });
+      });
+      localStorage.setItem(LAST_SYNC_KEY, now);
+
+      // Pre-package database snapshot so 11 PM Cloud backup uses only 1 Read!
+      queueSnapshotPublishDebounced(60000);
+    } catch (err) {
+      console.warn('[Sync] touchSyncTimestamp note:', err);
+    }
+  };
+
+  if (immediate) {
+    if (touchSyncDebounceTimer) clearTimeout(touchSyncDebounceTimer);
+    await executeTouch();
+  } else {
+    if (touchSyncDebounceTimer) clearTimeout(touchSyncDebounceTimer);
+    touchSyncDebounceTimer = setTimeout(executeTouch, 2500);
+  }
+};
+
+/**
+ * Atomic customer addition notification:
+ * Updates lastUpdated, increments totalCustomers, and adds accountNumber to activeCustomerAccounts.
+ */
+export const touchSyncOnCustomerAdd = async (accountNumber: string): Promise<void> => {
+  try {
+    const now = new Date().toISOString();
+    const cleanAcc = String(accountNumber || '').trim();
+    const statsRef = doc(db, 'stats', 'summary');
+    const custCount = StorageService.getCustomers().length;
+    const collCount = StorageService.getCollections().length;
+    const loanCount = StorageService.getLoans().length;
+    await updateDoc(statsRef, {
+      lastUpdated: now,
+      totalCustomers: custCount,
+      totalCollections: collCount,
+      totalLoans: loanCount,
+      activeCustomerAccounts: arrayUnion(cleanAcc),
+    }).catch(async () => {
+      await setDoc(
+        statsRef,
+        {
+          lastUpdated: now,
+          totalCustomers: custCount,
+          totalCollections: collCount,
+          totalLoans: loanCount,
+          activeCustomerAccounts: [cleanAcc],
+        },
+        { merge: true }
+      );
+    });
+    localStorage.setItem(LAST_SYNC_KEY, now);
+  } catch (err) {
+    console.warn('[Sync] touchSyncOnCustomerAdd note:', err);
+  }
+};
+
+/**
+ * Atomic customer deletion notification:
+ * Updates lastUpdated, decrements totalCustomers, and removes accountNumber from activeCustomerAccounts.
+ */
+export const touchSyncOnCustomerDelete = async (accountNumber?: string): Promise<void> => {
+  try {
+    const now = new Date().toISOString();
+    const cleanAcc = accountNumber ? String(accountNumber).trim() : '';
+    const statsRef = doc(db, 'stats', 'summary');
+    const custCount = StorageService.getCustomers().length;
+    const collCount = StorageService.getCollections().length;
+    const loanCount = StorageService.getLoans().length;
+    const payload: Record<string, any> = {
+      lastUpdated: now,
+      totalCustomers: custCount,
+      totalCollections: collCount,
+      totalLoans: loanCount,
+    };
+    if (cleanAcc) {
+      payload.activeCustomerAccounts = arrayRemove(cleanAcc);
+    }
+    await updateDoc(statsRef, payload).catch(async () => {
+      await setDoc(statsRef, payload, { merge: true });
+    });
+    localStorage.setItem(LAST_SYNC_KEY, now);
+  } catch (err) {
+    console.warn('[Sync] touchSyncOnCustomerDelete note:', err);
+  }
+};
+
+/**
+ * Records a deletion tombstone so other devices know to prune this record
+ * during incremental sync without scanning the whole collection.
+ */
+export const recordDeletion = async (
+  collectionName: 'customers' | 'collections' | 'loans' | 'loanPayments' | 'bishi' | 'interestRates' | 'thakbaki',
+  docId: string,
+  extra?: { accountNumber?: string; name?: string; [key: string]: any }
+): Promise<void> => {
+  try {
+    const now = new Date().toISOString();
+    const cleanAcc = extra?.accountNumber ? String(extra.accountNumber).trim() : null;
+    const deletionId = `${collectionName}_${cleanAcc || docId}`;
+    const delRef = doc(db, 'deletions', deletionId);
+    await setDoc(delRef, {
+      id: deletionId,
+      collectionName,
+      docId,
+      accountNumber: cleanAcc,
+      name: extra?.name || null,
+      deletedAt: now,
+    });
+  } catch (err) {
+    console.warn('[Sync] recordDeletion note:', err);
+  }
+};
+
+/**
+ * Performs synchronization between local storage and Firestore:
+ * - If forceFull is true or count mismatch detected: fetches and merges complete remote records.
+ * - Otherwise performs fast delta sync based on updatedAt timestamps.
+ */
+export const performIncrementalSync = async (forceFull: boolean = false): Promise<IncrementalSyncResult> => {
+  if (isSyncInProgress) {
+    return {
+      updatedCount: 0,
+      deletedCount: 0,
+      readsCount: 0,
+      isUpToDate: true,
+      message: 'सिंक आधीपासूनच सुरू आहे (Sync already in progress)',
+    };
+  }
+
+  isSyncInProgress = true;
+  let readsCount = 0;
+  let updatedCount = 0;
+  let deletedCount = 0;
+
+  try {
+    const lastSyncedAt = localStorage.getItem(LAST_SYNC_KEY);
+
+    // Step 1: Read stats/summary for the latest cloud timestamp & counts (1 read)
+    const statsRef = doc(db, 'stats', 'summary');
+    const statsSnap = await getDoc(statsRef);
+    readsCount++;
+
+    const statsData = statsSnap.exists() ? statsSnap.data() : null;
+    const cloudLastUpdated = statsData?.lastUpdated as string | undefined;
+
+    const localCusts = StorageService.getCustomers();
+    const localLoans = StorageService.getLoans();
+    const localColls = StorageService.getCollections();
+
+    const cloudCusts = Number(statsData?.totalCustomers) || 0;
+    const cloudColls = Number(statsData?.totalCollections) || 0;
+    const cloudLoans = Number(statsData?.totalLoans) || 0;
+
+    const localAccSet = new Set(localCusts.map((c) => String(c.accountNumber || '').trim().toLowerCase()));
+    const hasMissingActiveAccounts =
+      Array.isArray(statsData?.activeCustomerAccounts) &&
+      statsData.activeCustomerAccounts.some((acc: string) => !localAccSet.has(String(acc).trim().toLowerCase()));
+
+    // Detect if this device is missing customers or loans compared to the cloud (needs pull from cloud)
+    const hasCountsMismatch =
+      (cloudCusts > 0 && localCusts.length < cloudCusts) ||
+      (cloudLoans > 0 && localLoans.length < cloudLoans) ||
+      hasMissingActiveAccounts;
+
+    // Detect if this device has new customers/loans created while offline (needs delta push to cloud)
+    const hasLocalMore =
+      (cloudCusts > 0 && localCusts.length > cloudCusts) ||
+      (cloudLoans > 0 && localLoans.length > cloudLoans);
+
+    if (hasLocalMore && Array.isArray(statsData?.activeCustomerAccounts) && statsData.activeCustomerAccounts.length > 0) {
+      const cloudAccounts = new Set(
+        statsData.activeCustomerAccounts.map((a: string) => String(a).trim().toLowerCase())
+      );
+      const lastSyncTime = lastSyncedAt ? new Date(lastSyncedAt).getTime() : 0;
+
+      const offlineCreatedCusts: Customer[] = [];
+      const deletedOnCloudCusts: Customer[] = [];
+
+      localCusts.forEach((c) => {
+        const acc = String(c.accountNumber || '').trim().toLowerCase();
+        if (!cloudAccounts.has(acc)) {
+          const createdTime = c.createdAt ? new Date(c.createdAt).getTime() : 0;
+          if (lastSyncTime > 0 && createdTime > 0 && createdTime <= lastSyncTime) {
+            deletedOnCloudCusts.push(c);
+          } else if (lastSyncTime === 0 || createdTime > lastSyncTime) {
+            offlineCreatedCusts.push(c);
+          } else {
+            deletedOnCloudCusts.push(c);
+          }
+        }
+      });
+
+      if (deletedOnCloudCusts.length > 0) {
+        const deletedAccs = new Set(deletedOnCloudCusts.map((c) => String(c.accountNumber || '').trim().toLowerCase()));
+        const deletedIds = new Set(deletedOnCloudCusts.map((c) => c.id));
+        const prunedCusts = localCusts.filter((c) => !deletedIds.has(c.id) && !deletedAccs.has(String(c.accountNumber || '').trim().toLowerCase()));
+        setStoredData(STORAGE_KEYS.CUSTOMERS, prunedCusts);
+
+        const colls = StorageService.getCollections().filter((col) => !deletedIds.has(col.customerId) && !deletedAccs.has(String(col.accountNumber || '').trim().toLowerCase()));
+        setStoredData(STORAGE_KEYS.COLLECTIONS, colls);
+
+        const loans = StorageService.getLoans().filter((l) => !deletedIds.has(l.customerId) && !deletedAccs.has(String(l.accountNumber || '').trim().toLowerCase()));
+        setStoredData(STORAGE_KEYS.LOANS, loans);
+
+        const pays = StorageService.getLoanPayments().filter((p) => !deletedIds.has(p.customerId) && !deletedAccs.has(String(p.accountNumber || '').trim().toLowerCase()));
+        setStoredData(STORAGE_KEYS.LOAN_PAYMENTS, pays);
+
+        deletedCount += deletedOnCloudCusts.length;
+      }
+
+      if (offlineCreatedCusts.length > 0) {
+        for (const c of offlineCreatedCusts) {
+          await StorageService.syncCustomerToFirestore(c);
+        }
+        await touchSyncTimestamp(undefined, true);
+        return {
+          updatedCount: offlineCreatedCusts.length,
+          deletedCount,
+          readsCount,
+          isUpToDate: true,
+          message: 'नवीन नोंदी क्लाउडवर यशस्वीपणे सेव्ह झाल्या',
+        };
+      }
+    }
+
+    // If forceFull is requested OR record count mismatch detected, run full reconciliation
+    if (forceFull || hasCountsMismatch) {
+      await StorageService.fetchAndSyncFromFirestore();
+      const finalLoans = StorageService.getLoans().length;
+      const finalColls = StorageService.getCollections().length;
+      const finalCusts = StorageService.getCustomers().length;
+      const finalSyncTimestamp = cloudLastUpdated || new Date().toISOString();
+      localStorage.setItem(LAST_SYNC_KEY, finalSyncTimestamp);
+      invalidateStatsCache();
+
+      const diff =
+        Math.max(0, finalColls - localColls.length) +
+        Math.max(0, finalLoans - localLoans.length) +
+        Math.max(0, finalCusts - localCusts.length);
+
+      return {
+        updatedCount: diff,
+        deletedCount: 0,
+        readsCount: readsCount + 9,
+        isUpToDate: true,
+        message:
+          diff > 0
+            ? `${diff} नवीन नोंदी क्लाउडवरून यशस्वीपणे समक्रमित झाल्या`
+            : 'सर्व डेटा क्लाउडवरून अद्ययावत आहे',
+      };
+    }
+
+    // Step 1.1: Immediate ghost-customer reconciliation using activeCustomerAccounts
+    if (Array.isArray(statsData?.activeCustomerAccounts) && statsData.activeCustomerAccounts.length > 0 && cloudCusts > 0) {
+      const activeSet = new Set(
+        statsData.activeCustomerAccounts.map((a: string) => String(a).trim().toLowerCase())
+      );
+      const pruned = localCusts.filter((c) =>
+        activeSet.has(String(c.accountNumber).trim().toLowerCase())
+      );
+      if (pruned.length !== localCusts.length && pruned.length >= cloudCusts) {
+        deletedCount += localCusts.length - pruned.length;
+        setStoredData(STORAGE_KEYS.CUSTOMERS, pruned);
+      }
+    }
+
+    // If cloud timestamp is valid, counts match, and we are already synchronized with it
+    if (cloudLastUpdated && lastSyncedAt && cloudLastUpdated <= lastSyncedAt && !hasCountsMismatch && !hasLocalMore) {
+      invalidateStatsCache();
+      return {
+        updatedCount: 0,
+        deletedCount,
+        readsCount,
+        isUpToDate: deletedCount === 0,
+        message:
+          deletedCount > 0
+            ? `${deletedCount} हटवलेले खातेदार काढून टाकले (1 रीड)`
+            : 'सर्व डेटा आधीपासूनच अद्ययावत आहे (Data is already up to date - 1 read)',
+      };
+    }
+
+    const filterTimestamp = lastSyncedAt || '2000-01-01T00:00:00.000Z';
+
+    // Step 2: Query modified or newly created documents across collections
+    const [custSnap, loanSnap, loanPaySnap, delSnap, collSnap, bishiSnap] = await Promise.all([
+      getDocs(query(collection(db, 'customers'), where('updatedAt', '>', filterTimestamp))),
+      getDocs(query(collection(db, 'loans'), where('updatedAt', '>', filterTimestamp))),
+      getDocs(query(collection(db, 'loanPayments'), where('updatedAt', '>', filterTimestamp))),
+      getDocs(query(collection(db, 'deletions'), where('deletedAt', '>', filterTimestamp))),
+      getDocs(query(collection(db, 'collections'), where('updatedAt', '>', filterTimestamp))).catch(() => null),
+      getDocs(collection(db, 'bishi')).catch(() => null),
+    ]);
+
+    readsCount += custSnap.size + loanSnap.size + loanPaySnap.size + delSnap.size + (collSnap?.size || 0) + (bishiSnap?.size || 0);
+
+    // 2.1 Update Customers and their embedded installments
+    if (!custSnap.empty) {
+      const incomingCusts: Customer[] = [];
+      const extractedColls: CollectionEntry[] = [];
+      custSnap.forEach((d: any) => {
+        const raw = d.data();
+        const acc = String(raw.accountNumber || raw.accountNo || '').trim();
+        const name = raw.name || raw.customerName || '';
+        const fullCust: Customer = {
+          ...raw,
+          id: raw.id || d.id,
+          name,
+          customerName: raw.customerName || name,
+          accountNumber: acc,
+          accountNo: acc,
+        };
+        incomingCusts.push(fullCust);
+
+        if (Array.isArray(raw.installments) && raw.installments.length > 0) {
+          raw.installments.forEach((inst: any) => {
+            extractedColls.push({
+              id: inst.id || `coll_${fullCust.id}_${inst.periodIndex}`,
+              customerId: fullCust.id,
+              customerName: fullCust.name,
+              accountNumber: fullCust.accountNumber,
+              officeId: inst.officeId || fullCust.officeId || 'MAIN',
+              bishiType: inst.bishiType || fullCust.bishiType,
+              bishiName: inst.bishiName || fullCust.bishiName,
+              periodIndex: inst.periodIndex,
+              periodLabel: inst.periodLabel || `हप्ता ${inst.periodIndex}`,
+              dueDate: inst.dueDate,
+              paymentDate: inst.paymentDate || undefined,
+              paymentTime: inst.paymentTime || undefined,
+              paymentMode: inst.paymentMode || undefined,
+              expectedAmount: Number(inst.expectedAmount) || 0,
+              collectedAmount: Number(inst.collectedAmount) || 0,
+              extraAmount: Number(inst.extraAmount) || 0,
+              remainingAmount: Number(inst.remainingAmount) || 0,
+              interestAmount: Number(inst.interestAmount) || 0,
+              historicalInterestRate: Number(inst.historicalInterestRate) || 0,
+              penaltyAmount: Number(inst.penaltyAmount) || 0,
+              historicalPenaltyRate: Number(inst.historicalPenaltyRate) || 0,
+              totalPaid: Number(inst.totalPaid) || 0,
+              totalWithPenalty: Number(inst.totalWithPenalty) || 0,
+              status: inst.status || 'PENDING',
+              note: inst.note || undefined,
+              updatedAt: inst.updatedAt || undefined,
+            });
+          });
+        }
+      });
+      const localCusts = StorageService.getCustomers();
+      const merged = deduplicateCustomers([...incomingCusts, ...localCusts]);
+      setStoredData(STORAGE_KEYS.CUSTOMERS, merged);
+
+      if (extractedColls.length > 0) {
+        const localColls = StorageService.getCollections();
+        const mergedColls = deduplicateCollections([...extractedColls, ...localColls]);
+        setStoredData(STORAGE_KEYS.COLLECTIONS, mergedColls);
+      }
+      updatedCount += incomingCusts.length;
+    }
+
+    // 2.2 Direct Collections sync
+    if (collSnap && !collSnap.empty) {
+      const incomingDirectColls: CollectionEntry[] = [];
+      collSnap.forEach((d: any) => {
+        const raw = d.data();
+        incomingDirectColls.push({ ...raw, id: raw.id || d.id });
+      });
+      if (incomingDirectColls.length > 0) {
+        const localColls = StorageService.getCollections();
+        const mergedColls = deduplicateCollections([...incomingDirectColls, ...localColls]);
+        setStoredData(STORAGE_KEYS.COLLECTIONS, mergedColls);
+        updatedCount += incomingDirectColls.length;
+      }
+    }
+
+    // 2.3 Update Loans
+    if (!loanSnap.empty) {
+      const incomingLoans: Loan[] = [];
+      loanSnap.forEach((d: any) => {
+        const raw = d.data();
+        incomingLoans.push({ ...raw, id: raw.id || d.id });
+      });
+      const localLoans = StorageService.getLoans();
+      const merged = deduplicateLoans([...incomingLoans, ...localLoans]);
+      setStoredData(STORAGE_KEYS.LOANS, merged);
+      updatedCount += incomingLoans.length;
+    }
+
+    // 2.4 Update Loan Payments
+    if (!loanPaySnap.empty) {
+      const incomingPays: LoanPayment[] = [];
+      loanPaySnap.forEach((d: any) => {
+        const raw = d.data();
+        incomingPays.push({ ...raw, id: raw.id || d.id });
+      });
+      const localPays = StorageService.getLoanPayments();
+      const merged = deduplicateLoanPayments([...incomingPays, ...localPays]);
+      setStoredData(STORAGE_KEYS.LOAN_PAYMENTS, merged);
+      updatedCount += incomingPays.length;
+    }
+
+    // 2.45 Update Bishi Configs (authoritative remote snapshot)
+    if (bishiSnap && !bishiSnap.empty) {
+      const incomingBishi: BishiConfig[] = [];
+      bishiSnap.forEach((d: any) => {
+        const raw = d.data();
+        incomingBishi.push({ ...raw, id: raw.id || d.id });
+      });
+      setStoredData(STORAGE_KEYS.BISHI_CONFIGS, incomingBishi);
+      updatedCount += incomingBishi.length;
+    }
+
+    // 2.5 Process Deletions
+    if (!delSnap.empty) {
+      const deletedCustomerIds = new Set<string>();
+      const deletedCustomerAccounts = new Set<string>();
+      const deletedCollIds = new Set<string>();
+      const deletedLoanIds = new Set<string>();
+      const deletedPayIds = new Set<string>();
+      const deletedBishiIds = new Set<string>();
+      const deletedRateIds = new Set<string>();
+      const deletedThakbakiIds = new Set<string>();
+
+      delSnap.forEach((d: any) => {
+        const raw = d.data();
+        if (raw.collectionName === 'customers') {
+          if (raw.docId) deletedCustomerIds.add(raw.docId);
+          if (raw.accountNumber) deletedCustomerAccounts.add(String(raw.accountNumber).trim().toLowerCase());
+        } else if (raw.collectionName === 'collections') {
+          deletedCollIds.add(raw.docId);
+        } else if (raw.collectionName === 'loans') {
+          deletedLoanIds.add(raw.docId);
+        } else if (raw.collectionName === 'loanPayments') {
+          deletedPayIds.add(raw.docId);
+        } else if (raw.collectionName === 'bishi') {
+          if (raw.docId) deletedBishiIds.add(raw.docId);
+        } else if (raw.collectionName === 'interestRates') {
+          if (raw.docId) deletedRateIds.add(raw.docId);
+        } else if (raw.collectionName === 'thakbaki') {
+          if (raw.docId) deletedThakbakiIds.add(raw.docId);
+        }
+        deletedCount++;
+      });
+
+      if (deletedCustomerIds.size > 0 || deletedCustomerAccounts.size > 0) {
+        const current = StorageService.getCustomers().filter(
+          (c) =>
+            !deletedCustomerIds.has(c.id) &&
+            (!c.accountNumber || !deletedCustomerAccounts.has(String(c.accountNumber).trim().toLowerCase()))
+        );
+        setStoredData(STORAGE_KEYS.CUSTOMERS, current);
+
+        const currentColls = StorageService.getCollections().filter(
+          (c) =>
+            !deletedCustomerIds.has(c.customerId) &&
+            (!c.accountNumber || !deletedCustomerAccounts.has(String(c.accountNumber).trim().toLowerCase()))
+        );
+        setStoredData(STORAGE_KEYS.COLLECTIONS, currentColls);
+
+        const currentLoans = StorageService.getLoans().filter(
+          (l) =>
+            !deletedCustomerIds.has(l.customerId) &&
+            (!l.accountNumber || !deletedCustomerAccounts.has(String(l.accountNumber).trim().toLowerCase()))
+        );
+        setStoredData(STORAGE_KEYS.LOANS, currentLoans);
+
+        const currentPays = StorageService.getLoanPayments().filter(
+          (p) =>
+            !deletedCustomerIds.has(p.customerId) &&
+            (!p.accountNumber || !deletedCustomerAccounts.has(String(p.accountNumber).trim().toLowerCase()))
+        );
+        setStoredData(STORAGE_KEYS.LOAN_PAYMENTS, currentPays);
+      }
+      if (deletedCollIds.size > 0) {
+        const current = StorageService.getCollections().filter((c) => !deletedCollIds.has(c.id));
+        setStoredData(STORAGE_KEYS.COLLECTIONS, current);
+      }
+      if (deletedLoanIds.size > 0) {
+        const current = StorageService.getLoans().filter((l) => !deletedLoanIds.has(l.id));
+        setStoredData(STORAGE_KEYS.LOANS, current);
+      }
+      if (deletedPayIds.size > 0) {
+        const current = StorageService.getLoanPayments().filter((p) => !deletedPayIds.has(p.id));
+        setStoredData(STORAGE_KEYS.LOAN_PAYMENTS, current);
+      }
+      if (deletedBishiIds.size > 0) {
+        const current = StorageService.getBishiConfigs().filter((b) => !deletedBishiIds.has(b.id));
+        setStoredData(STORAGE_KEYS.BISHI_CONFIGS, current);
+      }
+      if (deletedRateIds.size > 0) {
+        const current = StorageService.getInterestRates().filter((r) => !deletedRateIds.has(r.id));
+        setStoredData(STORAGE_KEYS.INTEREST_RATES, current);
+      }
+      if (deletedThakbakiIds.size > 0) {
+        const current = StorageService.getThakbakiList().filter((t) => !deletedThakbakiIds.has(t.id));
+        setStoredData(STORAGE_KEYS.THAKBAKI, current);
+      }
+    }
+
+    // Mark current sync timestamp
+    const newTimestamp = cloudLastUpdated || new Date().toISOString();
+    localStorage.setItem(LAST_SYNC_KEY, newTimestamp);
+    invalidateStatsCache();
+
+    return {
+      updatedCount,
+      deletedCount,
+      readsCount,
+      isUpToDate: updatedCount === 0 && deletedCount === 0,
+      message:
+        updatedCount > 0 || deletedCount > 0
+          ? `${updatedCount} नवीन/बदललेल्या नोंदी आणि ${deletedCount} हटवलेल्या नोंदी अद्ययावत झाल्या (${readsCount} रीड्स)`
+          : `सर्व डेटा अद्ययावत आहे (${readsCount} रीड)`,
+    };
+  } catch (err: any) {
+    console.warn('[Sync] performIncrementalSync error:', err);
+    return {
+      updatedCount: 0,
+      deletedCount: 0,
+      readsCount: Math.max(1, readsCount),
+      isUpToDate: false,
+      message: `रिफ्रेश करताना त्रुटी: ${err?.message || 'अज्ञात त्रुटी'}`,
+    };
+  } finally {
+    isSyncInProgress = false;
+  }
+};

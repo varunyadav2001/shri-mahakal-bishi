@@ -1,0 +1,860 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// This security rules file assumes the following data structures:
+//
+// Collection: admins
+// Document ID: {adminId} (e.g., "admin_primary", Firebase Auth UID)
+// Fields:
+//   - id: string (required, 1-100 chars, immutable)
+//   - name: string (required, 1-100 chars)
+//   - mobile: string (required, 10-15 chars)
+//   - email: string (optional, 5-100 chars, email format)
+//   - photoURL: string (optional, URL)
+//   - password: string (optional, 4-100 chars)
+//   - role: string (optional, 'SUPER_ADMIN' | 'ADMIN')
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: customers
+// Document ID: {customerId} (e.g., "cust_101", "15_AUGUST_101_Ramesh")
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - accountNumber: string (required, 1-30 chars)
+//   - accountNo: string (optional, 1-30 chars)
+//   - name: string (required, 1-100 chars)
+//   - customerName: string (optional, 1-100 chars)
+//   - nameLower: string (optional, 1-100 chars)
+//   - mobile: string (required, 10-15 chars) - used to verify member ownership
+//   - bishiType: string (required, 1-50 chars)
+//   - bishiName: string (optional, 1-100 chars)
+//   - bishiDate: string (optional, 1-30 chars)
+//   - modality: string (optional, 'W' | 'M' | 'WEEKLY' | 'MONTHLY')
+//   - amount: number (required, >= 0, <= 10000000)
+//   - totalInstallments: number (optional, >= 0)
+//   - interestRate: number (optional, >= 0)
+//   - penaltyRate: number (optional, >= 0)
+//   - officeId: string (optional, 1-30 chars)
+//   - address: string (optional, <= 300 chars)
+//   - photoURL: string (optional, <= 1000 chars)
+//   - hasLoan: bool (optional)
+//   - status: string (optional, 'ACTIVE' | 'COMPLETED' | 'SETTLED' | 'CLOSED')
+//   - summary: map (optional, aggregated installment calculations)
+//   - installments: list (optional, max 150 embedded collection items)
+//   - loanDetails: map (optional, active loan details)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: collections
+// Document ID: {collectionId}
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - customerId: string (required, 1-100 chars)
+//   - customerName: string (optional, <= 100 chars)
+//   - customerMobile: string (optional, <= 20 chars)
+//   - customerPhone: string (optional, <= 20 chars)
+//   - accountNumber: string (required, 1-30 chars)
+//   - officeId: string (optional, <= 30 chars)
+//   - bishiType: string (optional, <= 50 chars)
+//   - bishiName: string (optional, <= 100 chars)
+//   - periodIndex: number (optional, >= 0)
+//   - periodLabel: string (optional, <= 50 chars)
+//   - dueDate: string (optional, <= 30 chars)
+//   - date: string (optional, <= 30 chars)
+//   - paymentDate: string (optional, <= 30 chars)
+//   - paymentTime: string (optional, <= 30 chars)
+//   - expectedAmount: number (optional, >= 0)
+//   - collectedAmount: number (optional, >= 0)
+//   - extraAmount: number (optional, >= 0)
+//   - remainingAmount: number (optional, >= 0)
+//   - interestAmount: number (optional, >= 0)
+//   - historicalInterestRate: number (optional, >= 0)
+//   - penaltyAmount: number (optional, >= 0)
+//   - historicalPenaltyRate: number (optional, >= 0)
+//   - totalPaid: number (optional, >= 0)
+//   - totalWithPenalty: number (optional, >= 0)
+//   - status: string (optional, <= 30 chars)
+//   - paymentMode: string (optional, <= 30 chars)
+//   - paymentMethod: string (optional, <= 30 chars)
+//   - note / notes: string (optional, <= 500 chars)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: loans
+// Document ID: {loanId}
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - customerId: string (required, 1-100 chars, immutable)
+//   - customerName: string (optional, <= 100 chars)
+//   - customerMobile: string (optional, <= 20 chars)
+//   - accountNumber: string (required, 1-30 chars)
+//   - officeId: string (optional, <= 30 chars)
+//   - bishiType: string (optional, <= 50 chars)
+//   - principalAmount: number (required, >= 0)
+//   - issueDate: string (optional, <= 30 chars)
+//   - interestRate: number (optional, >= 0)
+//   - totalInterest: number (optional, >= 0)
+//   - totalInterestPaid: number (optional, >= 0)
+//   - totalPayable: number (optional, >= 0)
+//   - paidAmount: number (optional, >= 0)
+//   - discountAmount: number (optional, >= 0)
+//   - remainingAmount: number (optional, >= 0)
+//   - balancePrincipal: number (optional, >= 0)
+//   - penaltyAmount: number (optional, >= 0)
+//   - status: string (optional, 'ACTIVE' | 'CLOSED' | 'COMPLETED' | 'SETTLED' | 'ROLLOVER')
+//   - purposeNote / notes: string (optional, <= 500 chars)
+//   - previousLoanId: string (optional, <= 100 chars)
+//   - rolledOverAt: string (optional, <= 60 chars)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: loanPayments
+// Document ID: {paymentId}
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - loanId: string (optional, <= 100 chars)
+//   - customerId: string (required, 1-100 chars, immutable)
+//   - customerName: string (optional, <= 100 chars)
+//   - customerMobile: string (optional, <= 20 chars)
+//   - accountNumber: string (optional, <= 30 chars)
+//   - officeId: string (optional, <= 30 chars)
+//   - paymentDate: string (optional, <= 30 chars)
+//   - paidAmount: number (required, >= 0)
+//   - interestPaid: number (optional, >= 0)
+//   - totalInterest / totalInterestPaid: number (optional, >= 0)
+//   - penaltyPaid: number (optional, >= 0)
+//   - discountAmount: number (optional, >= 0)
+//   - remainingLoan: number (optional, >= 0)
+//   - totalPaid: number (optional, >= 0)
+//   - paymentMode: string (optional, <= 30 chars)
+//   - note: string (optional, <= 500 chars)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: installments
+// Document ID: {installmentId}
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - customerId: string (required, 1-100 chars, immutable)
+//   - customerName: string (optional, <= 100 chars)
+//   - accountNumber / accountNo: string (optional, <= 30 chars)
+//   - type: string (optional, <= 30 chars)
+//   - sourceId: string (optional, <= 100 chars)
+//   - dueDate: string (required, <= 30 chars)
+//   - amount: number (required, >= 0)
+//   - status: string (optional, 'pending' | 'paid' | 'overdue')
+//   - paidAt: string/timestamp (optional)
+//   - periodIndex: number (optional, >= 0)
+//   - periodLabel: string (optional, <= 50 chars)
+//   - officeId: string (optional, <= 30 chars)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: requests & member_requests
+// Document ID: {requestId}
+// Fields:
+//   - id: string (optional, 0-100 chars, immutable)
+//   - memberUid: string (optional, <= 128 chars)
+//   - customerId: string (optional, <= 100 chars)
+//   - customerName: string (optional, <= 100 chars)
+//   - customerPhone: string (optional, <= 20 chars)
+//   - mobile: string (optional, <= 20 chars)
+//   - accountNumber: string (optional, <= 30 chars)
+//   - type: string (required, <= 50 chars)
+//   - amount: number (optional, >= 0)
+//   - message: string (required, <= 1000 chars)
+//   - status: string (required, 'PENDING' | 'APPROVED' | 'REJECTED')
+//   - fcmToken: string (optional, <= 500 chars)
+//   - schemeId: string (optional, <= 50 chars)
+//   - schemeName: string (optional, <= 100 chars)
+//   - modality: string (optional, <= 20 chars)
+//   - totalInstallments: number (optional, >= 0)
+//   - officeId: string (optional, <= 30 chars)
+//   - payload: map (optional)
+//   - metadata: map (optional)
+//   - reviewNote: string (optional, <= 500 chars)
+//   - reviewedBy: string (optional, <= 100 chars)
+//   - reviewedById: string (optional, <= 128 chars)
+//   - reviewedAt: string (optional, <= 60 chars)
+//   - createdAt: string/timestamp (optional, immutable)
+//   - updatedAt: string/timestamp (optional)
+//
+// Collection: notifications
+// Document ID: {notificationId}
+// Fields:
+//   - id: string (optional, 1-100 chars, immutable)
+//   - recipientPhone / mobile: string (optional, <= 20 chars)
+//   - recipientCustomerId / customerId: string (optional, <= 100 chars)
+//   - memberUid: string (optional, <= 128 chars)
+//   - requestId: string (optional, <= 100 chars)
+//   - title: string (required, 1-200 chars)
+//   - titleMr: string (optional, <= 200 chars)
+//   - body / message: string (optional, <= 1000 chars)
+//   - messageMr: string (optional, <= 1000 chars)
+//   - type: string (optional, <= 50 chars)
+//   - status: string (optional, <= 30 chars)
+//   - read: bool (required)
+//   - createdAt: string/timestamp (optional, immutable)
+//
+// Collection: stats
+// Document ID: {docId} (e.g. "summary")
+// Fields:
+//   - totalCustomers, todaysCollection, totalBishiCollected, totalPrincipalLoans,
+//     loanBalanceDue, todaysPenalty, todaysDueAmount, todaysDueInstallments: number (>= 0)
+//   - lastUpdated: string/timestamp (optional)
+//
+// Collection: audit_logs & auditLogs
+// Document ID: {logId}
+// Fields:
+//   - action: string (required, <= 50 chars)
+//   - timestamp: string/timestamp (required, <= 60 chars)
+//   - adminId, adminName, performedBy, performedById, entityType, entityId, collection, documentId: string (optional)
+//   - details, previousData, newData: string/map (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Root Level Default Deny
+    // ===============================================================
+    // All documents across the database are inaccessible unless explicitly permitted.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // Core Helper Functions
+    // ===============================================================
+
+    // Check if the request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the authenticated user has verified administrator authority.
+    // Authority sources:
+    // 1. Firebase Auth anonymous sign-in provider (Admin Web App session)
+    // 2. Firebase Auth custom claim token: admin == true OR role in ['ADMIN', 'SUPER_ADMIN']
+    // 3. Primary Bootstrap Admin email
+    // 4. Primary Bootstrap Admin phone number
+    // 5. Existing document in the /admins collection matching the user's UID
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.keys().hasAny(['firebase']) &&
+         request.auth.token.firebase.keys().hasAny(['sign_in_provider']) &&
+         request.auth.token.firebase.sign_in_provider == 'anonymous') ||
+        (request.auth.token.keys().hasAny(['admin']) && request.auth.token.admin == true) ||
+        (request.auth.token.keys().hasAny(['role']) && (request.auth.token.role == 'ADMIN' || request.auth.token.role == 'SUPER_ADMIN')) ||
+        (request.auth.token.keys().hasAny(['email']) && request.auth.token.email == 'admin@narayanbishi.com') ||
+        (request.auth.token.keys().hasAny(['phone_number']) && (request.auth.token.phone_number == '+919876543210' || request.auth.token.phone_number == '9876543210')) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Verify if a phone number matches the authenticated user's phone token.
+    // Handles both 10-digit Indian local format (e.g., '9876543210')
+    // and standard E.164 international format with '+91'.
+    function isMemberWithPhone(phone) {
+      return isAuthenticated() &&
+        phone is string &&
+        'phone_number' in request.auth.token &&
+        (
+          request.auth.token.phone_number == phone ||
+          request.auth.token.phone_number == '+91' + phone ||
+          '+91' + request.auth.token.phone_number == phone
+        );
+    }
+
+    // Verify if the authenticated member owns the parent customer record.
+    function isCustomerOwner(customerId) {
+      return isAuthenticated() &&
+        customerId is string &&
+        customerId.size() > 0 &&
+        exists(/databases/$(database)/documents/customers/$(customerId)) &&
+        isMemberWithPhone(get(/databases/$(database)/documents/customers/$(customerId)).data.mobile);
+    }
+
+    // Verify if the authenticated member owns this request
+    function isMemberOwnRequest(data) {
+      return (
+        ('customerPhone' in data && isMemberWithPhone(data.customerPhone)) ||
+        ('mobile' in data && isMemberWithPhone(data.mobile)) ||
+        ('memberUid' in data && data.memberUid == request.auth.uid) ||
+        ('customerId' in data && isCustomerOwner(data.customerId))
+      );
+    }
+
+    // Verify if the authenticated member owns this notification
+    function isMemberOwnNotification(data) {
+      return (
+        ('recipientPhone' in data && isMemberWithPhone(data.recipientPhone)) ||
+        ('mobile' in data && isMemberWithPhone(data.mobile)) ||
+        ('recipientCustomerId' in data && isCustomerOwner(data.recipientCustomerId)) ||
+        ('customerId' in data && isCustomerOwner(data.customerId)) ||
+        ('memberUid' in data && data.memberUid == request.auth.uid)
+      );
+    }
+
+    // Validate that the document hasn't changed in specified immutable fields
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Optional string validator with length bounds
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+        (data[field] is string && data[field].size() >= minLen && data[field].size() <= maxLen);
+    }
+
+    // Optional number validator with range bounds
+    function isValidOptionalNumber(data, field, minVal, maxVal) {
+      return !(field in data) ||
+        (data[field] is number && data[field] >= minVal && data[field] <= maxVal);
+    }
+
+    // Optional boolean validator
+    function isValidOptionalBool(data, field) {
+      return !(field in data) || (data[field] is bool);
+    }
+
+    // Optional list validator with max items limit
+    function isValidOptionalList(data, field, maxSize) {
+      return !(field in data) || (data[field] is list && data[field].size() <= maxSize);
+    }
+
+    // Optional map validator
+    function isValidOptionalMap(data, field) {
+      return !(field in data) || (data[field] is map);
+    }
+
+    // ===============================================================
+    // Domain Validators (Applied on BOTH Create & Update)
+    // ===============================================================
+
+    function isValidAdmin(data) {
+      return (
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.mobile is string && data.mobile.size() >= 10 && data.mobile.size() <= 15 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'email', 5, 100) &&
+        isValidOptionalString(data, 'photoURL', 1, 1000) &&
+        isValidOptionalString(data, 'password', 4, 100) &&
+        isValidOptionalString(data, 'role', 1, 30) &&
+        isValidOptionalString(data, 'createdAt', 1, 60) &&
+        isValidOptionalString(data, 'updatedAt', 1, 60)
+      );
+    }
+
+    function isValidCustomer(data) {
+      return (
+        data.accountNumber is string && data.accountNumber.size() > 0 && data.accountNumber.size() <= 30 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.mobile is string && data.mobile.size() >= 10 && data.mobile.size() <= 15 &&
+        data.bishiType is string && data.bishiType.size() > 0 && data.bishiType.size() <= 50 &&
+        data.amount is number && data.amount >= 0 && data.amount <= 10000000 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'accountNo', 1, 30) &&
+        isValidOptionalString(data, 'customerName', 1, 100) &&
+        isValidOptionalString(data, 'nameLower', 1, 100) &&
+        isValidOptionalString(data, 'bishiName', 1, 100) &&
+        isValidOptionalString(data, 'bishiDate', 1, 30) &&
+        isValidOptionalString(data, 'modality', 1, 20) &&
+        isValidOptionalNumber(data, 'totalInstallments', 0, 1000) &&
+        isValidOptionalNumber(data, 'interestRate', 0, 100) &&
+        isValidOptionalNumber(data, 'penaltyRate', 0, 100000) &&
+        isValidOptionalString(data, 'officeId', 1, 30) &&
+        isValidOptionalString(data, 'address', 0, 300) &&
+        isValidOptionalString(data, 'photoURL', 0, 1000) &&
+        isValidOptionalBool(data, 'hasLoan') &&
+        isValidOptionalString(data, 'status', 1, 30) &&
+        isValidOptionalMap(data, 'summary') &&
+        isValidOptionalList(data, 'installments', 150) &&
+        isValidOptionalMap(data, 'loanDetails') &&
+        isValidOptionalString(data, 'createdAt', 1, 60) &&
+        isValidOptionalString(data, 'updatedAt', 1, 60)
+      );
+    }
+
+    function isValidCollection(data) {
+      return (
+        data.customerId is string && data.customerId.size() > 0 && data.customerId.size() <= 100 &&
+        data.accountNumber is string && data.accountNumber.size() > 0 && data.accountNumber.size() <= 30 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'customerName', 0, 100) &&
+        isValidOptionalString(data, 'customerMobile', 0, 20) &&
+        isValidOptionalString(data, 'customerPhone', 0, 20) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalString(data, 'bishiType', 0, 50) &&
+        isValidOptionalString(data, 'bishiName', 0, 100) &&
+        isValidOptionalNumber(data, 'periodIndex', 0, 1000) &&
+        isValidOptionalString(data, 'periodLabel', 0, 50) &&
+        isValidOptionalString(data, 'dueDate', 0, 30) &&
+        isValidOptionalString(data, 'date', 0, 30) &&
+        isValidOptionalString(data, 'paymentDate', 0, 30) &&
+        isValidOptionalString(data, 'paymentTime', 0, 30) &&
+        isValidOptionalNumber(data, 'expectedAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'collectedAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'extraAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'remainingAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'interestAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'historicalInterestRate', 0, 100) &&
+        isValidOptionalNumber(data, 'penaltyAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'historicalPenaltyRate', 0, 100000) &&
+        isValidOptionalNumber(data, 'totalPaid', 0, 10000000) &&
+        isValidOptionalNumber(data, 'totalWithPenalty', 0, 10000000) &&
+        isValidOptionalString(data, 'status', 0, 30) &&
+        isValidOptionalString(data, 'paymentMode', 0, 30) &&
+        isValidOptionalString(data, 'paymentMethod', 0, 30) &&
+        isValidOptionalString(data, 'note', 0, 500) &&
+        isValidOptionalString(data, 'notes', 0, 500) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidLoan(data) {
+      return (
+        data.customerId is string && data.customerId.size() > 0 && data.customerId.size() <= 100 &&
+        data.accountNumber is string && data.accountNumber.size() > 0 && data.accountNumber.size() <= 30 &&
+        data.principalAmount is number && data.principalAmount >= 0 && data.principalAmount <= 50000000 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'customerName', 0, 100) &&
+        isValidOptionalString(data, 'customerMobile', 0, 20) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalString(data, 'bishiType', 0, 50) &&
+        isValidOptionalString(data, 'issueDate', 0, 30) &&
+        isValidOptionalNumber(data, 'interestRate', 0, 100) &&
+        isValidOptionalNumber(data, 'totalInterest', 0, 50000000) &&
+        isValidOptionalNumber(data, 'totalInterestPaid', 0, 50000000) &&
+        isValidOptionalNumber(data, 'totalPayable', 0, 100000000) &&
+        isValidOptionalNumber(data, 'paidAmount', 0, 100000000) &&
+        isValidOptionalNumber(data, 'discountAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'remainingAmount', 0, 100000000) &&
+        isValidOptionalNumber(data, 'balancePrincipal', 0, 50000000) &&
+        isValidOptionalNumber(data, 'penaltyAmount', 0, 10000000) &&
+        isValidOptionalString(data, 'status', 0, 30) &&
+        isValidOptionalString(data, 'purposeNote', 0, 500) &&
+        isValidOptionalString(data, 'notes', 0, 500) &&
+        isValidOptionalString(data, 'previousLoanId', 0, 100) &&
+        isValidOptionalString(data, 'rolledOverAt', 0, 60) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidLoanPayment(data) {
+      return (
+        data.customerId is string && data.customerId.size() > 0 && data.customerId.size() <= 100 &&
+        data.paidAmount is number && data.paidAmount >= 0 && data.paidAmount <= 50000000 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'loanId', 0, 100) &&
+        isValidOptionalString(data, 'customerName', 0, 100) &&
+        isValidOptionalString(data, 'customerMobile', 0, 20) &&
+        isValidOptionalString(data, 'accountNumber', 0, 30) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalString(data, 'paymentDate', 0, 30) &&
+        isValidOptionalNumber(data, 'interestPaid', 0, 50000000) &&
+        isValidOptionalNumber(data, 'totalInterest', 0, 50000000) &&
+        isValidOptionalNumber(data, 'totalInterestPaid', 0, 50000000) &&
+        isValidOptionalNumber(data, 'penaltyPaid', 0, 10000000) &&
+        isValidOptionalNumber(data, 'discountAmount', 0, 10000000) &&
+        isValidOptionalNumber(data, 'remainingLoan', 0, 100000000) &&
+        isValidOptionalNumber(data, 'totalPaid', 0, 100000000) &&
+        isValidOptionalString(data, 'paymentMode', 0, 30) &&
+        isValidOptionalString(data, 'note', 0, 500) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidInstallment(data) {
+      return (
+        data.customerId is string && data.customerId.size() > 0 && data.customerId.size() <= 100 &&
+        data.amount is number && data.amount >= 0 && data.amount <= 10000000 &&
+        data.dueDate is string && data.dueDate.size() > 0 && data.dueDate.size() <= 30 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'customerName', 0, 100) &&
+        isValidOptionalString(data, 'accountNumber', 0, 30) &&
+        isValidOptionalString(data, 'accountNo', 0, 30) &&
+        isValidOptionalString(data, 'type', 0, 30) &&
+        isValidOptionalString(data, 'sourceId', 0, 100) &&
+        isValidOptionalString(data, 'status', 0, 30) &&
+        isValidOptionalNumber(data, 'periodIndex', 0, 1000) &&
+        isValidOptionalString(data, 'periodLabel', 0, 50) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidMemberRequest(data) {
+      return (
+        data.type is string && data.type.size() > 0 && data.type.size() <= 50 &&
+        data.message is string && data.message.size() <= 1000 &&
+        data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+        isValidOptionalString(data, 'id', 0, 100) &&
+        isValidOptionalString(data, 'customerPhone', 0, 20) &&
+        isValidOptionalString(data, 'mobile', 0, 20) &&
+        isValidOptionalString(data, 'customerId', 0, 100) &&
+        isValidOptionalString(data, 'customerName', 0, 100) &&
+        isValidOptionalString(data, 'memberUid', 0, 128) &&
+        isValidOptionalString(data, 'accountNumber', 0, 30) &&
+        isValidOptionalNumber(data, 'amount', 0, 50000000) &&
+        isValidOptionalString(data, 'fcmToken', 0, 500) &&
+        isValidOptionalString(data, 'schemeId', 0, 50) &&
+        isValidOptionalString(data, 'schemeName', 0, 100) &&
+        isValidOptionalString(data, 'modality', 0, 20) &&
+        isValidOptionalNumber(data, 'totalInstallments', 0, 1000) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalMap(data, 'payload') &&
+        isValidOptionalMap(data, 'metadata') &&
+        isValidOptionalString(data, 'reviewNote', 0, 500) &&
+        isValidOptionalString(data, 'reviewedBy', 0, 100) &&
+        isValidOptionalString(data, 'reviewedById', 0, 128) &&
+        isValidOptionalString(data, 'reviewedAt', 0, 60) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidNotification(data) {
+      return (
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.read is bool &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'recipientPhone', 10, 20) &&
+        isValidOptionalString(data, 'mobile', 10, 20) &&
+        isValidOptionalString(data, 'recipientCustomerId', 1, 100) &&
+        isValidOptionalString(data, 'customerId', 1, 100) &&
+        isValidOptionalString(data, 'memberUid', 1, 128) &&
+        isValidOptionalString(data, 'requestId', 1, 100) &&
+        isValidOptionalString(data, 'titleMr', 0, 200) &&
+        isValidOptionalString(data, 'body', 0, 1000) &&
+        isValidOptionalString(data, 'message', 0, 1000) &&
+        isValidOptionalString(data, 'messageMr', 0, 1000) &&
+        isValidOptionalString(data, 'type', 0, 50) &&
+        isValidOptionalString(data, 'status', 0, 30) &&
+        isValidOptionalString(data, 'createdAt', 0, 60)
+      );
+    }
+
+    function isValidStats(data) {
+      return (
+        data is map &&
+        isValidOptionalNumber(data, 'totalCustomers', 0, 1000000) &&
+        isValidOptionalNumber(data, 'todaysCollection', 0, 100000000) &&
+        isValidOptionalNumber(data, 'totalBishiCollected', 0, 1000000000) &&
+        isValidOptionalNumber(data, 'totalPrincipalLoans', 0, 1000000000) &&
+        isValidOptionalNumber(data, 'loanBalanceDue', 0, 1000000000) &&
+        isValidOptionalNumber(data, 'todaysPenalty', 0, 10000000) &&
+        isValidOptionalNumber(data, 'todaysDueAmount', 0, 100000000) &&
+        isValidOptionalNumber(data, 'todaysDueInstallments', 0, 1000000) &&
+        isValidOptionalNumber(data, 'pendingRequestsCount', 0, 100000) &&
+        isValidOptionalString(data, 'lastUpdated', 0, 60)
+      );
+    }
+
+    function isValidAuditLog(data) {
+      return (
+        data.action is string && data.action.size() > 0 && data.action.size() <= 50 &&
+        data.timestamp is string && data.timestamp.size() > 0 && data.timestamp.size() <= 60 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'adminId', 0, 128) &&
+        isValidOptionalString(data, 'adminName', 0, 100) &&
+        isValidOptionalString(data, 'performedBy', 0, 100) &&
+        isValidOptionalString(data, 'performedById', 0, 128) &&
+        isValidOptionalString(data, 'entityType', 0, 50) &&
+        isValidOptionalString(data, 'entityId', 0, 100) &&
+        isValidOptionalString(data, 'collection', 0, 50) &&
+        isValidOptionalString(data, 'documentId', 0, 100)
+      );
+    }
+
+    function isValidBishiConfig(data) {
+      return (
+        data.name is string && data.name.size() > 0 && data.name.size() <= 300 &&
+        isValidOptionalString(data, 'id', 0, 100) &&
+        isValidOptionalString(data, 'startDate', 0, 50) &&
+        isValidOptionalString(data, 'endDate', 0, 50) &&
+        isValidOptionalNumber(data, 'totalInstallments', 0, 5000) &&
+        isValidOptionalString(data, 'modality', 0, 30) &&
+        isValidOptionalString(data, 'officeId', 0, 50) &&
+        isValidOptionalString(data, 'color', 0, 60) &&
+        isValidOptionalString(data, 'bgPastel', 0, 100) &&
+        isValidOptionalNumber(data, 'startAccountNumber', 0, 10000000) &&
+        isValidOptionalString(data, 'status', 0, 50) &&
+        isValidOptionalString(data, 'completedAt', 0, 60) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidThakbaki(data) {
+      return (
+        data.accountNumber is string && data.accountNumber.size() > 0 && data.accountNumber.size() <= 30 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.mobile is string && data.mobile.size() >= 10 && data.mobile.size() <= 20 &&
+        data.initialAmount is number && data.initialAmount >= 0 &&
+        isValidOptionalString(data, 'id', 1, 100) &&
+        isValidOptionalString(data, 'customerId', 0, 100) &&
+        isValidOptionalString(data, 'officeId', 0, 30) &&
+        isValidOptionalNumber(data, 'paidAmount', 0, 100000000) &&
+        isValidOptionalNumber(data, 'remainingAmount', 0, 100000000) &&
+        isValidOptionalString(data, 'status', 0, 30) &&
+        isValidOptionalString(data, 'startDate', 0, 30) &&
+        isValidOptionalString(data, 'lastPaymentDate', 0, 30) &&
+        isValidOptionalString(data, 'note', 0, 500) &&
+        isValidOptionalList(data, 'payments', 200) &&
+        isValidOptionalString(data, 'createdAt', 0, 60) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60)
+      );
+    }
+
+    function isValidSnapshot(data) {
+      return (
+        data is map &&
+        isValidOptionalString(data, 'version', 0, 20) &&
+        isValidOptionalString(data, 'updatedAt', 0, 60) &&
+        isValidOptionalNumber(data, 'totalChunks', 1, 100) &&
+        isValidOptionalString(data, 'payload', 0, 1048576) &&
+        isValidOptionalNumber(data, 'compressedChars', 0, 1048576) &&
+        isValidOptionalNumber(data, 'rawKb', 0, 100000) &&
+        isValidOptionalMap(data, 'recordCounts')
+      );
+    }
+
+    // ===============================================================
+    // Collection Match Rules
+    // ===============================================================
+
+    // 1. Admins Profile Management
+    // Read and write by authenticated admins only. Primary admin protected from deletion.
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidAdmin(request.resource.data);
+      allow update: if isAdmin() && isValidAdmin(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin() && adminId != 'admin_primary';
+    }
+
+    // 2. Customers Collection
+    // Admins have full access. Members can read only their own record where mobile matches.
+    match /customers/{customerId} {
+      allow read: if isAdmin() || (isAuthenticated() && isMemberWithPhone(resource.data.mobile));
+      allow create: if isAdmin() && isValidCustomer(request.resource.data);
+      allow update: if isAdmin() && isValidCustomer(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    // 3. Collections / Passbook Receipts
+    // Admins have full access. Members can read only their own receipts.
+    match /collections/{collectionId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerMobile' in resource.data && isMemberWithPhone(resource.data.customerMobile)) ||
+        ('customerPhone' in resource.data && isMemberWithPhone(resource.data.customerPhone)) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if isAdmin() && isValidCollection(request.resource.data);
+      allow update: if isAdmin() && isValidCollection(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    // 4. Loans Collection
+    // Admins have full access. Members can read only their own loans.
+    match /loans/{loanId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerMobile' in resource.data && isMemberWithPhone(resource.data.customerMobile)) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if isAdmin() && isValidLoan(request.resource.data);
+      allow update: if isAdmin() && isValidLoan(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt', 'customerId']);
+      allow delete: if isAdmin();
+    }
+
+    // 5. Loan Payments Collection
+    // Admins have full access. Members can read only their own loan repayments.
+    match /loanPayments/{paymentId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerMobile' in resource.data && isMemberWithPhone(resource.data.customerMobile)) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if isAdmin() && isValidLoanPayment(request.resource.data);
+      allow update: if isAdmin() && isValidLoanPayment(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt', 'customerId']);
+      allow delete: if isAdmin();
+    }
+
+    // 6. Installments Due-Schedule
+    // Admins have full access. Members can read only their own installments schedule.
+    match /installments/{installmentId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if isAdmin() && isValidInstallment(request.resource.data);
+      allow update: if isAdmin() && isValidInstallment(request.resource.data) && areImmutableFieldsUnchanged(['id', 'customerId']);
+      allow delete: if isAdmin();
+    }
+
+    // 7. Member Requests & Approvals
+    // Admins: Full read/write.
+    // Members: Can create a request if auth != null, request.resource.data.status == 'PENDING',
+    //          and request.resource.data.customerPhone/mobile matches their authenticated phone.
+    //          Can read their own requests. Cannot update status or delete.
+    match /requests/{requestId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerPhone' in resource.data && isMemberWithPhone(resource.data.customerPhone)) ||
+        ('mobile' in resource.data && isMemberWithPhone(resource.data.mobile)) ||
+        ('memberUid' in resource.data && resource.data.memberUid == request.auth.uid) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if (isAdmin() && isValidMemberRequest(request.resource.data)) || (
+        isAuthenticated() &&
+        request.resource.data.status == 'PENDING' &&
+        (
+          ('customerPhone' in request.resource.data && isMemberWithPhone(request.resource.data.customerPhone)) ||
+          ('mobile' in request.resource.data && isMemberWithPhone(request.resource.data.mobile)) ||
+          ('memberUid' in request.resource.data && request.resource.data.memberUid == request.auth.uid) ||
+          ('phone_number' in request.auth.token)
+        ) &&
+        isValidMemberRequest(request.resource.data)
+      );
+      allow update: if (isAdmin() && isValidMemberRequest(request.resource.data)) || (
+        isAuthenticated() &&
+        isMemberOwnRequest(resource.data) &&
+        request.resource.data.status == resource.data.status &&
+        resource.data.status == 'PENDING' &&
+        areImmutableFieldsUnchanged(['id', 'createdAt', 'customerId', 'customerPhone', 'mobile', 'status', 'reviewedBy', 'reviewedById', 'reviewedAt', 'reviewNote']) &&
+        isValidMemberRequest(request.resource.data)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /member_requests/{requestId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('customerPhone' in resource.data && isMemberWithPhone(resource.data.customerPhone)) ||
+        ('mobile' in resource.data && isMemberWithPhone(resource.data.mobile)) ||
+        ('memberUid' in resource.data && resource.data.memberUid == request.auth.uid) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId))
+      ));
+      allow create: if (isAdmin() && isValidMemberRequest(request.resource.data)) || (
+        isAuthenticated() &&
+        request.resource.data.status == 'PENDING' &&
+        (
+          ('customerPhone' in request.resource.data && isMemberWithPhone(request.resource.data.customerPhone)) ||
+          ('mobile' in request.resource.data && isMemberWithPhone(request.resource.data.mobile)) ||
+          ('memberUid' in request.resource.data && request.resource.data.memberUid == request.auth.uid) ||
+          ('phone_number' in request.auth.token)
+        ) &&
+        isValidMemberRequest(request.resource.data)
+      );
+      allow update: if (isAdmin() && isValidMemberRequest(request.resource.data)) || (
+        isAuthenticated() &&
+        isMemberOwnRequest(resource.data) &&
+        request.resource.data.status == resource.data.status &&
+        resource.data.status == 'PENDING' &&
+        areImmutableFieldsUnchanged(['id', 'createdAt', 'customerId', 'customerPhone', 'mobile', 'status', 'reviewedBy', 'reviewedById', 'reviewedAt', 'reviewNote']) &&
+        isValidMemberRequest(request.resource.data)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 8. In-App Notifications
+    // Admins: Full read/write.
+    // Members: Can read their own notifications (recipientPhone or recipientCustomerId).
+    //          Can update read status (mark as read).
+    match /notifications/{notificationId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        ('recipientPhone' in resource.data && isMemberWithPhone(resource.data.recipientPhone)) ||
+        ('mobile' in resource.data && isMemberWithPhone(resource.data.mobile)) ||
+        ('recipientCustomerId' in resource.data && isCustomerOwner(resource.data.recipientCustomerId)) ||
+        ('customerId' in resource.data && isCustomerOwner(resource.data.customerId)) ||
+        ('memberUid' in resource.data && resource.data.memberUid == request.auth.uid)
+      ));
+      allow create: if isAdmin() && isValidNotification(request.resource.data);
+      allow update: if (isAdmin() && isValidNotification(request.resource.data)) || (
+        isAuthenticated() &&
+        isMemberOwnNotification(resource.data) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']) &&
+        request.resource.data.read is bool &&
+        request.resource.data.read == true
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 9. Stats Summary Singleton
+    // Admins: Full access. Authenticated users: Read-only.
+    match /stats/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidStats(request.resource.data);
+    }
+
+    // 10. Audit Logs (audit_logs & auditLogs)
+    // Admins: Read-only. System / Admins: Create allowed with validation.
+    // Client update/delete: Strictly forbidden (immutable audit trail).
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if (isAdmin() || isAuthenticated()) && isValidAuditLog(request.resource.data);
+      allow update, delete: if false;
+    }
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if (isAdmin() || isAuthenticated()) && isValidAuditLog(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // 11. Bishi Schemes & Configurations
+    // Admins: Full access. Authenticated users: Read-only.
+    match /bishi_configs/{id} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidBishiConfig(request.resource.data);
+      allow delete: if isAdmin();
+    }
+    match /bishi/{id} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidBishiConfig(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // 12. Office Locations
+    // Admins: Full access. Authenticated users: Read-only.
+    match /offices/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 13. System Settings, Interest Rates & Penalty Settings
+    // Admins: Full access. Authenticated users: Read-only.
+    match /settings/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /interestRates/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /penaltySettings/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 14. Thakbaki (Arrears / Recovery)
+    // Admins: Full access. Members: Read-only access to their own arrears where mobile matches.
+    match /thakbaki/{id} {
+      allow read: if isAdmin() || (isAuthenticated() && isMemberWithPhone(resource.data.mobile));
+      allow write: if isAdmin() && isValidThakbaki(request.resource.data);
+    }
+
+    // 15. System Backups & Incremental Deletion Tracking
+    // Admins only.
+    match /system_snapshots/{id} {
+      allow read, write: if isAdmin() && isValidSnapshot(request.resource.data);
+      allow delete: if isAdmin();
+    }
+    match /deletions/{id} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
