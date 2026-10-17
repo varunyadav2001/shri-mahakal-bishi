@@ -1700,10 +1700,10 @@ export const StorageService = {
       }
 
       // If installment #1 has a payment or is PAID, check and award 10% referral commission to referrer
-      if (matchingInst && matchingInst.periodIndex === 1 && (matchingInst.status === 'PAID' || Number(matchingInst.collectedAmount) > 0)) {
+      if (Number(entry.periodIndex) === 1 && (entry.status === 'PAID' || Number(entry.collectedAmount) > 0)) {
         StorageService.awardReferralCommissionOnFirstPayment(
           cust,
-          Number(matchingInst.collectedAmount) || Number(matchingInst.expectedAmount) || cust.amount
+          Number(entry.collectedAmount) || Number(entry.expectedAmount) || cust.amount
         );
       }
     };

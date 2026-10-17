@@ -45,6 +45,7 @@ import {
   EyeOff,
   History,
   RefreshCw,
+  Share2,
 } from 'lucide-react';
 
 export const CustomerDetail: React.FC = () => {
@@ -600,6 +601,59 @@ export const CustomerDetail: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Referral / Reference Info Card if Customer Joined Via Reference */}
+        {customer.referredBy && (
+          <div className="mt-4 print:mt-2 p-3.5 sm:p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200/80 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                  <Share2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-black text-emerald-950 flex items-center gap-1.5">
+                    <span>{language === 'EN' ? 'Referral & Reference Details' : 'रेफरन्स माहिती (Referral Program)'}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
+                      १०% हप्ता १ सवलत लागू
+                    </span>
+                  </h4>
+                </div>
+              </div>
+
+              <div className="text-xs font-black text-emerald-900 bg-white px-3 py-1 rounded-xl border border-emerald-300 w-fit">
+                {financials.completedInstallmentsCount >= 1 ? (
+                  <span className="text-emerald-700">✅ १ला हप्ता भरला • १०% कमिशन जमा</span>
+                ) : (
+                  <span className="text-amber-800">⏳ १ला हप्ता बाकी • ₹{customer.referralDiscount || Math.round(customer.amount * 0.1)} कमिशन प्रतीक्षा</span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 text-xs">
+              <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
+                <span className="text-[10px] text-slate-500 font-bold block uppercase">{language === 'EN' ? 'Referred By:' : 'कोणाचा रेफरन्स:'}</span>
+                <span className="font-black text-emerald-950 text-sm">👤 {customer.referredByName || 'मार्गदर्शक सदस्य'}</span>
+                <span className="text-[11px] text-slate-500 font-semibold block">{customer.referredBy} {customer.referredByCode ? `• कोड: ${customer.referredByCode}` : ''}</span>
+              </div>
+
+              <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
+                <span className="text-[10px] text-slate-500 font-bold block uppercase">{language === 'EN' ? '1st Installment (10% Off):' : '१ला हप्ता (१०% सूट):'}</span>
+                <span className="font-black text-slate-900 text-sm">
+                  {formatCurrency(Math.max(0, customer.amount - (customer.referralDiscount || Math.round(customer.amount * 0.1))), language)}
+                </span>
+                <span className="text-[11px] text-emerald-700 font-bold block">
+                  - {formatCurrency(customer.referralDiscount || Math.round(customer.amount * 0.1), language)} (१०% सवलत)
+                </span>
+              </div>
+
+              <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
+                <span className="text-[10px] text-slate-500 font-bold block uppercase">{language === 'EN' ? 'Next Installments:' : 'पुढील सर्व हप्ते (२, ३, ...):'}</span>
+                <span className="font-black text-slate-900 text-sm">{formatCurrency(customer.amount, language)}</span>
+                <span className="text-[11px] text-slate-500 font-semibold block">नियमित पूर्ण रक्कम (तो भरेल)</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Financial Summary Grid - Requirement 11 */}
         <div className="mt-6 print:mt-2.5">

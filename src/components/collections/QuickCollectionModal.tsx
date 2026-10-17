@@ -728,6 +728,41 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                         </div>
                       )}
 
+                      {/* 10% Referral Discount Alert for Installment #1 */}
+                      {Boolean((selectedCustomer?.referredBy || selectedCustomer?.referralDiscount) && selectedEntry?.periodIndex === 1) && (
+                        <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 flex items-center justify-between gap-2 shadow-2xs">
+                          <div className="flex items-center space-x-2 text-emerald-900">
+                            <span className="text-xl">🎁</span>
+                            <div>
+                              <p className="font-black text-xs text-emerald-900">
+                                {language === 'EN'
+                                  ? 'Referral Discount: 10% OFF on 1st Installment!'
+                                  : 'रेफरल सवलत: पहिल्या हप्त्यावर १०% सूट लागू!'}
+                              </p>
+                              <p className="text-[10px] text-emerald-700 font-medium">
+                                {language === 'EN'
+                                  ? `Referred by: ${selectedCustomer?.referredByName || selectedCustomer?.referredBy}. Subsequent installments will be full ₹${selectedCustomer?.amount}.`
+                                  : `रेफरन्स: ${selectedCustomer?.referredByName || selectedCustomer?.referredBy}. पुढील सर्व हप्ते पूर्ण ₹${selectedCustomer?.amount} असतील.`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="line-through text-[11px] text-slate-400 font-bold mr-1.5">₹{selectedCustomer?.amount}</span>
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                              ₹{selectedEntry?.expectedAmount}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Info note for installment #2+ for referred customers */}
+                      {Boolean((selectedCustomer?.referredBy || selectedCustomer?.referralDiscount) && (selectedEntry?.periodIndex || 0) > 1) && (
+                        <div className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-between text-[11px] text-slate-600 font-semibold">
+                          <span>ℹ️ {language === 'EN' ? `Installment #${selectedEntry?.periodIndex}: Regular Amount (No discount after 1st installment)` : `हप्ता #${selectedEntry?.periodIndex}: नियमित रक्कम (पहिल्या हप्त्यानंतर सवलत नाही)`}</span>
+                          <span className="font-black text-slate-800">₹{selectedCustomer?.amount}</span>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                           <div className="flex justify-between items-center mb-1">
