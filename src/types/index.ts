@@ -56,6 +56,12 @@ export interface Customer {
   status: 'ACTIVE' | 'COMPLETED';
   createdAt: string;
   updatedAt?: string;
+  referredBy?: string;
+  referredByName?: string;
+  referredByCode?: string;
+  referralDiscount?: number;
+  referralDiscountPercentage?: number;
+  referralCommissionStatus?: 'PENDING' | 'EARNED' | 'PAID';
   summary?: {
     totalExpected: number;
     totalCollected: number;
@@ -268,6 +274,10 @@ export interface MemberRequest {
   reviewedAt?: string;
   createdAt: string;
   updatedAt: string;
+  referredBy?: string;
+  referredByName?: string;
+  referredByCode?: string;
+  referralDiscount?: number;
   payload?: Record<string, any>;
   metadata?: Record<string, any>;
 }

@@ -31,6 +31,9 @@ import {
   X,
   RefreshCw,
   FileCheck,
+  Share2,
+  Gift,
+  CheckCircle2,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -41,6 +44,8 @@ export const Dashboard: React.FC = () => {
     bishiConfigs,
     customers,
     collections,
+    referrals,
+    requests,
     loans,
     t,
     language,
@@ -143,6 +148,119 @@ export const Dashboard: React.FC = () => {
         (l.accountNumber && filteredCustomerIdentifiers.accs.has(String(l.accountNumber).trim()))
     );
   }, [loans, isFilterActive, filteredCustomerIdentifiers]);
+
+  // Combined reference and referral connections for Dashboard display
+  const referredConnections = React.useMemo(() => {
+    const list: Array<{
+      id: string;
+      referredName: string;
+      referredMobile: string;
+      accountNumber?: string;
+      schemeName?: string;
+      referrerName: string;
+      referrerMobile: string;
+      referrerCode?: string;
+      originalAmount: number;
+      discountedAmount: number;
+      discountAmount: number;
+      firstInstallmentStatus: 'PAID' | 'PENDING';
+      commissionStatus: 'CREDITED' | 'PENDING';
+      commissionAmount: number;
+      isEnrolled: boolean;
+    }> = [];
+
+    const seenMobiles = new Set<string>();
+
+    // 1. From customers who have referredBy
+    customers.forEach((c) => {
+      if (c.referredBy) {
+        const mob = c.mobile.replace(/\D/g, '');
+        seenMobiles.add(mob);
+
+        const custColls = collections.filter(
+          (item) => item.customerId === c.id || item.accountNumber === c.accountNumber
+        );
+        const firstColl = custColls.find((item) => item.periodIndex === 1);
+        const isPaid = firstColl?.status === 'PAID' || (firstColl?.collectedAmount || 0) > 0;
+        const origAmt = Number(c.amount) || 1000;
+        const discAmt = Number(c.referralDiscount) || Math.round(origAmt * 0.1);
+        const expAmt = Number(firstColl?.expectedAmount) || Math.max(0, origAmt - discAmt);
+
+        list.push({
+          id: `cust_${c.id}`,
+          referredName: c.name,
+          referredMobile: c.mobile,
+          accountNumber: c.accountNumber,
+          schemeName: getBishiNameMarathi(c.bishiType, language, bishiConfigs),
+          referrerName: c.referredByName || 'मार्गदर्शक सदस्य',
+          referrerMobile: c.referredBy,
+          referrerCode: c.referredByCode,
+          originalAmount: origAmt,
+          discountedAmount: expAmt,
+          discountAmount: discAmt,
+          firstInstallmentStatus: isPaid ? 'PAID' : 'PENDING',
+          commissionStatus: isPaid ? 'CREDITED' : 'PENDING',
+          commissionAmount: discAmt,
+          isEnrolled: true,
+        });
+      }
+    });
+
+    // 2. From referrals collection
+    referrals.forEach((r) => {
+      const mob = (r.referredCustomerMobile || '').replace(/\D/g, '');
+      if (mob && !seenMobiles.has(mob)) {
+        seenMobiles.add(mob);
+        const isPaid = r.status === 'COMMISSION_PAID' || r.status === 'COMMISSION_EARNED';
+        const origAmt = Number(r.firstInstallmentAmount) || 1000;
+        const discAmt = Number(r.commissionAmount) || Math.round(origAmt * 0.1);
+
+        list.push({
+          id: `ref_${r.id}`,
+          referredName: r.referredCustomerName,
+          referredMobile: r.referredCustomerMobile,
+          accountNumber: r.referredAccountNumber,
+          referrerName: r.referrerName,
+          referrerMobile: r.referrerMobile,
+          referrerCode: r.referralCode,
+          originalAmount: origAmt,
+          discountedAmount: Math.max(0, origAmt - discAmt),
+          discountAmount: discAmt,
+          firstInstallmentStatus: isPaid ? 'PAID' : 'PENDING',
+          commissionStatus: isPaid ? 'CREDITED' : 'PENDING',
+          commissionAmount: discAmt,
+          isEnrolled: Boolean(r.referredAccountNumber),
+        });
+      }
+    });
+
+    // 3. From pending member requests with referral
+    requests.forEach((req) => {
+      const mob = (req.mobile || '').replace(/\D/g, '');
+      if (req.referredBy && mob && !seenMobiles.has(mob)) {
+        seenMobiles.add(mob);
+        const amt = Number(req.amount) || 1000;
+        const disc = Math.round(amt * 0.1);
+        list.push({
+          id: `req_${req.id}`,
+          referredName: req.customerName,
+          referredMobile: req.mobile,
+          referrerName: req.referredByName || 'मार्गदर्शक सदस्य',
+          referrerMobile: req.referredBy,
+          referrerCode: req.referredByCode,
+          originalAmount: amt,
+          discountedAmount: amt - disc,
+          discountAmount: disc,
+          firstInstallmentStatus: 'PENDING',
+          commissionStatus: 'PENDING',
+          commissionAmount: disc,
+          isEnrolled: false,
+        });
+      }
+    });
+
+    return list;
+  }, [customers, collections, referrals, requests, language, bishiConfigs]);
 
   // Today's pending list scoped to active filtered collections
   const todaysPendingList = React.useMemo(() => {
@@ -698,6 +816,169 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
+        </div>
+
+        {/* Section: Reference & Referral Tracker (कोण कोणाच्या रेफरन्सने आले आणि १०% हप्ता १ सवलत) */}
+        <div className="w-full bg-white rounded-2xl sm:rounded-3xl border border-[#E2E8F0] shadow-xs overflow-hidden flex flex-col justify-between">
+          <div className="p-3.5 sm:p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                <Share2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span>{language === 'EN' ? 'Referral & References Tracker' : 'रेफरन्स ट्रॅकर (References)'}</span>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    १०% हप्ता १ सवलत
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  {language === 'EN'
+                    ? 'Track who joined via whose referral & first installment 10% discount'
+                    : 'कोण कोणाच्या रेफरन्सने आले आणि पहिल्या हप्त्यावर मिळालेली १०% सवलत'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <span className="inline-flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-black rounded-full border border-emerald-200">
+                <span>{referredConnections.length} रेफरल्स</span>
+              </span>
+              <Link
+                to="/referrals"
+                className="inline-flex items-center space-x-1 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-900 text-xs font-black rounded-xl border border-brand-200 transition-colors cursor-pointer"
+              >
+                <span>{language === 'EN' ? 'View All' : 'सर्व रेफरल्स'}</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {referredConnections.length === 0 ? (
+            <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+              <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center">
+                <Share2 className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-600">
+                {language === 'EN' ? 'No referred members recorded yet.' : 'अद्याप कोणत्याही रेफरल सदस्याची नोंद नाही.'}
+              </p>
+              <p className="text-[11px] text-slate-400 max-w-sm">
+                {language === 'EN'
+                  ? 'When members share their referral code in the app, new members get 10% off their first installment and referrer earns 10% commission.'
+                  : 'सभासदांनी ॲपमधून रेफरल कोड शेअर केल्यावर नवीन सभासदांना पहिल्या हप्त्यावर १०% सूट मिळते व रेफरल करणाऱ्याला १०% कमिशन मिळते.'}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Mobile Card View (< md) */}
+              <div className="block md:hidden space-y-3 p-3 bg-slate-50/50">
+                {referredConnections.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <div>
+                        <div className="font-extrabold text-slate-900 text-sm">{item.referredName}</div>
+                        <div className="text-[11px] text-slate-500 font-semibold">{item.referredMobile}</div>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                        item.firstInstallmentStatus === 'PAID'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {item.firstInstallmentStatus === 'PAID' ? 'हप्ता १ भरला ✅' : 'हप्ता १ बाकी ⏳'}
+                      </span>
+                    </div>
+
+                    <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500 font-bold">कोणाचा रेफरन्स:</span>
+                        <span className="font-black text-emerald-900">
+                          👤 {item.referrerName} ({item.referrerMobile})
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500 font-bold">१ला हप्ता (१०% सूट):</span>
+                        <span className="font-black text-slate-900">
+                          ₹{item.discountedAmount} <span className="text-[10px] text-emerald-700 font-bold">(-₹{item.discountAmount})</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500 font-bold">१०% कमिशन:</span>
+                        <span className="font-black text-emerald-700">
+                          {item.commissionStatus === 'CREDITED' ? `₹${item.commissionAmount} जमा ✅` : `₹${item.commissionAmount} प्रतीक्षा ⏳`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block overflow-x-auto p-4">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-[#F8FAFC] text-[#0F172A] font-extrabold border-b border-[#E2E8F0]">
+                    <tr>
+                      <th className="p-3 pl-4">नवीन आलेला सदस्य (Referred User)</th>
+                      <th className="p-3">कोणाचा रेफरन्स (Referred By)</th>
+                      <th className="p-3 text-right">मूळ हप्ता रक्कम</th>
+                      <th className="p-3 text-right">१ला हप्ता (१०% सूट)</th>
+                      <th className="p-3 text-center">१ला हप्ता स्थिती</th>
+                      <th className="p-3 text-center">१०% कमिशन स्थिती</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E2E8F0] font-medium">
+                    {referredConnections.map((item) => (
+                      <tr key={item.id} className="hover:bg-[#F8FAFC] transition-colors">
+                        <td className="p-3 pl-4">
+                          <div className="font-extrabold text-slate-900">{item.referredName}</div>
+                          <div className="text-[11px] text-slate-500 font-semibold">
+                            {item.referredMobile} {item.accountNumber ? `• खाते क्र. ${item.accountNumber}` : '• नवीन अर्ज'}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold text-xs">
+                            <span>👤 {item.referrerName}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                            {item.referrerMobile} {item.referrerCode ? `• कोड: ${item.referrerCode}` : ''}
+                          </div>
+                        </td>
+                        <td className="p-3 text-right font-bold text-slate-600">
+                          ₹{item.originalAmount}
+                        </td>
+                        <td className="p-3 text-right font-extrabold text-slate-900">
+                          <div>₹{item.discountedAmount}</div>
+                          <div className="text-[10px] text-emerald-700 font-black">
+                            -₹{item.discountAmount} (१०% सूट)
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${
+                            item.firstInstallmentStatus === 'PAID'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}>
+                            {item.firstInstallmentStatus === 'PAID' ? 'भरला ✅' : 'प्रलंबित ⏳'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${
+                            item.commissionStatus === 'CREDITED'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {item.commissionStatus === 'CREDITED' ? `₹${item.commissionAmount} जमा ✅` : `₹${item.commissionAmount} प्रतीक्षा ⏳`}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Bottom Section: Daily Pending Box */}

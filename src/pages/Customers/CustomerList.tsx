@@ -457,6 +457,18 @@ export const CustomerList: React.FC = () => {
                           {formatCurrency(cust.amount, language)}
                         </span>
                       </div>
+                      <div>
+                        <span className="text-[10px] font-extrabold text-slate-400 block uppercase">
+                          {t.colReference || 'रेफरन्स'}
+                        </span>
+                        {cust.referredBy ? (
+                          <span className="text-emerald-700 font-bold block truncate text-[11px]">
+                            👤 {cust.referredByName || 'रेफरल'} ({cust.referredBy}) • १०% सूट
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 font-bold text-xs">-</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Collection Financials Pill */}
@@ -583,6 +595,7 @@ export const CustomerList: React.FC = () => {
                       </div>
                     </th>
                     <th className="p-3.5">{t.colMobile}</th>
+                    <th className="p-3.5">{t.colReference || 'रेफरन्स'}</th>
                     <th className="p-3.5">{t.colBishi}</th>
                     <th className="p-3.5 text-center">{t.colModality}</th>
                     <th className="p-3.5 text-right">{t.colInstallmentAmount}</th>
@@ -617,6 +630,20 @@ export const CustomerList: React.FC = () => {
                           </Link>
                         </td>
                         <td className="p-3.5 text-slate-600">{cust.mobile}</td>
+                        <td className="p-3.5">
+                          {cust.referredBy ? (
+                            <div className="flex flex-col min-w-[130px]">
+                              <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 w-fit">
+                                <span>👤 {cust.referredByName || 'रेफरल'}</span>
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-medium mt-0.5 whitespace-nowrap">
+                                {cust.referredBy} • <strong className="text-emerald-700">१०% हप्ता १ सूट</strong>
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs font-semibold">-</span>
+                          )}
+                        </td>
                         <td className="p-3.5 text-slate-800 font-semibold">
                           {getBishiNameMarathi(cust.bishiType, language)}
                         </td>

@@ -10,6 +10,7 @@ import {
   getDoc,
   onSnapshot,
   writeBatch,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import {
@@ -926,6 +927,10 @@ export const normalizeMemberRequest = (raw: any, docId: string): MemberRequest =
     schemeName: raw.schemeName || raw.payload?.schemeName,
     modality,
     totalInstallments: Number(raw.totalInstallments || raw.payload?.totalInstallments) || (modality === 'W' ? 52 : 12),
+    referredBy: raw.referredBy || raw.payload?.referredBy || raw.metadata?.referredBy,
+    referredByName: raw.referredByName || raw.payload?.referredByName || raw.metadata?.referredByName,
+    referredByCode: raw.referredByCode || raw.payload?.referredByCode || raw.metadata?.referredByCode,
+    referralDiscount: Number(raw.referralDiscount || raw.payload?.referralDiscount || Math.round(amount * 0.1)),
     createdAt: createdAtIso,
     updatedAt: raw.updatedAt || createdAtIso,
     reviewedBy: raw.reviewedBy,
@@ -937,6 +942,10 @@ export const normalizeMemberRequest = (raw: any, docId: string): MemberRequest =
       schemeName: raw.schemeName || raw.payload?.schemeName,
       modality,
       amount,
+      referredBy: raw.referredBy || raw.payload?.referredBy,
+      referredByName: raw.referredByName || raw.payload?.referredByName,
+      referredByCode: raw.referredByCode || raw.payload?.referredByCode,
+      referralDiscount: Number(raw.referralDiscount || raw.payload?.referralDiscount || Math.round(amount * 0.1)),
       startDate: raw.payload?.startDate || raw.startDate || createdAtIso.split('T')[0],
     },
   };
@@ -1688,6 +1697,14 @@ export const StorageService = {
             ).catch(() => {});
           } catch (_) {}
         }
+      }
+
+      // If installment #1 has a payment or is PAID, check and award 10% referral commission to referrer
+      if (matchingInst && matchingInst.periodIndex === 1 && (matchingInst.status === 'PAID' || Number(matchingInst.collectedAmount) > 0)) {
+        StorageService.awardReferralCommissionOnFirstPayment(
+          cust,
+          Number(matchingInst.collectedAmount) || Number(matchingInst.expectedAmount) || cust.amount
+        );
       }
     };
 
@@ -2882,6 +2899,15 @@ export const StorageService = {
         getDocs(collection(db, 'users')).catch(() => null),
       ]);
       const remoteRequests: MemberRequest[] = [];
+      const userMap = new Map<string, any>();
+      if (userSnap && !userSnap.empty) {
+        userSnap.forEach((d: any) => {
+          const u = d.data();
+          const p = String(u.phone || u.userId || d.id || '').replace(/\D/g, '');
+          if (p) userMap.set(p, u);
+        });
+      }
+
       if (reqSnap && !reqSnap.empty) {
         reqSnap.forEach((d: any) => {
           remoteRequests.push(normalizeMemberRequest(d.data(), d.id));
@@ -2903,6 +2929,7 @@ export const StorageService = {
           const u = d.data();
           const phone = String(u.phone || u.userId || d.id || '').replace(/\D/g, '');
           if (phone && !existingMobiles.has(phone) && !existingCustMobiles.has(phone)) {
+            const hasRef = Boolean(u.referredBy);
             remoteRequests.push({
               id: `REQ_${phone}`,
               userId: phone,
@@ -2913,7 +2940,13 @@ export const StorageService = {
               schemeName: u.activeSchemeName || 'नवीन ॲप नोंदणी (New App Registration)',
               status: (u.isApproved || u.status === 'active' || u.status === 'approved') && u.activeSchemeId ? 'APPROVED' : 'PENDING',
               amount: 1000,
-              message: 'Android ॲपवरून नवीन सभासद नोंदणी झाली आहे.',
+              message: hasRef
+                ? `Android ॲपवरून नोंदणी (रेफरन्स: ${u.referredByName || u.referredBy})`
+                : 'Android ॲपवरून नवीन सभासद नोंदणी झाली आहे.',
+              referredBy: u.referredBy,
+              referredByName: u.referredByName,
+              referredByCode: u.referredByCode,
+              referralDiscount: hasRef ? Math.round(1000 * 0.1) : undefined,
               createdAt: u.createdAtString || new Date().toISOString(),
               updatedAt: u.updatedAt || u.createdAtString || new Date().toISOString(),
             });
@@ -2921,6 +2954,18 @@ export const StorageService = {
           }
         });
       }
+
+      // Enrich any requests with user referral metadata if missing
+      remoteRequests.forEach((req) => {
+        const p = String(req.mobile || (req as any).userPhone || req.userId || '').replace(/\D/g, '');
+        const u = userMap.get(p);
+        if (u && u.referredBy && !req.referredBy) {
+          req.referredBy = u.referredBy;
+          req.referredByName = u.referredByName || 'मार्गदर्शक सदस्य';
+          req.referredByCode = u.referredByCode || '';
+          req.referralDiscount = Math.round((Number(req.amount) || 1000) * 0.1);
+        }
+      });
       const localRequests = StorageService.getRequests();
       const reqMap = new Map<string, MemberRequest>();
       // Remote documents take priority
@@ -3061,6 +3106,28 @@ export const StorageService = {
             const allCust = StorageService.getCustomers();
             const autoAcc = generateNextAccountNumber(schemeId, allCust, bishiConfigs);
 
+            // Check if user was referred (from req or payload or users collection doc)
+            let refBy = req.referredBy || (req as any).payload?.referredBy;
+            let refByName = req.referredByName || (req as any).payload?.referredByName;
+            let refByCode = req.referredByCode || (req as any).payload?.referredByCode;
+
+            if (!refBy && searchMobile) {
+              try {
+                const uDoc = await getDoc(doc(db, 'users', searchMobile));
+                if (uDoc.exists()) {
+                  const ud = uDoc.data();
+                  if (ud.referredBy) {
+                    refBy = String(ud.referredBy).replace(/\D/g, '');
+                    refByName = ud.referredByName || refByName;
+                    refByCode = ud.referredByCode || refByCode;
+                  }
+                }
+              } catch (_) {}
+            }
+
+            const hasRef = Boolean(refBy);
+            const refDiscount = hasRef ? Math.round(amount * 0.1) : 0;
+
             const newCust = StorageService.addCustomer({
               accountNumber: autoAcc,
               name: customerName,
@@ -3077,10 +3144,15 @@ export const StorageService = {
               address: 'Online Member Application',
               hasLoan: false,
               status: 'ACTIVE',
+              referredBy: refBy,
+              referredByName: refByName,
+              referredByCode: refByCode,
+              referralDiscount: refDiscount,
             });
             createdOrUpdatedCustomer = newCust;
 
             // Generate full weekly/monthly collection schedule upfront!
+            // If referred, 1st installment will automatically have 10% cut!
             const rawEntries =
               modality === 'W'
                 ? generateWeeklyEntries(newCust, effectiveDate, totalInstallments)
@@ -3099,6 +3171,26 @@ export const StorageService = {
             }));
 
             StorageService.saveCollectionsBatch(preparedCollections);
+
+            if (hasRef && refBy) {
+              const newRef: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'> = {
+                referrerCustomerId: refBy,
+                referrerName: refByName || 'मार्गदर्शक सदस्य',
+                referrerMobile: refBy,
+                referrerAccountNumber: '',
+                referredCustomerId: newCust.id,
+                referredCustomerName: newCust.name,
+                referredCustomerMobile: newCust.mobile,
+                referredAccountNumber: newCust.accountNumber,
+                referralCode: refByCode || `REF-${newCust.accountNumber}`,
+                firstInstallmentAmount: Math.round(amount * 0.9),
+                commissionPercentage: 10,
+                commissionAmount: refDiscount,
+                status: 'PENDING_FIRST_PAYMENT',
+                notes: `Referred via code ${refByCode || ''}. 10% discount applied to 1st installment.`,
+              };
+              StorageService.saveReferral(newRef);
+            }
 
             // Sync the newly created customer with full installment schedule to Firestore
             newCust.installments = preparedCollections.map((c) => ({
@@ -3399,6 +3491,123 @@ export const StorageService = {
     syncToFirestore('referrals', referralId, updated);
     notifyDataChange();
     return updated;
+  },
+
+  awardReferralCommissionOnFirstPayment: async (customer: Customer, firstInstallmentAmount: number): Promise<void> => {
+    try {
+      const cleanMemberPhone = String(customer.mobile || '').replace(/\D/g, '');
+      let refPhone = String(customer.referredBy || '').replace(/\D/g, '');
+      let refName = customer.referredByName || 'मार्गदर्शक सदस्य';
+
+      // If customer.referredBy is not set on Customer object, check Firestore users collection
+      if (!refPhone && cleanMemberPhone) {
+        try {
+          const uDoc = await getDoc(doc(db, 'users', cleanMemberPhone));
+          if (uDoc.exists()) {
+            const uData = uDoc.data();
+            if (uData.referredBy) {
+              refPhone = String(uData.referredBy).replace(/\D/g, '');
+              refName = uData.referredByName || refName;
+              customer.referredBy = refPhone;
+              customer.referredByName = refName;
+              customer.referredByCode = uData.referredByCode;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!refPhone) return;
+
+      const commId = `COMM_${cleanMemberPhone}_1`;
+      const commAmount = Math.round((Number(customer.amount) || Number(firstInstallmentAmount) || 1000) * 0.1);
+      const nowIso = new Date().toISOString();
+
+      // 1. Write to commissions collection in Firestore
+      await setDoc(
+        doc(db, 'commissions', commId),
+        {
+          id: commId,
+          referrerPhone: refPhone,
+          referrerName: refName,
+          referredPhone: cleanMemberPhone,
+          referredName: customer.name || 'सदस्य',
+          installmentAmount: firstInstallmentAmount,
+          commissionPercentage: 10,
+          commissionAmount: commAmount,
+          status: 'CREDITED',
+          schemeId: customer.bishiType || '',
+          schemeName: customer.bishiName || customer.bishiType || '',
+          accountNo: customer.accountNumber || '',
+          createdAt: serverTimestamp(),
+          createdAtIso: nowIso,
+        },
+        { merge: true }
+      ).catch(() => {});
+
+      // 2. Update referrals collection in Firestore & localStorage
+      const allRefs = StorageService.getReferrals();
+      const refIdx = allRefs.findIndex(
+        (r) => r.referredCustomerMobile.replace(/\D/g, '') === cleanMemberPhone || r.referredCustomerId === customer.id
+      );
+
+      if (refIdx !== -1) {
+        allRefs[refIdx] = {
+          ...allRefs[refIdx],
+          status: 'COMMISSION_EARNED',
+          commissionAmount: commAmount,
+          earnedAt: nowIso,
+          updatedAt: nowIso,
+        };
+        setStoredData(STORAGE_KEYS.REFERRALS, allRefs);
+        syncToFirestore('referrals', allRefs[refIdx].id, allRefs[refIdx]);
+      } else {
+        const newRef: Referral = {
+          id: `ref_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          referrerCustomerId: refPhone,
+          referrerName: refName,
+          referrerMobile: refPhone,
+          referrerAccountNumber: '',
+          referredCustomerId: customer.id,
+          referredCustomerName: customer.name,
+          referredCustomerMobile: cleanMemberPhone,
+          referredAccountNumber: customer.accountNumber,
+          referralCode: customer.referredByCode || `REF-${customer.accountNumber}`,
+          firstInstallmentAmount,
+          commissionPercentage: 10,
+          commissionAmount: commAmount,
+          status: 'COMMISSION_EARNED',
+          earnedAt: nowIso,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        };
+        allRefs.unshift(newRef);
+        setStoredData(STORAGE_KEYS.REFERRALS, allRefs);
+        syncToFirestore('referrals', newRef.id, newRef);
+      }
+      notifyDataChange();
+
+      // 3. Update referrer's user document in Firestore to increment earned commissions
+      try {
+        const refUserDoc = await getDoc(doc(db, 'users', refPhone));
+        if (refUserDoc.exists()) {
+          const currentTotal = Number(refUserDoc.data().totalCommissionEarned) || 0;
+          await setDoc(
+            doc(db, 'users', refPhone),
+            {
+              totalCommissionEarned: currentTotal + commAmount,
+              lastCommissionEarnedAt: nowIso,
+            },
+            { merge: true }
+          );
+        }
+      } catch (_) {}
+
+      // 4. Update customer doc in Firestore
+      customer.referralCommissionStatus = 'EARNED';
+      syncToFirestore('customers', customer.id, customer);
+    } catch (e) {
+      console.warn('Error awarding referral commission:', e);
+    }
   },
 
   // ── Staff & Roles Management ──────────────────────────────────────────────

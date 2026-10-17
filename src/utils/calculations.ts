@@ -309,10 +309,17 @@ export const generateWeeklyEntries = (
 ): Omit<CollectionEntry, 'id'>[] => {
   const entries: Omit<CollectionEntry, 'id'>[] = [];
   const startDate = parseLocalDate(startDateStr);
+  const hasRefDiscount = Boolean(customer.referredBy || (customer.referralDiscount && customer.referralDiscount > 0));
 
   for (let i = 1; i <= totalWeeks; i++) {
     const dueDate = new Date(startDate);
     dueDate.setDate(startDate.getDate() + (i - 1) * 7);
+
+    // If referred, first installment has 10% cut; subsequent installments are regular full amount
+    const isFirstInstallment = i === 1;
+    const expAmt = isFirstInstallment && hasRefDiscount
+      ? Math.max(0, Math.round(customer.amount * 0.9))
+      : customer.amount;
 
     entries.push({
       customerId: customer.id,
@@ -323,15 +330,16 @@ export const generateWeeklyEntries = (
       periodIndex: i,
       periodLabel: `आठवडा ${i}`,
       dueDate: formatLocalDate(dueDate),
-      expectedAmount: customer.amount,
+      expectedAmount: expAmt,
       collectedAmount: 0,
-      remainingAmount: customer.amount,
+      remainingAmount: expAmt,
       interestAmount: 0,
       historicalInterestRate: customer.interestRate,
       penaltyAmount: 0,
       historicalPenaltyRate: customer.penaltyRate,
       totalPaid: 0,
       status: 'PENDING',
+      note: isFirstInstallment && hasRefDiscount ? 'पहिला हप्ता: १०% रेफरल सवलत लागू' : undefined,
       updatedAt: new Date().toISOString(),
     });
   }
@@ -346,10 +354,17 @@ export const generateMonthlyEntries = (
 ): Omit<CollectionEntry, 'id'>[] => {
   const entries: Omit<CollectionEntry, 'id'>[] = [];
   const startDate = parseLocalDate(startDateStr);
+  const hasRefDiscount = Boolean(customer.referredBy || (customer.referralDiscount && customer.referralDiscount > 0));
 
   for (let i = 1; i <= totalMonths; i++) {
     const dueDate = new Date(startDate);
     dueDate.setMonth(startDate.getMonth() + (i - 1));
+
+    // If referred, first installment has 10% cut; subsequent installments are regular full amount
+    const isFirstInstallment = i === 1;
+    const expAmt = isFirstInstallment && hasRefDiscount
+      ? Math.max(0, Math.round(customer.amount * 0.9))
+      : customer.amount;
 
     entries.push({
       customerId: customer.id,
@@ -360,15 +375,16 @@ export const generateMonthlyEntries = (
       periodIndex: i,
       periodLabel: `महिना ${i}`,
       dueDate: formatLocalDate(dueDate),
-      expectedAmount: customer.amount,
+      expectedAmount: expAmt,
       collectedAmount: 0,
-      remainingAmount: customer.amount,
+      remainingAmount: expAmt,
       interestAmount: 0,
       historicalInterestRate: customer.interestRate,
       penaltyAmount: 0,
       historicalPenaltyRate: customer.penaltyRate,
       totalPaid: 0,
       status: 'PENDING',
+      note: isFirstInstallment && hasRefDiscount ? 'पहिला हप्ता: १०% रेफरल सवलत लागू' : undefined,
       updatedAt: new Date().toISOString(),
     });
   }
