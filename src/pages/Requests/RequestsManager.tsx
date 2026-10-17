@@ -455,6 +455,7 @@ export const RequestsManager: React.FC = () => {
                 <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-bold uppercase text-[11px] tracking-wider">
                   <th className="py-3 px-4">{language === 'EN' ? 'Date & Time' : 'दिनांक व वेळ'}</th>
                   <th className="py-3 px-4">{language === 'EN' ? 'Member Name' : 'सभासदाचे नाव व मोबाईल'}</th>
+                  <th className="py-3 px-4">{language === 'EN' ? 'Reference' : 'रेफरन्स'}</th>
                   <th className="py-3 px-4">{language === 'EN' ? 'Target Bhishi Scheme' : 'इच्छित भिशी योजना'}</th>
                   <th className="py-3 px-4">{language === 'EN' ? 'Installment Amount' : 'हप्ता रक्कम'}</th>
                   <th className="py-3 px-4">{language === 'EN' ? 'Message' : 'सभासदाचा संदेश'}</th>
@@ -484,6 +485,21 @@ export const RequestsManager: React.FC = () => {
                             </span>
                           )}
                         </div>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {req.referredBy ? (
+                          <div className="flex flex-col">
+                            <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 w-fit">
+                              <span>👤 {req.referredByName || 'रेफरल'}</span>
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-medium mt-0.5 whitespace-nowrap">
+                              {req.referredBy} • <strong className="text-emerald-700">१०% हप्ता १ सवलत</strong>
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-xs font-semibold">-</span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4">
@@ -618,6 +634,20 @@ export const RequestsManager: React.FC = () => {
                         <div className="pt-1.5 border-t border-gray-200/60">
                           <span className="text-gray-500 block mb-0.5 font-medium">{language === 'EN' ? 'Member Message:' : 'सभासदाचा संदेश:'}</span>
                           <p className="text-gray-800 italic bg-white p-2 rounded-lg border border-gray-200">"{selectedRequest.message}"</p>
+                        </div>
+                      )}
+                      {selectedRequest.referredBy && (
+                        <div className="pt-2 border-t border-emerald-200 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
+                          <div className="flex items-center gap-1.5 text-xs font-black text-emerald-900">
+                            <span className="text-base">🎁</span>
+                            <span>{language === 'EN' ? 'Referral Program Active' : '१०% रेफरल सवलत लागू'}</span>
+                          </div>
+                          <p className="text-[11px] text-emerald-800 mt-0.5">
+                            कोणाचा रेफरन्स: <strong>{selectedRequest.referredByName || 'रेफरल'} ({selectedRequest.referredBy})</strong>
+                          </p>
+                          <p className="text-[11px] text-emerald-700 font-bold mt-1">
+                            💡 मंजूर झाल्यावर १ल्या हप्त्यावर १०% सूट आपोआप लागू होईल: १ला हप्ता <strong>₹{Math.round((Number(approvalAmount) || 1000) * 0.9)}</strong> राहील आणि पुढील हप्ते नियमित (<strong>₹{approvalAmount || 1000}</strong>) राहतील.
+                          </p>
                         </div>
                       )}
                     </div>
