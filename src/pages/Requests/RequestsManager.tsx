@@ -420,14 +420,14 @@ export const RequestsManager: React.FC = () => {
         </div>
 
         {/* Search Input */}
-        <div className="relative min-w-[240px]">
+        <div className="relative w-full md:w-auto md:min-w-[260px]">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={language === 'EN' ? 'Search by name, mobile, account...' : 'नाव, मोबाईल, खाते क्र. शोधा...'}
-            className="w-full text-xs sm:text-sm pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+            className="w-full text-xs sm:text-sm pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
           />
         </div>
       </div>
@@ -449,134 +449,283 @@ export const RequestsManager: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-bold uppercase text-[11px] tracking-wider">
-                  <th className="py-3 px-4">{language === 'EN' ? 'Date & Time' : 'दिनांक व वेळ'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Member Name' : 'सभासदाचे नाव व मोबाईल'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Reference' : 'रेफरन्स'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Target Bhishi Scheme' : 'इच्छित भिशी योजना'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Installment Amount' : 'हप्ता रक्कम'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Message' : 'सभासदाचा संदेश'}</th>
-                  <th className="py-3 px-4">{language === 'EN' ? 'Status' : 'स्थिती'}</th>
-                  <th className="py-3 px-4 text-right">{language === 'EN' ? 'Actions' : 'कृती'}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredRequests.map((req) => {
-                  const schemeInfo = getRequestSchemeDisplay(req);
-                  return (
-                    <tr key={req.id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium text-xs">
-                        {formatDateMarathi(req.createdAt.split('T')[0], language)}
-                        <span className="block text-[10px] text-gray-400">
-                          {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-gray-900">{req.customerName || 'सभासद'}</div>
-                        <div className="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
-                          <span className="font-semibold text-slate-600">{req.mobile}</span>
+          <>
+            {/* Dedicated Mobile Card View (< md screens) */}
+            <div className="block md:hidden space-y-3 p-3 bg-slate-50/50">
+              {filteredRequests.map((req) => {
+                const schemeInfo = getRequestSchemeDisplay(req);
+                return (
+                  <div
+                    key={req.id}
+                    className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3 hover:shadow-md transition-shadow"
+                  >
+                    {/* Top Header: Member Name, Mobile & Status */}
+                    <div className="flex items-start justify-between border-b border-gray-100 pb-2.5 gap-2">
+                      <div className="min-w-0">
+                        <div className="font-black text-gray-900 text-sm truncate">
+                          {req.customerName || (language === 'EN' ? 'Member' : 'सभासद')}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-600 font-semibold flex-wrap">
+                          <a
+                            href={`tel:${req.mobile}`}
+                            className="text-[#2563EB] hover:underline flex items-center gap-1 font-bold"
+                          >
+                            <span>📞</span>
+                            <span>{req.mobile}</span>
+                          </a>
                           {req.accountNumber && (
                             <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-[10px]">
                               #{req.accountNumber}
                             </span>
                           )}
                         </div>
-                      </td>
+                      </div>
+                      <div className="shrink-0">{getStatusBadge(req.status)}</div>
+                    </div>
 
-                      <td className="py-3 px-4">
-                        {req.referredBy ? (
-                          <div className="flex flex-col">
-                            <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 w-fit">
-                              <span>👤 {req.referredByName || 'रेफरल'}</span>
-                            </span>
-                            <span className="text-[10px] text-slate-500 font-medium mt-0.5 whitespace-nowrap">
-                              {req.referredBy} • <strong className="text-emerald-700">१०% हप्ता १ सवलत</strong>
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 text-xs font-semibold">-</span>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-4">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-50 text-emerald-900 border border-emerald-300 shadow-2xs">
+                    {/* Scheme & Amount Details Card */}
+                    <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 text-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-gray-500 font-bold">
+                          {language === 'EN' ? 'Scheme:' : 'भिशी योजना:'}
+                        </span>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-white text-emerald-900 border border-emerald-300 shadow-2xs">
                           <Landmark className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                           <span>{schemeInfo.schemeName}</span>
                         </div>
-                        <div className="text-[11px] text-gray-500 font-semibold mt-1 flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-bold text-[10px]">
-                            {schemeInfo.modalityLabel}
-                          </span>
-                          <span>•</span>
-                          <span>{schemeInfo.totalInstallments} {language === 'EN' ? 'Installments' : 'हप्ते'}</span>
-                        </div>
-                      </td>
+                      </div>
 
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="font-black text-emerald-900 text-sm">
-                          {formatCurrency(req.amount || 1000, language)}
-                        </div>
-                        <span className="text-[10px] text-gray-500 font-bold block">
-                          {language === 'EN' ? 'Per Installment' : 'प्रति हप्ता'}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-gray-500 font-bold">
+                          {language === 'EN' ? 'Schedule:' : 'वारंवारता व हप्ते:'}
                         </span>
-                      </td>
+                        <span className="font-bold text-gray-800">
+                          {schemeInfo.modalityLabel} • {schemeInfo.totalInstallments} {language === 'EN' ? 'Installments' : 'हप्ते'}
+                        </span>
+                      </div>
 
-                      <td className="py-3 px-4 max-w-xs">
-                        <div className="text-xs text-gray-700 truncate" title={req.message}>
-                          {req.message || <span className="text-gray-400 italic">काही संदेश नाही</span>}
-                        </div>
-                        {req.reviewNote && (
-                          <div className="text-[11px] text-rose-700 mt-1 bg-rose-50 p-1.5 rounded border border-rose-100">
-                            <strong>{language === 'EN' ? 'Admin Note:' : 'प्रशासक नोंद:'}</strong> {req.reviewNote}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-4 whitespace-nowrap">{getStatusBadge(req.status)}</td>
-
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
-                        {req.status === 'PENDING' ? (
-                          <div className="inline-flex items-center gap-2">
-                            <button
-                              onClick={() => openReviewModal(req, 'APPROVE')}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all"
-                            >
-                              {language === 'EN' ? 'Approve' : 'मान्यता द्या'}
-                            </button>
-                            <button
-                              onClick={() => openReviewModal(req, 'REJECT')}
-                              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition-all"
-                            >
-                              {language === 'EN' ? 'Reject' : 'नाकारा'}
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-gray-400 font-medium">
-                            {req.reviewedBy ? `${language === 'EN' ? 'By' : 'द्वारा'}: ${req.reviewedBy}` : 'Processed'}
+                      <div className="flex items-center justify-between pt-1 border-t border-emerald-200/60">
+                        <span className="text-[11px] text-gray-500 font-bold">
+                          {language === 'EN' ? 'Installment Amount:' : 'हप्ता रक्कम:'}
+                        </span>
+                        <span className="font-black text-emerald-950 text-sm">
+                          {formatCurrency(req.amount || 1000, language)}{' '}
+                          <span className="text-[10px] text-gray-500 font-normal">
+                            ({language === 'EN' ? 'Per Installment' : 'प्रति हप्ता'})
                           </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Referral Program Tag (if any) */}
+                    {req.referredBy && (
+                      <div className="bg-emerald-100/60 p-2.5 rounded-xl border border-emerald-200 text-xs flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-base">👤</span>
+                          <div className="min-w-0">
+                            <span className="font-bold text-emerald-950 block truncate">
+                              रेफरन्स: {req.referredByName || 'रेफरल'}
+                            </span>
+                            <span className="text-[10px] text-emerald-800 block">
+                              {req.referredBy}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-black shrink-0">
+                          १०% हप्ता १ सवलत
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Member Message (if any) */}
+                    {req.message && (
+                      <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-700">
+                        <span className="text-[10px] text-gray-400 font-bold block mb-0.5">
+                          {language === 'EN' ? 'Member Note:' : 'सभासदाचा संदेश:'}
+                        </span>
+                        <p className="italic">"{req.message}"</p>
+                      </div>
+                    )}
+
+                    {/* Admin Review Note (if reviewed) */}
+                    {req.reviewNote && (
+                      <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-200 text-xs text-rose-800">
+                        <span className="text-[10px] font-black block mb-0.5">
+                          {language === 'EN' ? 'Admin Note:' : 'प्रशासक नोंद:'}
+                        </span>
+                        <p>{req.reviewNote}</p>
+                      </div>
+                    )}
+
+                    {/* Date & Actions Bar */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 border-t border-gray-100 text-xs gap-2">
+                      <span className="text-[11px] text-gray-500 font-medium">
+                        {formatDateMarathi(req.createdAt.split('T')[0], language)}{' '}
+                        <span className="text-gray-400">
+                          {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </span>
+
+                      {req.status === 'PENDING' ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openReviewModal(req, 'APPROVE')}
+                            className="flex-1 sm:flex-initial px-4 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition-all touch-target cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>{language === 'EN' ? 'Approve' : 'मान्यता द्या'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openReviewModal(req, 'REJECT')}
+                            className="flex-1 sm:flex-initial px-3.5 py-2.5 min-h-[44px] bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl text-xs font-black transition-all touch-target cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            <span>{language === 'EN' ? 'Reject' : 'नाकारा'}</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-500 font-medium">
+                          {req.reviewedBy ? `${language === 'EN' ? 'By' : 'द्वारा'}: ${req.reviewedBy}` : 'Processed'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View (>= md screens) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-bold uppercase text-[11px] tracking-wider">
+                    <th className="py-3 px-4">{language === 'EN' ? 'Date & Time' : 'दिनांक व वेळ'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Member Name' : 'सभासदाचे नाव व मोबाईल'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Reference' : 'रेफरन्स'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Target Bhishi Scheme' : 'इच्छित भिशी योजना'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Installment Amount' : 'हप्ता रक्कम'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Message' : 'सभासदाचा संदेश'}</th>
+                    <th className="py-3 px-4">{language === 'EN' ? 'Status' : 'स्थिती'}</th>
+                    <th className="py-3 px-4 text-right">{language === 'EN' ? 'Actions' : 'कृती'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredRequests.map((req) => {
+                    const schemeInfo = getRequestSchemeDisplay(req);
+                    return (
+                      <tr key={req.id} className="hover:bg-gray-50/60 transition-colors">
+                        <td className="py-3 px-4 whitespace-nowrap text-gray-600 font-medium text-xs">
+                          {formatDateMarathi(req.createdAt.split('T')[0], language)}
+                          <span className="block text-[10px] text-gray-400">
+                            {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-gray-900">{req.customerName || 'सभासद'}</div>
+                          <div className="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
+                            <span className="font-semibold text-slate-600">{req.mobile}</span>
+                            {req.accountNumber && (
+                              <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-[10px]">
+                                #{req.accountNumber}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="py-3 px-4">
+                          {req.referredBy ? (
+                            <div className="flex flex-col">
+                              <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 w-fit">
+                                <span>👤 {req.referredByName || 'रेफरल'}</span>
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-medium mt-0.5 whitespace-nowrap">
+                                {req.referredBy} • <strong className="text-emerald-700">१०% हप्ता १ सवलत</strong>
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs font-semibold">-</span>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-4">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-50 text-emerald-900 border border-emerald-300 shadow-2xs">
+                            <Landmark className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                            <span>{schemeInfo.schemeName}</span>
+                          </div>
+                          <div className="text-[11px] text-gray-500 font-semibold mt-1 flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-bold text-[10px]">
+                              {schemeInfo.modalityLabel}
+                            </span>
+                            <span>•</span>
+                            <span>{schemeInfo.totalInstallments} {language === 'EN' ? 'Installments' : 'हप्ते'}</span>
+                          </div>
+                        </td>
+
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="font-black text-emerald-900 text-sm">
+                            {formatCurrency(req.amount || 1000, language)}
+                          </div>
+                          <span className="text-[10px] text-gray-500 font-bold block">
+                            {language === 'EN' ? 'Per Installment' : 'प्रति हप्ता'}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 max-w-xs">
+                          <div className="text-xs text-gray-700 truncate" title={req.message}>
+                            {req.message || <span className="text-gray-400 italic">काही संदेश नाही</span>}
+                          </div>
+                          {req.reviewNote && (
+                            <div className="text-[11px] text-rose-700 mt-1 bg-rose-50 p-1.5 rounded border border-rose-100">
+                              <strong>{language === 'EN' ? 'Admin Note:' : 'प्रशासक नोंद:'}</strong> {req.reviewNote}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-4 whitespace-nowrap">{getStatusBadge(req.status)}</td>
+
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          {req.status === 'PENDING' ? (
+                            <div className="inline-flex items-center gap-2">
+                              <button
+                                onClick={() => openReviewModal(req, 'APPROVE')}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer"
+                              >
+                                {language === 'EN' ? 'Approve' : 'मान्यता द्या'}
+                              </button>
+                              <button
+                                onClick={() => openReviewModal(req, 'REJECT')}
+                                className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                              >
+                                {language === 'EN' ? 'Reject' : 'नाकारा'}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400 font-medium">
+                              {req.reviewedBy ? `${language === 'EN' ? 'By' : 'द्वारा'}: ${req.reviewedBy}` : 'Processed'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Review Modal Portal */}
       {selectedRequest && reviewAction && (
         <ModalPortal>
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-150 my-auto">
               {/* Modal Header */}
               <div
-                className={`p-5 flex items-center justify-between text-white ${
+                className={`p-4 sm:p-5 flex items-center justify-between text-white shrink-0 ${
                   reviewAction === 'APPROVE' ? 'bg-[#1E3A8A]' : 'bg-rose-700'
                 }`}
               >
@@ -587,7 +736,7 @@ export const RequestsManager: React.FC = () => {
                     <XCircle className="w-6 h-6 text-rose-300" />
                   )}
                   <div>
-                    <h3 className="font-bold text-lg">
+                    <h3 className="font-bold text-base sm:text-lg">
                       {reviewAction === 'APPROVE'
                         ? language === 'EN'
                           ? 'Approve Scheme Joining Request'
@@ -604,7 +753,7 @@ export const RequestsManager: React.FC = () => {
               </div>
 
               {/* Modal Body */}
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
                 {/* Details summary */}
                 {(() => {
                   const sInfo = getRequestSchemeDisplay(selectedRequest);

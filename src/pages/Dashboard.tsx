@@ -719,54 +719,62 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 5: Total Loan */}
+          {/* Card 5: Active Bishi Schemes */}
           <div 
-            onClick={() => navigate('/loans')}
-            className="relative overflow-hidden bg-gradient-to-br from-[#c89a2e] to-[#9e761d] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
+            onClick={() => navigate('/bishi')}
+            className="relative overflow-hidden bg-gradient-to-br from-[#059669] to-[#047857] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
           >
             <div className="absolute -top-3 -right-3 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 pointer-events-none group-hover:scale-125 transition-transform duration-300" />
             <div className="flex items-center justify-between relative z-10">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-xs text-white flex items-center justify-center font-bold flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-                <Landmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <button onClick={(e) => { e.stopPropagation(); navigate('/loans'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#c89a2e] group-hover:scale-110 transition-all cursor-pointer">
+              <button onClick={(e) => { e.stopPropagation(); navigate('/bishi'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#059669] group-hover:scale-110 transition-all cursor-pointer">
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="mt-2 sm:mt-2.5 relative z-10">
-              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">{t.statTotalLoan}</span>
+              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">
+                {language === 'EN' ? 'Active Schemes' : 'सक्रिय भिशी योजना'}
+              </span>
               <div className="text-base sm:text-xl font-black text-white tracking-tight mt-0.5">
-                {formatCurrency(totalLoanAmount, language)}
+                {bishiConfigs.length}
               </div>
-              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">{t.statTotalLoanSub}</div>
+              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">
+                {language === 'EN' ? 'Bhishi Schemes' : 'सर्व उपलब्ध योजना'}
+              </div>
             </div>
           </div>
 
-          {/* Card 6: Remaining Loan */}
+          {/* Card 6: Member Requests */}
           <div 
-            onClick={() => navigate('/loans')}
-            className="relative overflow-hidden bg-gradient-to-br from-[#0d8a6a] to-[#075f48] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
+            onClick={() => navigate('/requests')}
+            className="relative overflow-hidden bg-gradient-to-br from-[#d97706] to-[#b45309] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
           >
             <div className="absolute -top-3 -right-3 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 pointer-events-none group-hover:scale-125 transition-transform duration-300" />
             <div className="flex items-center justify-between relative z-10">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-xs text-white flex items-center justify-center font-bold flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-                <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
               <div className="flex items-center space-x-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-amber-300 text-[#075f48] font-black text-[10px] uppercase shadow-xs">
-                  {language === 'EN' ? 'LOAN DUE' : 'कर्ज बाकी'}
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-[#b45309] font-black text-[10px] uppercase shadow-xs">
+                  {language === 'EN' ? 'PENDING' : 'प्रलंबित'}
                 </span>
-                <button onClick={(e) => { e.stopPropagation(); navigate('/loans'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#0d8a6a] group-hover:scale-110 transition-all cursor-pointer">
+                <button onClick={(e) => { e.stopPropagation(); navigate('/requests'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#d97706] group-hover:scale-110 transition-all cursor-pointer">
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
             <div className="mt-2 sm:mt-2.5 relative z-10">
-              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">{t.statLoanRemaining}</span>
+              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">
+                {language === 'EN' ? 'Member Requests' : 'नवीन सदस्य अर्ज'}
+              </span>
               <div className="text-base sm:text-xl font-black text-white tracking-tight mt-0.5">
-                {formatCurrency(loanRemainingAmount, language)}
+                {pendingRequestsCount}
               </div>
-              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">{t.statLoanRemSub}</div>
+              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">
+                {language === 'EN' ? 'Pending Approval' : 'मंजुरीसाठी प्रलंबित'}
+              </div>
             </div>
           </div>
 
@@ -793,26 +801,35 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 8: Today's Penalty */}
+          {/* Card 8: Referral Program */}
           <div 
-            onClick={() => navigate('/penalty')}
-            className="relative overflow-hidden bg-gradient-to-br from-[#c4525b] to-[#993b42] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
+            onClick={() => navigate('/referrals')}
+            className="relative overflow-hidden bg-gradient-to-br from-[#7c3aed] to-[#6d28d9] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group cursor-pointer"
           >
             <div className="absolute -top-3 -right-3 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 pointer-events-none group-hover:scale-125 transition-transform duration-300" />
             <div className="flex items-center justify-between relative z-10">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-xs text-white flex items-center justify-center font-bold flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-                <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <button onClick={(e) => { e.stopPropagation(); navigate('/penalty'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#c4525b] group-hover:scale-110 transition-all cursor-pointer">
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center space-x-1.5">
+                <span className="px-2 py-0.5 rounded-full bg-purple-200 text-[#6d28d9] font-black text-[10px] uppercase shadow-xs">
+                  {language === 'EN' ? '10% COMM.' : '१०% कमिशन'}
+                </span>
+                <button onClick={(e) => { e.stopPropagation(); navigate('/referrals'); }} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-black group-hover:bg-white group-hover:text-[#7c3aed] group-hover:scale-110 transition-all cursor-pointer">
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
             <div className="mt-2 sm:mt-2.5 relative z-10">
-              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">{t.statTodayPenalty}</span>
+              <span className="text-[11px] sm:text-xs font-bold text-white/90 truncate block">
+                {language === 'EN' ? 'Referral Program' : 'रेफरल कार्यक्रम'}
+              </span>
               <div className="text-base sm:text-xl font-black text-white tracking-tight mt-0.5">
-                {formatCurrency(todaysPenaltyAmount, language)}
+                {referrals.length}
               </div>
-              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">{t.statTodayPenSub}</div>
+              <div className="text-[10px] sm:text-[11px] text-white/75 font-medium truncate block mt-0.5">
+                {language === 'EN' ? '10% Commission' : '१०% कमिशन व सवलत'}
+              </div>
             </div>
           </div>
 

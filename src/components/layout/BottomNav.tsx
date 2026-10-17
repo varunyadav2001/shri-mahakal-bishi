@@ -1,16 +1,25 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, Wallet, UserCheck } from 'lucide-react';
+import { Home, Users, Wallet, Inbox, Menu } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
-export const BottomNav: React.FC = () => {
-  const { t } = useApp();
+interface BottomNavProps {
+  onMenuToggle?: () => void;
+}
+
+export const BottomNav: React.FC<BottomNavProps> = ({ onMenuToggle }) => {
+  const { t, language, pendingRequestsCount } = useApp();
 
   const navItems = [
     { label: t.navDashboard, icon: Home, path: '/dashboard' },
     { label: t.navCustomers, icon: Users, path: '/customers' },
     { label: t.navCollections, icon: Wallet, path: '/collections' },
-    { label: t.navProfile, icon: UserCheck, path: '/profile' },
+    {
+      label: language === 'EN' ? 'Requests' : 'अर्ज',
+      icon: Inbox,
+      path: '/requests',
+      badge: pendingRequestsCount,
+    },
   ];
 
   return (
@@ -18,7 +27,7 @@ export const BottomNav: React.FC = () => {
       aria-label="Mobile Bottom Navigation"
       className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#E2E8F0] shadow-[0_-4px_16px_rgba(30,58,138,0.08)] lg:hidden no-print pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="grid grid-cols-4 h-16 max-w-md mx-auto px-1">
+      <div className="grid grid-cols-5 h-16 max-w-md mx-auto px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -26,7 +35,7 @@ export const BottomNav: React.FC = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `group relative flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition-all duration-200 select-none ${
+                `group relative flex flex-col items-center justify-center gap-1 py-1.5 px-0.5 rounded-xl transition-all duration-200 select-none min-h-[44px] ${
                   isActive
                     ? 'text-[#2563EB] font-extrabold'
                     : 'text-[#64748B] hover:text-[#2563EB] font-semibold'
@@ -40,7 +49,7 @@ export const BottomNav: React.FC = () => {
                     <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-b-full bg-[#2563EB]" />
                   )}
                   <div
-                    className={`flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 ${
+                    className={`relative flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 ${
                       isActive
                         ? 'bg-[#EFF6FF] text-[#2563EB] scale-105'
                         : 'group-hover:bg-slate-100'
@@ -51,8 +60,13 @@ export const BottomNav: React.FC = () => {
                         isActive ? 'stroke-[2.5]' : 'stroke-[2]'
                       }`}
                     />
+                    {item.badge !== undefined && item.badge > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-black bg-rose-500 text-white flex items-center justify-center shadow-xs animate-pulse">
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[11px] leading-tight tracking-tight truncate max-w-full px-0.5">
+                  <span className="text-[10px] leading-tight tracking-tight truncate max-w-full px-0.5">
                     {item.label}
                   </span>
                 </>
@@ -60,6 +74,21 @@ export const BottomNav: React.FC = () => {
             </NavLink>
           );
         })}
+
+        {/* 5th Button: Menu Drawer Toggle */}
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          className="group relative flex flex-col items-center justify-center gap-1 py-1.5 px-0.5 rounded-xl transition-all duration-200 select-none text-[#64748B] hover:text-[#2563EB] font-semibold cursor-pointer min-h-[44px]"
+          aria-label={language === 'EN' ? 'Open Menu' : 'मेनू उघडा'}
+        >
+          <div className="flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 group-hover:bg-slate-100">
+            <Menu className="w-5 h-5 transition-transform duration-200 stroke-[2]" />
+          </div>
+          <span className="text-[10px] leading-tight tracking-tight truncate max-w-full px-0.5">
+            {language === 'EN' ? 'Menu' : 'मेन्यू'}
+          </span>
+        </button>
       </div>
     </nav>
   );

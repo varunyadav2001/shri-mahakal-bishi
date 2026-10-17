@@ -125,7 +125,7 @@ const ProtectedLayout: React.FC = () => {
       </div>
 
       {/* Mobile Bottom Navigation Bar (Visible only on <1024px) */}
-      <BottomNav />
+      <BottomNav onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       {/* Toast Notifications */}
       <ToastContainer />
