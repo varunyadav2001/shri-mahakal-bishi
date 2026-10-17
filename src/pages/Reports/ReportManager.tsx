@@ -573,9 +573,9 @@ export const ReportManager: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Reports (0 reads if unchanged)' : 'अहवाल डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="px-3.5 py-2.5 min-h-[44px] rounded-xl bg-white hover:bg-emerald-50 text-[#0F7A5C] border border-[#E4EAE7] font-extrabold text-xs shadow-2xs flex items-center space-x-1.5 touch-target cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="px-3.5 py-2.5 min-h-[44px] rounded-xl bg-white hover:bg-blue-50 text-[#2563EB] border border-[#E2E8F0] font-extrabold text-xs shadow-2xs flex items-center space-x-1.5 touch-target cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-4 h-4 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 
@@ -624,7 +624,7 @@ export const ReportManager: React.FC = () => {
               onClick={() => setViewMode('LEDGER_CARD')}
               className={`flex-1 sm:flex-initial px-4 py-2.5 min-h-[46px] rounded-xl text-xs font-black transition-all flex items-center justify-center space-x-2 touch-target cursor-pointer relative ${
                 viewMode === 'LEDGER_CARD'
-                  ? 'bg-[#0B5C45] text-white shadow-md border-2 border-[#0B5C45] scale-[1.01]'
+                  ? 'bg-[#1E3A8A] text-white shadow-md border-2 border-[#1E3A8A] scale-[1.01]'
                   : 'bg-white text-slate-800 border-2 border-amber-400 hover:border-amber-500 animate-tab-blink hover:bg-amber-50 shadow-xs'
               }`}
             >
@@ -642,7 +642,7 @@ export const ReportManager: React.FC = () => {
               onClick={() => setViewMode('SUMMARY')}
               className={`flex-1 sm:flex-initial px-4 py-2.5 min-h-[46px] rounded-xl text-xs font-black transition-all flex items-center justify-center space-x-2 touch-target cursor-pointer relative ${
                 viewMode === 'SUMMARY'
-                  ? 'bg-[#0B5C45] text-white shadow-md border-2 border-[#0B5C45] scale-[1.01]'
+                  ? 'bg-[#1E3A8A] text-white shadow-md border-2 border-[#1E3A8A] scale-[1.01]'
                   : 'bg-white text-slate-800 border-2 border-amber-400 hover:border-amber-500 animate-tab-blink hover:bg-amber-50 shadow-xs'
               }`}
             >
@@ -679,7 +679,7 @@ export const ReportManager: React.FC = () => {
           {/* Customer Dropdown & Reveal Filter (Visible in Ledger Card Mode) */}
           {viewMode === 'LEDGER_CARD' && (
             <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-              <div className="flex items-center space-x-2 w-full sm:w-auto bg-[#F4F6F5] p-1.5 rounded-2xl border border-[#E4EAE7]">
+              <div className="flex items-center space-x-2 w-full sm:w-auto bg-[#F8FAFC] p-1.5 rounded-2xl border border-[#E2E8F0]">
                 <div className="w-32 sm:w-44 shrink-0">
                   <MarathiTextInput
                     value={ledgerSearch}
@@ -691,7 +691,7 @@ export const ReportManager: React.FC = () => {
                       }
                     }}
                     placeholder={language === 'EN' ? 'Acc No / Name...' : 'खाते क्र / नाव...'}
-                    className="w-full h-10 px-3 rounded-xl border border-[#E4EAE7] bg-white font-extrabold text-xs focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C]"
+                    className="w-full h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white font-extrabold text-xs focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]"
                   />
                 </div>
                 <div className="flex-1 sm:w-64">
@@ -731,14 +731,14 @@ export const ReportManager: React.FC = () => {
 
         {/* Dropdown Filters Grid for Summary Mode */}
         {viewMode === 'SUMMARY' && (
-          <div className="space-y-4 pt-3 border-t border-[#E4EAE7]">
+          <div className="space-y-4 pt-3 border-t border-[#E2E8F0]">
             {/* Search filter for summary reports */}
             <div>
               <MarathiTextInput
                 value={summarySearch}
                 onChange={(val) => setSummarySearch(val)}
                 placeholder={language === 'EN' ? 'Search Acc No / Name / Mobile (e.g. 101 / Suraj)...' : 'खाते क्रमांक / नाव / मोबाईल शोधा (उदा. 101 / सुरज)...'}
-                className="w-full h-11 px-4 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-xs sm:text-sm font-extrabold focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] bg-[#F4F6F5]/50 focus:outline-none transition-all"
+                className="w-full h-11 px-4 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-xs sm:text-sm font-extrabold focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] bg-[#F8FAFC]/50 focus:outline-none transition-all"
               />
             </div>
 

@@ -60,9 +60,13 @@ export interface Customer {
     totalExpected: number;
     totalCollected: number;
     totalExtraAmount?: number;
+    totalPenalty?: number;
+    totalCollectedWithPenalty?: number;
     totalRemaining: number;
+    paidInstallments?: number;
     completedInstallments: number;
     pendingInstallments: number;
+    totalInstallments?: number;
   };
   installments?: any[];
   loanDetails?: any;
@@ -106,6 +110,7 @@ export interface CollectionEntry {
   id: string;
   customerId: string;
   customerName?: string;
+  customerMobile?: string;
   accountNumber: string;
   officeId: OfficeId;
   bishiType: BishiType;
@@ -236,11 +241,12 @@ export interface ThakbakiEntry {
 }
 
 // ── Member App & Approvals Section Types ─────────────────────────────────────
-export type RequestType = 'join_scheme' | 'loan' | 'payment' | 'profile_change' | 'other' | 'JOIN_SCHEME' | 'LOAN' | 'PAYMENT' | 'PROFILE_CHANGE' | 'OTHER';
+export type RequestType = 'join_scheme' | 'new_member' | 'loan' | 'payment' | 'profile_change' | 'other' | 'JOIN_SCHEME' | 'NEW_MEMBER' | 'LOAN' | 'PAYMENT' | 'PROFILE_CHANGE' | 'OTHER';
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface MemberRequest {
   id: string;
+  userId?: string;
   memberUid?: string;
   customerId?: string;
   customerName: string;
@@ -270,11 +276,17 @@ export interface InAppNotification {
   id: string;
   memberUid?: string;
   customerId?: string;
-  mobile: string;
+  mobile?: string;
+  recipientPhone?: string;
+  recipientCustomerId?: string;
   title: string;
-  body: string;
-  type: 'REQUEST_APPROVED' | 'REQUEST_REJECTED' | 'PAYMENT_RECEIVED' | 'DUE_REMINDER' | 'GENERAL';
+  titleMr?: string;
+  body?: string;
+  message?: string;
+  messageMr?: string;
+  type: 'REQUEST_APPROVED' | 'REQUEST_REJECTED' | 'PAYMENT_RECEIVED' | 'DUE_REMINDER' | 'GENERAL' | string;
   requestId?: string;
+  status?: string;
   read: boolean;
   createdAt: string;
 }
@@ -346,4 +358,88 @@ export interface AutoBackupConfig {
   lastDailyFirstOpenDate?: string;
   lastDailyFirstOpenTimestamp?: number;
   lastDailyFirstOpenFilename?: string;
+}
+
+// ── Shri Mahakal Finance: 20% Return Payouts Schema ──────────────────────────
+export interface Payout {
+  id: string;
+  customerId: string;
+  customerName: string;
+  accountNumber: string;
+  mobile: string;
+  bishiType: BishiType;
+  bishiName?: string;
+  totalInstallmentsPaid: number;
+  totalPrincipalCollected: number;
+  returnPercentage: number; // Standard 20%
+  returnAmount: number;     // 20% of totalPrincipalCollected
+  netPayoutAmount: number;  // totalPrincipalCollected + returnAmount - deductions
+  deductions?: number;      // Pending loans or penalties deducted
+  status: 'ELIGIBLE' | 'APPROVED' | 'PAID';
+  maturityDate?: string;
+  payoutDate?: string;
+  paymentMode?: 'CASH' | 'BANK' | 'UPI';
+  referenceNo?: string;
+  processedBy?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Shri Mahakal Finance: 10% First Installment Referral Program ─────────────
+export interface Referral {
+  id: string;
+  referrerCustomerId: string;
+  referrerName: string;
+  referrerMobile: string;
+  referrerAccountNumber?: string;
+  referredCustomerId: string;
+  referredCustomerName: string;
+  referredCustomerMobile: string;
+  referredAccountNumber?: string;
+  referralCode?: string;
+  firstInstallmentAmount: number;
+  commissionPercentage: number; // Standard 10%
+  commissionAmount: number;     // 10% of first installment
+  status: 'PENDING_FIRST_PAYMENT' | 'COMMISSION_EARNED' | 'COMMISSION_PAID';
+  earnedAt?: string;
+  paidAt?: string;
+  paymentMode?: 'CASH' | 'UPI' | 'BANK';
+  referenceNo?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Staff & Roles Access Levels ─────────────────────────────────────────────
+export type StaffRole = 'SUPER_ADMIN' | 'ADMIN' | 'COLLECTION_AGENT' | 'ACCOUNTANT';
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  mobile: string;
+  email?: string;
+  role: StaffRole;
+  active: boolean;
+  canCollect: boolean;
+  canApproveRequests: boolean;
+  canViewReports: boolean;
+  canManageLoans: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// ── Member Push / In-App Broadcast Alerts ────────────────────────────────────
+export interface BroadcastAlert {
+  id: string;
+  title: string;
+  titleMr?: string;
+  message: string;
+  messageMr?: string;
+  targetAudience: 'ALL_MEMBERS' | 'SPECIFIC_SCHEME' | 'DEFAULTERS';
+  schemeId?: string;
+  sentBy: string;
+  sentAt: string;
+  recipientCount?: number;
 }

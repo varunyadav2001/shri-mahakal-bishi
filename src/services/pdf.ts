@@ -786,7 +786,7 @@ export const generateMemberLedgerPDF = async (
                 <td style="padding: 5px 4px; border: 1px solid #b8a99a; text-align: center; font-weight: 800; color: #334155;">${row.srNo}</td>
                 <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: center; font-weight: 700; color: #1e293b;">${formatDateMarathi(row.date, lang)}</td>
                 <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; font-weight: 800; color: #15803d;">${row.deposit > 0 ? formatCurrency(row.deposit, lang) : '-'}</td>
-                <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; font-weight: 900; color: #0b5c45;">${row.cumulativeDeposit > 0 ? formatCurrency(row.cumulativeDeposit, lang) : '-'}</td>
+                <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; font-weight: 900; color: #1E3A8A;">${row.cumulativeDeposit > 0 ? formatCurrency(row.cumulativeDeposit, lang) : '-'}</td>
                 <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; color: #be123c; font-weight: 700;">${row.bishiPenalty > 0 ? formatCurrency(row.bishiPenalty, lang) : '-'}</td>
                 <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; font-weight: 700; color: #1e293b;">${row.expected > 0 ? formatCurrency(row.expected, lang) : '-'}</td>
                 <td style="padding: 5px 6px; border: 1px solid #b8a99a; text-align: right; color: #c2410c; font-weight: 700;">${row.loanIssued > 0 ? formatCurrency(row.loanIssued, lang) : '-'}</td>
@@ -852,7 +852,7 @@ export const generateMemberLedgerPDF = async (
           </tr>
           <tr>
             <td style="background: #8B4513; color: white; padding: 5px 8px; border: 1px solid #8B4513;">${lang === 'EN' ? 'Total Bishi (with Int):' : 'एकूण भिशी (व्याजासह):'}</td>
-            <td style="background: #fffde7; padding: 5px 8px; border: 1px solid #b8a99a; font-weight: 900; color: #0b5c45; font-size: 12.5px;">
+            <td style="background: #fffde7; padding: 5px 8px; border: 1px solid #b8a99a; font-weight: 900; color: #1E3A8A; font-size: 12.5px;">
               ${formatCurrency(totalExpectedWithInt, lang)} <span style="font-size: 9.5px; color: #475569; font-weight: 700;">(${lang === 'EN' ? 'Base: ' : 'ठेव: '}${formatCurrency(expectedBase, lang)} + ${lang === 'EN' ? 'Int: +' : 'व्याज: +'}${formatCurrency(expectedInterest, lang)})</span>
             </td>
             <td style="background: #8B4513; color: white; padding: 5px 8px; border: 1px solid #8B4513;">${lang === 'EN' ? 'Dividend / Interest:' : 'लाभांश / व्याजदर:'}</td>
@@ -898,7 +898,7 @@ export const generateMemberLedgerPDF = async (
           <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 10.5px; font-weight: 700;">
             <div style="border: 1px solid #8B4513; padding: 6px 12px; border-radius: 6px; background: #fffde7; min-width: 250px; line-height: 1.5;">
               <div>१) टाकणी: ___________________</div>
-              <div style="color: #0b5c45; font-weight: 800;">२) डिव्हिडंड / व्याज (${rate}%): ${formatCurrency(actualEarnedInterest, lang)}</div>
+              <div style="color: #1E3A8A; font-weight: 800;">२) डिव्हिडंड / व्याज (${rate}%): ${formatCurrency(actualEarnedInterest, lang)}</div>
               <div>३) खाते नं.: <strong>${customer.accountNumber}</strong></div>
               <div style="color: #1e3a8a; font-weight: 800;">४) एकूण अंतिम परतावा: ${formatCurrency(totalPayout, lang)}</div>
             </div>
@@ -1094,7 +1094,7 @@ export const generateCustomerPDF = async (
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="width: 44px; vertical-align: middle;">
-                <div style="width: 40px; height: 40px; border-radius: 8px; background: #0F7A5C; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900;">
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: #2563EB; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900;">
                   ${customer.name ? customer.name.charAt(0) : 'ख'}
                 </div>
               </td>

@@ -64,15 +64,15 @@ export const LoginRegister: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-emerald-50/30 flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-marathi relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-marathi relative overflow-hidden">
       {/* Top Right Header Language Selector */}
       <div className="flex justify-end items-center max-w-7xl w-full mx-auto z-20">
         <button
           type="button"
           onClick={() => setLanguage(language === 'MR' ? 'EN' : 'MR')}
-          className="flex items-center space-x-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 shadow-sm text-xs font-black text-slate-800 cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-all touch-target"
+          className="flex items-center space-x-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 shadow-sm text-xs font-black text-slate-800 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all touch-target"
         >
-          <Globe className="w-4 h-4 text-[#0F7A5C]" />
+          <Globe className="w-4 h-4 text-[#2563EB]" />
           <span>{language === 'EN' ? 'English' : 'मराठी'}</span>
           <span className="text-[10px] text-slate-400 font-bold">
             ({language === 'EN' ? 'मराठी' : 'EN'})
@@ -120,17 +120,17 @@ export const LoginRegister: React.FC = () => {
           </div>
 
           {/* Illustration Graphic Box */}
-          <div className="bg-gradient-to-r from-teal-50/60 to-emerald-50/60 p-6 sm:p-8 rounded-3xl border border-teal-100/80 shadow-xs flex justify-center items-center relative">
+          <div className="bg-gradient-to-r from-blue-50/60 to-slate-100/80 p-6 sm:p-8 rounded-3xl border border-blue-100/80 shadow-xs flex justify-center items-center relative">
             <div className="relative w-full max-w-md h-44 flex items-center justify-center">
               {/* Visual Vector Graphic */}
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-xs rounded-2xl border border-teal-100 shadow-sm p-4 flex items-center justify-between">
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-xs rounded-2xl border border-blue-100 shadow-sm p-4 flex items-center justify-between">
                 <div className="space-y-2">
-                  <div className="w-28 h-3 bg-teal-200 rounded-full"></div>
-                  <div className="w-20 h-3 bg-emerald-200 rounded-full"></div>
+                  <div className="w-28 h-3 bg-blue-200 rounded-full"></div>
+                  <div className="w-20 h-3 bg-indigo-200 rounded-full"></div>
                   <div className="w-36 h-2.5 bg-slate-200 rounded-full"></div>
                   <div className="w-24 h-2.5 bg-slate-200 rounded-full"></div>
                 </div>
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white flex flex-col items-center justify-center shadow-lg transform rotate-3">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#0F172A] text-white flex flex-col items-center justify-center shadow-lg transform rotate-3">
                   <FileText className="w-8 h-8 mb-1" />
                   <span className="text-[10px] font-black tracking-wider uppercase">{t.appName}</span>
                 </div>
@@ -150,7 +150,7 @@ export const LoginRegister: React.FC = () => {
             
             {/* Feature 1 */}
             <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 font-bold">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0 font-bold">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
@@ -266,7 +266,7 @@ export const LoginRegister: React.FC = () => {
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     placeholder={language === 'EN' ? 'e.g. 9876543210 or narayan@gmail.com' : 'उदा. ९८७६५४३२१० किंवा narayan@gmail.com'}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/40"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-[#2563EB] focus:outline-none bg-slate-50/40"
                   />
                 </div>
               </div>
@@ -283,7 +283,7 @@ export const LoginRegister: React.FC = () => {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder={language === 'EN' ? 'Enter Password' : 'पासवर्ड टाका'}
-                    className="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/40"
+                    className="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-[#2563EB] focus:outline-none bg-slate-50/40"
                   />
                   <button
                     type="button"
@@ -304,7 +304,7 @@ export const LoginRegister: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setForgotPasswordMsg(!forgotPasswordMsg)}
-                  className="font-bold text-emerald-700 hover:underline cursor-pointer"
+                  className="font-bold text-blue-700 hover:underline cursor-pointer"
                 >
                   {language === 'EN' ? 'Forgot Password?' : 'पासवर्ड विसरलात?'}
                 </button>
@@ -334,7 +334,7 @@ export const LoginRegister: React.FC = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-sm transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 rounded-2xl bg-[#1E3A8A] hover:bg-[#2563EB] text-white font-black text-sm transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
               >
                 <span>
                   {submitting
@@ -345,8 +345,8 @@ export const LoginRegister: React.FC = () => {
               </button>
 
               {/* Security Footer Notice */}
-              <div className="mt-5 p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-slate-700 text-[11px] font-bold flex items-start space-x-3">
-                <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div className="mt-5 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-slate-700 text-[11px] font-bold flex items-start space-x-3">
+                <ShieldCheck className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="text-slate-900 font-extrabold block">
                     {language === 'EN' ? 'Authorized administrators only.' : 'फक्त अधिकृत प्रशासकांनाच प्रवेश आहे.'}

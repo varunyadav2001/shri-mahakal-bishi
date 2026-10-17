@@ -77,57 +77,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auth State Listener & Customer Binding
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    let customerUnsub: (() => void) | null = null;
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (customerUnsub) {
+        customerUnsub();
+        customerUnsub = null;
+      }
+
       if (currentUser && currentUser.phoneNumber) {
         const rawPhone = currentUser.phoneNumber.replace('+91', '').trim();
-        await fetchCustomerForPhone(rawPhone, currentUser.phoneNumber);
+        customerUnsub = bindCustomerRealtime(rawPhone, currentUser.phoneNumber);
       } else {
         setCustomer(null);
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (customerUnsub) customerUnsub();
+      unsubscribe();
+    };
   }, []);
 
-  const fetchCustomerForPhone = async (phone10: string, fullPhone: string) => {
+  const bindCustomerRealtime = (phone10: string, fullPhone: string) => {
     try {
       const q1 = query(collection(db, 'customers'), where('mobile', '==', phone10));
-      let snap = await getDocs(q1);
+      return onSnapshot(
+        q1,
+        (snap) => {
+          if (!snap.empty) {
+            // Find active customer doc if multiple exist
+            const activeDocs = snap.docs.filter((d) => {
+              const data = d.data();
+              return data.status !== 'CLOSED' && data.status !== 'DELETED';
+            });
 
-      if (snap.empty) {
-        const q2 = query(collection(db, 'customers'), where('mobile', '==', fullPhone));
-        snap = await getDocs(q2);
-      }
-
-      if (!snap.empty) {
-        const docSnap = snap.docs[0];
-        const custData = { id: docSnap.id, ...docSnap.data() } as Customer;
-        setCustomer(custData);
-
-        // Realtime sync for customer doc
-        onSnapshot(doc(db, 'customers', docSnap.id), (updatedSnap) => {
-          if (updatedSnap.exists()) {
-            setCustomer({ id: updatedSnap.id, ...updatedSnap.data() } as Customer);
+            if (activeDocs.length > 0) {
+              const docSnap = activeDocs[0];
+              setCustomer({ id: docSnap.id, ...docSnap.data() } as Customer);
+            } else {
+              // All matching docs were closed or marked deleted
+              setCustomer(null);
+            }
+          } else {
+            // Query 2: Try full phone number with country code
+            const q2 = query(collection(db, 'customers'), where('mobile', '==', fullPhone));
+            getDocs(q2).then((snap2) => {
+              if (!snap2.empty) {
+                const activeDocs2 = snap2.docs.filter((d) => {
+                  const data = d.data();
+                  return data.status !== 'CLOSED' && data.status !== 'DELETED';
+                });
+                if (activeDocs2.length > 0) {
+                  const docSnap2 = activeDocs2[0];
+                  setCustomer({ id: docSnap2.id, ...docSnap2.data() } as Customer);
+                  return;
+                }
+              }
+              // Completely deleted by admin!
+              setCustomer(null);
+            }).catch(() => {
+              setCustomer(null);
+            });
           }
-        });
-      } else {
-        // Fallback placeholder record if user just joined and not yet assigned an account
-        setCustomer({
-          id: 'cust_' + phone10,
-          accountNumber: 'नवीन',
-          name: 'खातेदार',
-          mobile: phone10,
-          officeId: 'MAIN',
-          bishiType: 'GENERAL',
-          amount: 0,
-          modality: 'M',
-          status: 'PENDING_REGISTRATION',
-        });
-      }
+        },
+        (err) => {
+          console.warn('Realtime customer listener error:', err);
+          setCustomer(null);
+        }
+      );
     } catch (err) {
-      console.error('Error fetching customer record:', err);
+      console.error('Error binding customer listener:', err);
+      setCustomer(null);
+      return () => {};
     }
   };
 

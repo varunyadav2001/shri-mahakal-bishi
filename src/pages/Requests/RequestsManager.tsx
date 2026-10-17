@@ -280,8 +280,8 @@ export const RequestsManager: React.FC = () => {
       <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-              <Inbox className="w-5 h-5 text-[#0B5C45]" />
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+              <Inbox className="w-5 h-5 text-[#2563EB]" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
@@ -407,7 +407,7 @@ export const RequestsManager: React.FC = () => {
             <select
               value={schemeFilter}
               onChange={(e) => setSchemeFilter(e.target.value)}
-              className="text-xs font-black bg-emerald-50 text-emerald-950 border-2 border-emerald-600 hover:border-emerald-700 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B5C45] shadow-xs cursor-pointer transition-colors"
+              className="text-xs font-black bg-blue-50 text-blue-950 border-2 border-blue-600 hover:border-blue-700 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB] shadow-xs cursor-pointer transition-colors"
             >
               <option value="ALL">{language === 'EN' ? 'All Bhishi Schemes' : 'सर्व भिशी योजना'}</option>
               {availableSchemes.map((s) => (
@@ -427,7 +427,7 @@ export const RequestsManager: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={language === 'EN' ? 'Search by name, mobile, account...' : 'नाव, मोबाईल, खाते क्र. शोधा...'}
-            className="w-full text-xs sm:text-sm pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0B5C45]"
+            className="w-full text-xs sm:text-sm pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
           />
         </div>
       </div>
@@ -561,12 +561,12 @@ export const RequestsManager: React.FC = () => {
               {/* Modal Header */}
               <div
                 className={`p-5 flex items-center justify-between text-white ${
-                  reviewAction === 'APPROVE' ? 'bg-[#0B5C45]' : 'bg-rose-700'
+                  reviewAction === 'APPROVE' ? 'bg-[#1E3A8A]' : 'bg-rose-700'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {reviewAction === 'APPROVE' ? (
-                    <CheckCircle className="w-6 h-6 text-emerald-300" />
+                    <CheckCircle className="w-6 h-6 text-blue-300" />
                   ) : (
                     <XCircle className="w-6 h-6 text-rose-300" />
                   )}
@@ -744,7 +744,7 @@ export const RequestsManager: React.FC = () => {
                   onClick={handleConfirmReview}
                   className={`px-5 py-2 text-xs font-bold text-white rounded-xl shadow-md transition-all flex items-center gap-1.5 ${
                     reviewAction === 'APPROVE'
-                      ? 'bg-[#0B5C45] hover:bg-[#0F7A5C]'
+                      ? 'bg-[#1E3A8A] hover:bg-[#2563EB]'
                       : 'bg-rose-600 hover:bg-rose-700'
                   } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >

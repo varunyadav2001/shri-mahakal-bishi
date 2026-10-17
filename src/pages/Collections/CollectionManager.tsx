@@ -118,29 +118,29 @@ export const CollectionManager: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Collections (0 reads if unchanged)' : 'जमा डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="w-full sm:w-auto px-3.5 py-2.5 min-h-[44px] bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all touch-target"
+            className="w-full sm:w-auto px-3.5 py-2.5 min-h-[44px] bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all touch-target"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 
           {/* Main Collection Action Button requested by user */}
           <button
             onClick={() => handleOpenQuickCollect()}
-            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs transition-colors shadow-md flex items-center justify-center space-x-2 touch-target"
+            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-extrabold text-xs transition-colors shadow-md flex items-center justify-center space-x-2 touch-target"
           >
             <Plus className="w-4 h-4" />
             <span>{t.btnRecordDeposit}</span>
           </button>
 
           {/* Tab Switcher */}
-          <div className="flex w-full sm:w-auto justify-center bg-[#F4F6F5] p-1.5 rounded-xl border border-[#E4EAE7] shadow-2xs gap-1.5">
+          <div className="flex w-full sm:w-auto justify-center bg-[#F8FAFC] p-1.5 rounded-xl border border-[#E2E8F0] shadow-2xs gap-1.5">
             <button
               onClick={() => setActiveTab('TODAY')}
               className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-black transition-all cursor-pointer ${
                 activeTab === 'TODAY'
-                  ? 'bg-[#0B5C45] text-white shadow-xs border border-[#0B5C45]'
-                  : 'bg-white text-[#5F6E68] hover:text-[#10241E] border border-slate-200 hover:bg-slate-50'
+                  ? 'bg-[#1E3A8A] text-white shadow-xs border border-[#1E3A8A]'
+                  : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {t.tabToday}
@@ -149,8 +149,8 @@ export const CollectionManager: React.FC = () => {
               onClick={() => setActiveTab('WEEKLY')}
               className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-black transition-all cursor-pointer ${
                 activeTab === 'WEEKLY'
-                  ? 'bg-[#0B5C45] text-white shadow-xs border border-[#0B5C45]'
-                  : 'bg-white text-[#5F6E68] hover:text-[#10241E] border border-slate-200 hover:bg-slate-50'
+                  ? 'bg-[#1E3A8A] text-white shadow-xs border border-[#1E3A8A]'
+                  : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {t.tabWeekly}
@@ -159,8 +159,8 @@ export const CollectionManager: React.FC = () => {
               onClick={() => setActiveTab('MONTHLY')}
               className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-black transition-all cursor-pointer ${
                 activeTab === 'MONTHLY'
-                  ? 'bg-[#0B5C45] text-white shadow-xs border border-[#0B5C45]'
-                  : 'bg-white text-[#5F6E68] hover:text-[#10241E] border border-slate-200 hover:bg-slate-50'
+                  ? 'bg-[#1E3A8A] text-white shadow-xs border border-[#1E3A8A]'
+                  : 'bg-white text-[#64748B] hover:text-[#0F172A] border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {t.tabMonthly}
@@ -170,14 +170,14 @@ export const CollectionManager: React.FC = () => {
       </div>
 
       {/* Filter Tabs for Pending vs Paid */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E4EAE7] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center bg-[#F4F6F5] p-1.5 rounded-xl border border-[#E4EAE7] gap-1 shadow-2xs">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center bg-[#F8FAFC] p-1.5 rounded-xl border border-[#E2E8F0] gap-1 shadow-2xs">
           <button
             onClick={() => setStatusFilter('ALL')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               statusFilter === 'ALL'
-                ? 'bg-[#10241E] text-white shadow-xs'
-                : 'text-[#5F6E68] hover:text-[#10241E] hover:bg-white/80'
+                ? 'bg-[#0F172A] text-white shadow-xs'
+                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-white/80'
             }`}
           >
             {t.tabAllRecords}
@@ -197,8 +197,8 @@ export const CollectionManager: React.FC = () => {
             onClick={() => setStatusFilter('PAID')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center space-x-1.5 cursor-pointer ${
               statusFilter === 'PAID'
-                ? 'bg-[#0F7A5C] text-white shadow-xs'
-                : 'text-[#0F7A5C] hover:bg-emerald-100/80 bg-emerald-50/70 border border-emerald-200/50'
+                ? 'bg-[#2563EB] text-white shadow-xs'
+                : 'text-[#2563EB] hover:bg-blue-100/80 bg-blue-50/70 border border-blue-200/50'
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -207,12 +207,12 @@ export const CollectionManager: React.FC = () => {
         </div>
 
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#0F7A5C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+          <Search className="w-4 h-4 text-[#2563EB] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
           <MarathiTextInput
             value={searchTerm}
             onChange={(val) => setSearchTerm(val)}
             placeholder={language === 'EN' ? 'Search Acc No / Name / Mobile (e.g. 101 / Suraj)...' : 'खाते क्र / नाव / मोबाईल शोधा (उदा. 101 / सुरज)...'}
-            className="w-full pl-10 pr-9 py-2 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-xs sm:text-sm font-extrabold focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] bg-[#F4F6F5]/50 focus:outline-none transition-all"
+            className="w-full pl-10 pr-9 py-2 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-xs sm:text-sm font-extrabold focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] bg-[#F8FAFC]/50 focus:outline-none transition-all"
           />
           {searchTerm && (
             <button

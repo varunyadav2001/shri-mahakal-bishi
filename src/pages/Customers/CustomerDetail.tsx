@@ -484,9 +484,9 @@ export const CustomerDetail: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Customer Details (0 reads if unchanged)' : 'खातेदार डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="px-3.5 py-2 min-h-[44px] rounded-xl bg-white hover:bg-emerald-50 text-[#0F7A5C] border border-[#E4EAE7] font-bold text-xs shadow-2xs flex items-center space-x-1.5 touch-target cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="px-3.5 py-2 min-h-[44px] rounded-xl bg-white hover:bg-blue-50 text-[#2563EB] border border-[#E2E8F0] font-bold text-xs shadow-2xs flex items-center space-x-1.5 touch-target cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-4 h-4 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 

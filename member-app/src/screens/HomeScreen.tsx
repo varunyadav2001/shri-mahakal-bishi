@@ -34,7 +34,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!customer?.id) return;
+    if (!customer?.id || customer?.status === 'CLOSED' || customer?.status === 'DELETED') {
+      setNextDue(null);
+      setActiveLoans([]);
+      setRecentCollections([]);
+      setLoading(false);
+      return;
+    }
 
     const fetchHomeData = async () => {
       setLoading(true);
@@ -50,6 +56,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         const instSnap = await getDocs(instQuery).catch(() => ({ docs: [] } as any));
         if (instSnap.docs && instSnap.docs.length > 0) {
           setNextDue({ id: instSnap.docs[0].id, ...instSnap.docs[0].data() } as Installment);
+        } else {
+          setNextDue(null);
         }
 
         // 2. Fetch active loans
@@ -61,6 +69,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         const loanSnap = await getDocs(loanQuery).catch(() => ({ docs: [] } as any));
         if (loanSnap.docs) {
           setActiveLoans(loanSnap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Loan)));
+        } else {
+          setActiveLoans([]);
         }
 
         // 3. Fetch recent collections
@@ -73,6 +83,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         const collSnap = await getDocs(collQuery).catch(() => ({ docs: [] } as any));
         if (collSnap.docs) {
           setRecentCollections(collSnap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Collection)));
+        } else {
+          setRecentCollections([]);
         }
       } catch (err) {
         console.error('Error fetching home screen data:', err);
@@ -82,8 +94,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
     };
 
     fetchHomeData();
-  }, [customer?.id]);
+  }, [customer?.id, customer?.status]);
 
+  const hasActiveBishi = customer && customer.status !== 'CLOSED' && customer.status !== 'DELETED' && customer.accountNumber;
   const totalLoanBalance = activeLoans.reduce((sum, l) => sum + (l.balancePrincipal || 0), 0);
 
   return (
@@ -122,43 +135,68 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </div>
 
         {/* Member Master Card */}
-        <div className="bg-gradient-to-br from-emerald-800 to-brand-950 p-5 rounded-3xl border border-emerald-700/50 shadow-inner relative">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">
-                {language === 'EN' ? 'Account Number' : 'खाते क्रमांक'}
-              </span>
-              <span className="text-2xl font-black text-white tracking-tight">
-                #{customer?.accountNumber || '---'}
-              </span>
-            </div>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-200 font-black text-[10px] border border-emerald-400/30">
-              {customer?.officeId || 'MAIN'} {language === 'EN' ? 'Office' : 'शाखा'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-emerald-700/40 text-xs">
-            <div>
-              <span className="text-[10px] text-emerald-300 font-bold block">
-                {language === 'EN' ? 'Active Scheme' : 'सुरू भिशी'}
-              </span>
-              <span className="font-extrabold text-white truncate block">
-                {customer?.bishiType || 'नारायण भिशी योजना'}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-emerald-300 font-bold block">
-                {language === 'EN' ? 'Installment' : 'हप्ता रक्कम'}
-              </span>
-              <span className="font-extrabold text-emerald-100 text-sm">
-                ₹{customer?.amount || 0}{' '}
-                <span className="text-[10px] font-medium text-emerald-300">
-                  ({customer?.modality === 'W' ? (language === 'EN' ? 'Wk' : 'साप्ता') : (language === 'EN' ? 'Mo' : 'मासि')})
+        {hasActiveBishi ? (
+          <div className="bg-gradient-to-br from-emerald-800 to-brand-950 p-5 rounded-3xl border border-emerald-700/50 shadow-inner relative">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">
+                  {language === 'EN' ? 'Account Number' : 'खाते क्रमांक'}
                 </span>
+                <span className="text-2xl font-black text-white tracking-tight">
+                  #{customer?.accountNumber}
+                </span>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-200 font-black text-[10px] border border-emerald-400/30">
+                {customer?.officeId || 'MAIN'} {language === 'EN' ? 'Office' : 'शाखा'}
               </span>
             </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-emerald-700/40 text-xs">
+              <div>
+                <span className="text-[10px] text-emerald-300 font-bold block">
+                  {language === 'EN' ? 'Active Scheme' : 'सुरू भिशी'}
+                </span>
+                <span className="font-extrabold text-white truncate block">
+                  {customer?.bishiType || 'भिशी योजना'}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-emerald-300 font-bold block">
+                  {language === 'EN' ? 'Installment' : 'हप्ता रक्कम'}
+                </span>
+                <span className="font-extrabold text-emerald-100 text-sm">
+                  ₹{customer?.amount || 0}{' '}
+                  <span className="text-[10px] font-medium text-emerald-300">
+                    ({customer?.modality === 'W' ? (language === 'EN' ? 'Wk' : 'साप्ता') : (language === 'EN' ? 'Mo' : 'मासि')})
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-emerald-950 to-slate-900 p-5 rounded-3xl border border-emerald-800/40 shadow-inner text-center space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center mx-auto">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-extrabold text-white">
+                {language === 'EN' ? 'No Active Bishi Scheme' : 'सध्या कोणतीही सक्रिय भिशी योजना नाही'}
+              </div>
+              <p className="text-[11px] text-emerald-200/80 mt-1">
+                {language === 'EN' 
+                  ? 'Your account has no active running bishi. You can apply for a new scheme below.'
+                  : 'तुमच्या खात्यावर सध्या सुरू असलेली भिशी नाही. नवीन भिशी योजनेसाठी खाली अर्ज करा.'}
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate('NEW_REQUEST')}
+              className="px-4 py-2 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-brand-950 text-xs font-black transition-all inline-flex items-center space-x-1.5 shadow-md"
+            >
+              <span>{language === 'EN' ? 'Apply for Bishi' : 'नवीन भिशीसाठी अर्ज करा'}</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="px-4 space-y-4 -mt-3">

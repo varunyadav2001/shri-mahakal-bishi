@@ -48,7 +48,7 @@ export const exportMemberLedgerToExcel = (
               <td style="text-align: center; border: 1px solid #b8c2cc; padding: 6px;">${row.srNo}</td>
               <td style="text-align: center; border: 1px solid #b8c2cc; padding: 6px;">${formatDateMarathi(row.date)}</td>
               <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px; font-weight: bold; color: #15803d;">${row.deposit > 0 ? row.deposit : ''}</td>
-              <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px; font-weight: bold; color: #0b5c45;">${row.cumulativeDeposit > 0 ? row.cumulativeDeposit : ''}</td>
+              <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px; font-weight: bold; color: #1E3A8A;">${row.cumulativeDeposit > 0 ? row.cumulativeDeposit : ''}</td>
               <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px; color: #be123c;">${row.bishiPenalty > 0 ? row.bishiPenalty : ''}</td>
               <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px;">${row.expected > 0 ? row.expected : ''}</td>
               <td style="text-align: right; border: 1px solid #b8c2cc; padding: 6px; color: #c2410c;">${row.loanIssued > 0 ? row.loanIssued : ''}</td>
@@ -113,7 +113,7 @@ export const exportMemberLedgerToExcel = (
         </tr>
         <tr>
           <td class="meta-header" style="background-color:#8B4513; color:#ffffff; font-weight:bold;">एकूण भिशी (व्याजासह)</td>
-          <td colspan="4" class="meta-val" style="background-color:#fffde7; font-weight:bold; color:#0b5c45;">₹${totalExpectedWithInt} (ठेव: ₹${totalExpected} + व्याज: +₹${expectedInterest})</td>
+          <td colspan="4" class="meta-val" style="background-color:#fffde7; font-weight:bold; color:#1E3A8A;">₹${totalExpectedWithInt} (ठेव: ₹${totalExpected} + व्याज: +₹${expectedInterest})</td>
           <td class="meta-header" style="background-color:#8B4513; color:#ffffff; font-weight:bold;">लाभांश / व्याजदर</td>
           <td colspan="5" class="meta-val" style="background-color:#fffde7; font-weight:bold; color:#1e3a8a;">${rate}% (${customer.modality === 'W' ? 'साप्ताहिक' : 'मासिक'})</td>
         </tr>
@@ -162,7 +162,7 @@ export const exportMemberLedgerToExcel = (
         <tr>
           <td colspan="5" style="background-color:#fffde7; border: 1px solid #8B4513; font-weight: bold; padding: 10px;">
             <div>१) टाकणी: ___________________</div>
-            <div style="color: #0b5c45;">२) डिव्हिडंड / व्याज (${rate}%): ₹${actualEarnedInterest}</div>
+            <div style="color: #1E3A8A;">२) डिव्हिडंड / व्याज (${rate}%): ₹${actualEarnedInterest}</div>
             <div>३) खाते नं.: <strong>${customer.accountNumber}</strong></div>
             <div style="color: #1e3a8a;">४) एकूण अंतिम परतावा: ₹${totalPayout}</div>
           </td>
@@ -279,8 +279,8 @@ export const exportGeneralReportToExcel = (
         body { font-family: 'Segoe UI', Arial, sans-serif; }
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #000000; padding: 8px; text-align: left; }
-        .th-header { background-color: #0B5C45; color: #ffffff; font-weight: bold; }
-        .tf-footer { background-color: #0F4A3C; color: #ffffff; font-weight: bold; }
+        .th-header { background-color: #1E3A8A; color: #ffffff; font-weight: bold; }
+        .tf-footer { background-color: #0F172A; color: #ffffff; font-weight: bold; }
       </style>
     </head>
     <body>
@@ -288,7 +288,7 @@ export const exportGeneralReportToExcel = (
       <p>${lang === 'EN' ? 'Scheme' : 'भिशी'}: ${bishiName} | ${lang === 'EN' ? 'Date' : 'तारीख'}: ${new Date().toLocaleDateString(lang === 'EN' ? 'en-IN' : 'mr-IN')}</p>
       <table>
         <thead>
-          <tr class="th-header" style="background-color:#0B5C45; color:#ffffff; font-weight:bold;">
+          <tr class="th-header" style="background-color:#1E3A8A; color:#ffffff; font-weight:bold;">
             <th>${lang === 'EN' ? 'Sr. No.' : 'अ. क्र.'}</th>
             <th>${lang === 'EN' ? 'Acc No.' : 'खाते क्र.'}</th>
             <th>${lang === 'EN' ? 'Customer Name' : 'खातेदाराचे नाव'}</th>

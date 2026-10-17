@@ -91,27 +91,27 @@ export function CustomDropdown<T extends string = string>({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between border transition-all cursor-pointer select-none bg-white text-[#10241E] font-bold shadow-2xs ${
+        className={`w-full flex items-center justify-between border transition-all cursor-pointer select-none bg-white text-[#0F172A] font-bold shadow-2xs ${
           isOpen
-            ? 'border-[#0F7A5C] ring-2 ring-[#0F7A5C]/20'
-            : 'border-[#E4EAE7] hover:border-[#0F7A5C]/60'
+            ? 'border-[#2563EB] ring-2 ring-[#2563EB]/20'
+            : 'border-[#E2E8F0] hover:border-[#2563EB]/60'
         } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''} ${sizeClasses} custom-dropdown-trigger ${triggerClassName}`}
       >
         <div className="flex items-center space-x-1.5 min-w-0 pr-2 truncate">
-          {prefixIcon && <span className="shrink-0 text-[#0F7A5C]">{prefixIcon}</span>}
-          {prefixLabel && <span className="text-xs font-bold text-[#5F6E68] shrink-0 hidden sm:inline">{prefixLabel}</span>}
-          <span className="truncate font-extrabold text-[#10241E]">
+          {prefixIcon && <span className="shrink-0 text-[#2563EB]">{prefixIcon}</span>}
+          {prefixLabel && <span className="text-xs font-bold text-[#64748B] shrink-0 hidden sm:inline">{prefixLabel}</span>}
+          <span className="truncate font-extrabold text-[#0F172A]">
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           {selectedOption?.badge && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-black bg-emerald-100 text-emerald-900 shrink-0">
+            <span className="ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-black bg-blue-100 text-blue-900 shrink-0">
               {selectedOption.badge}
             </span>
           )}
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 text-[#0F7A5C] shrink-0 transition-transform duration-200 ${
+          className={`w-4 h-4 text-[#2563EB] shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : 'rotate-0'
           }`}
         />
@@ -120,7 +120,7 @@ export function CustomDropdown<T extends string = string>({
       {/* Dropdown Menu Popup */}
       {isOpen && (
         <div
-          className={`absolute z-50 mt-1.5 min-w-full bg-white rounded-2xl shadow-xl border border-[#E4EAE7] p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
+          className={`absolute z-50 mt-1.5 min-w-full bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
             align === 'right' ? 'right-0' : 'left-0'
           } ${menuClassName}`}
         >
@@ -142,8 +142,8 @@ export function CustomDropdown<T extends string = string>({
                     }}
                     className={`w-full text-left px-3 py-2 sm:py-2.5 min-h-[44px] rounded-xl text-xs sm:text-sm font-bold transition-colors flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? 'bg-[#e6f4f0] text-[#0B5C45] font-black'
-                        : 'text-[#10241E] hover:bg-[#F4F6F5] hover:text-[#0F7A5C]'
+                        ? 'bg-[#EFF6FF] text-[#1E3A8A] font-black'
+                        : 'text-[#0F172A] hover:bg-[#F8FAFC] hover:text-[#2563EB]'
                     }`}
                   >
                     <div className="flex items-center space-x-2 min-w-0 pr-2">
@@ -157,14 +157,14 @@ export function CustomDropdown<T extends string = string>({
                         )}
                       </div>
                       {option.badge && (
-                        <span className="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-emerald-100 text-emerald-900 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-blue-100 text-blue-900 shrink-0">
                           {option.badge}
                         </span>
                       )}
                     </div>
 
                     {isSelected && (
-                      <Check className="w-4 h-4 text-[#0F7A5C] shrink-0 ml-2" />
+                      <Check className="w-4 h-4 text-[#2563EB] shrink-0 ml-2" />
                     )}
                   </button>
                 );

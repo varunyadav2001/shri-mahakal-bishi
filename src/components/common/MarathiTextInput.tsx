@@ -543,7 +543,7 @@ export const MarathiTextInput: React.FC<MarathiTextInputProps> = ({
             type="button"
             onClick={handleConvertAll}
             title="मराठीत रुपांतर करा (Convert to Marathi)"
-            className="absolute right-2 px-2 py-0.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-[#0F7A5C] text-[10px] font-black border border-emerald-300/80 shadow-2xs transition-all cursor-pointer flex items-center space-x-1"
+            className="absolute right-2 px-2 py-0.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-[#2563EB] text-[10px] font-black border border-blue-300/80 shadow-2xs transition-all cursor-pointer flex items-center space-x-1"
           >
             <span>मराठी ⇄</span>
           </button>
@@ -552,7 +552,7 @@ export const MarathiTextInput: React.FC<MarathiTextInputProps> = ({
 
       {/* Transliteration Suggestions Dropdown */}
       {suggestions.length > 0 && isMarathiMode && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-2xl shadow-xl border border-[#E4EAE7] p-2 flex flex-wrap gap-1.5 animate-in fade-in">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-2 flex flex-wrap gap-1.5 animate-in fade-in">
           {suggestions.map((sug, idx) => (
             <button
               key={idx}
@@ -561,9 +561,9 @@ export const MarathiTextInput: React.FC<MarathiTextInputProps> = ({
                 e.preventDefault();
                 applySuggestion(sug);
               }}
-              className="px-3 py-1.5 text-xs font-black text-[#10241E] bg-[#F4F6F5] hover:bg-[#0F7A5C] hover:text-white rounded-xl transition-all shadow-2xs cursor-pointer"
+              className="px-3 py-1.5 text-xs font-black text-[#0F172A] bg-[#F8FAFC] hover:bg-[#2563EB] hover:text-white rounded-xl transition-all shadow-2xs cursor-pointer"
             >
-              <span className="text-[#0F7A5C] group-hover:text-white mr-1 text-[10px]">{idx + 1}.</span> {sug}
+              <span className="text-[#2563EB] group-hover:text-white mr-1 text-[10px]">{idx + 1}.</span> {sug}
             </button>
           ))}
         </div>

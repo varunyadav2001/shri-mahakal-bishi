@@ -316,9 +316,9 @@ export const ThakbakiManager: React.FC = () => {
               onClick={() => refreshAllData()}
               disabled={isRefreshing}
               title={language === 'EN' ? 'Refresh Thak Baki (0 reads if unchanged)' : 'थकबाकी डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-              className="h-10 px-3.5 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+              className="h-10 px-3.5 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
             </button>
 
@@ -396,7 +396,7 @@ export const ThakbakiManager: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#0B5C45] text-white">
+              <tr className="bg-[#1E3A8A] text-white">
                 <th className="px-4 py-3 text-left font-bold text-xs whitespace-nowrap">अ.क्र.</th>
                 <th className="px-4 py-3 text-left font-bold text-xs whitespace-nowrap">{t.thakbakiAccountNo}</th>
                 <th className="px-4 py-3 text-left font-bold text-xs whitespace-nowrap">{t.thakbakiCustomerName}</th>

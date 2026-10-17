@@ -825,7 +825,7 @@ export const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
                     setLoanIssueDate(e.target.value);
                   }
                 }}
-                className="w-full h-11 px-4 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-sm font-bold text-[#10241E] focus:ring-2 focus:ring-[#0F7A5C] bg-white transition-all shadow-2xs"
+                className="w-full h-11 px-4 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-sm font-bold text-[#0F172A] focus:ring-2 focus:ring-[#2563EB] bg-white transition-all shadow-2xs"
               />
               {bishiElapsedMonths > 1 && (
                 <div className="mt-1 flex items-center space-x-1.5 text-[11px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-lg w-fit">

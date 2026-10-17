@@ -504,14 +504,14 @@ export const BackupManager: React.FC = () => {
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto">
       {/* Page Header */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E4EAE7] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E2E8F0] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-[#0F7A5C] border border-emerald-200 mb-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#0F7A5C]" />
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-[#2563EB] border border-blue-200 mb-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#2563EB]" />
             <span>{language === 'EN' ? 'Fully Automatic Google Drive Protection' : 'स्वयंचलित गुगल ड्राईव्ह संरक्षण'}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-[#10241E] tracking-tight flex items-center space-x-2.5">
-            <FolderSync className="w-6 h-6 text-[#0F7A5C]" />
+            <FolderSync className="w-6 h-6 text-[#2563EB]" />
             <span>{language === 'EN' ? 'Google Drive Backup & 1-Click Restore' : 'गुगल ड्राईव्ह बॅकअप व १-क्लिक रिस्टोर'}</span>
           </h2>
           <p className="text-xs sm:text-sm text-[#5F6E68] font-bold mt-1">
@@ -526,9 +526,9 @@ export const BackupManager: React.FC = () => {
             onClick={() => refreshAllData(true)}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Sync All Devices with Cloud' : 'सर्व डिव्हाइसेस क्लाउडसह सिंक करा'}
-            className="h-11 px-4 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="h-11 px-4 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Sync All Devices' : 'सर्व डिव्हाइसेस सिंक करा'}</span>
           </button>
         </div>
@@ -551,10 +551,10 @@ export const BackupManager: React.FC = () => {
       )}
 
       {/* LIVE DATABASE METRICS OVERVIEW */}
-      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E4EAE7] shadow-xs">
+      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E2E8F0] shadow-xs">
         <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2.5">
           <div className="flex items-center space-x-2">
-            <Database className="w-4 h-4 text-[#0F7A5C]" />
+            <Database className="w-4 h-4 text-[#2563EB]" />
             <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
               {language === 'EN' ? 'Current System Database Overview' : 'चालू डेटाबेस माहिती'}
             </span>
@@ -565,14 +565,14 @@ export const BackupManager: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-          <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100">
-            <div className="flex items-center justify-center space-x-1.5 text-[#0B5C45] mb-1">
+          <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-100">
+            <div className="flex items-center justify-center space-x-1.5 text-[#1E3A8A] mb-1">
               <Users className="w-3.5 h-3.5" />
               <span className="text-[11px] font-extrabold uppercase">
                 {language === 'EN' ? 'Customers' : 'खातेदार'}
               </span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-[#0B5C45]">
+            <div className="text-lg sm:text-xl font-black text-[#1E3A8A]">
               {liveStats.custCount}
             </div>
           </div>
@@ -653,8 +653,8 @@ export const BackupManager: React.FC = () => {
             {/* Status Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
               {/* Card 1: Last Saved Backup */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+              <div className="p-3 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -671,8 +671,8 @@ export const BackupManager: React.FC = () => {
               </div>
 
               {/* Card 2: Daily Website-Opening Backup */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-3">
-                <div className={`w-9 h-9 rounded-xl ${isFirstOpenCompletedToday ? 'bg-emerald-50 text-[#0F7A5C]' : 'bg-teal-50 text-teal-700'} flex items-center justify-center shrink-0`}>
+              <div className="p-3 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-3">
+                <div className={`w-9 h-9 rounded-xl ${isFirstOpenCompletedToday ? 'bg-blue-50 text-[#2563EB]' : 'bg-slate-50 text-slate-700'} flex items-center justify-center shrink-0`}>
                   <RotateCcw className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -684,7 +684,7 @@ export const BackupManager: React.FC = () => {
                       ? (language === 'EN' ? "Today's Open: Saved" : 'आजचा सुरक्षित बॅकअप पूर्ण')
                       : (language === 'EN' ? 'Runs on site open' : 'वेबसाइट उघडताना होतो')}
                   </div>
-                  <div className="text-[10px] text-emerald-700 font-bold truncate max-w-[180px]" title={autoConfig.lastDailyFirstOpenFilename}>
+                  <div className="text-[10px] text-blue-700 font-bold truncate max-w-[180px]" title={autoConfig.lastDailyFirstOpenFilename}>
                     {autoConfig.lastDailyFirstOpenTimestamp
                       ? formatDateTime(autoConfig.lastDailyFirstOpenTimestamp)
                       : (language === 'EN' ? 'Auto safety backup' : 'सुरक्षित बॅकअप')}
@@ -693,8 +693,8 @@ export const BackupManager: React.FC = () => {
               </div>
 
               {/* Card 3: Daily 11:00 PM Backup */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-3">
-                <div className={`w-9 h-9 rounded-xl ${isDaily11pmCompletedToday ? 'bg-emerald-50 text-[#0F7A5C]' : 'bg-amber-50 text-amber-700'} flex items-center justify-center shrink-0`}>
+              <div className="p-3 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-3">
+                <div className={`w-9 h-9 rounded-xl ${isDaily11pmCompletedToday ? 'bg-blue-50 text-[#2563EB]' : 'bg-amber-50 text-amber-700'} flex items-center justify-center shrink-0`}>
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -706,7 +706,7 @@ export const BackupManager: React.FC = () => {
                       ? (language === 'EN' ? "Today's 11 PM: Completed" : 'आजचा ११:०० PM बॅकअप पूर्ण')
                       : (language === 'EN' ? 'Scheduled: Tonight 11:00 PM' : 'नियोजित: आज रात्री ११:०० वा.')}
                   </div>
-                  <div className="text-[10px] text-emerald-700 font-bold truncate">
+                  <div className="text-[10px] text-blue-700 font-bold truncate">
                     {isDaily11pmCompletedToday
                       ? (autoConfig.lastDaily11pmTimestamp ? formatDateTime(autoConfig.lastDaily11pmTimestamp) : (language === 'EN' ? 'Completed for today' : 'आज पूर्ण झाला'))
                       : (language === 'EN' ? 'Nightly cloud backup' : 'रात्री आपोआप बॅकअप')}
@@ -715,8 +715,8 @@ export const BackupManager: React.FC = () => {
               </div>
 
               {/* Card 4: Google Drive Folder */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#0F7A5C] flex items-center justify-center shrink-0">
+              <div className="p-3 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#2563EB] flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
@@ -726,7 +726,7 @@ export const BackupManager: React.FC = () => {
                   <div className="text-xs font-black text-[#10241E] truncate">
                     Narayan_Bhishi_Backups
                   </div>
-                  <div className="text-[10px] text-emerald-700 font-bold truncate">
+                  <div className="text-[10px] text-blue-700 font-bold truncate">
                     {language === 'EN' ? 'Max 10 Backups (Rolling)' : 'कमाल १० बॅकअप (रोलिंग)'}
                   </div>
                 </div>
@@ -740,7 +740,7 @@ export const BackupManager: React.FC = () => {
               type="button"
               disabled={isUploadingToDrive}
               onClick={handleUploadToDrive}
-              className="w-full py-3.5 px-4 rounded-2xl bg-[#0F7A5C] hover:bg-[#0B5C45] active:scale-[0.98] text-white font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 rounded-2xl bg-[#2563EB] hover:bg-[#1E3A8A] active:scale-[0.98] text-white font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
               {isUploadingToDrive ? (
                 <>
@@ -755,7 +755,7 @@ export const BackupManager: React.FC = () => {
               )}
             </button>
 
-            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-[#E4EAE7] shadow-2xs">
+            <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs">
               <span className="text-xs font-black text-[#10241E]">
                 {language === 'EN' ? 'Daily automatic backup' : 'दररोज आपोआप बॅकअप'}
               </span>
@@ -766,14 +766,14 @@ export const BackupManager: React.FC = () => {
                   onChange={(e) => handleToggleDriveAutoBackup(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F7A5C]"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
               </label>
             </div>
 
             <button
               type="button"
               onClick={() => setShowDriveSettings(!showDriveSettings)}
-              className="w-full py-2 px-3 rounded-xl bg-white hover:bg-slate-50 border border-[#E4EAE7] text-slate-700 text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-white hover:bg-slate-50 border border-[#E2E8F0] text-slate-700 text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
             >
               <Settings className="w-3.5 h-3.5 text-slate-500" />
               <span>{showDriveSettings ? (language === 'EN' ? 'Hide Drive Webhook' : 'Webhook URL लपवा') : (language === 'EN' ? 'Drive Webhook Settings' : 'गुगल स्क्रिप्ट Webhook')}</span>
@@ -791,7 +791,7 @@ export const BackupManager: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCustomWebhookUrl(DEFAULT_DRIVE_WEBHOOK_URL)}
-                className="text-[11px] font-bold text-[#0F7A5C] hover:underline self-start sm:self-auto cursor-pointer"
+                className="text-[11px] font-bold text-[#2563EB] hover:underline self-start sm:self-auto cursor-pointer"
               >
                 {language === 'EN' ? 'Reset to Default URL' : 'मूळ URL वर पूर्ववत करा'}
               </button>
@@ -803,7 +803,7 @@ export const BackupManager: React.FC = () => {
                 value={customWebhookUrl}
                 onChange={(e) => setCustomWebhookUrl(e.target.value)}
                 placeholder="https://script.google.com/macros/s/.../exec"
-                className="flex-1 px-3 py-2 text-xs font-mono bg-white border border-[#E4EAE7] rounded-xl focus:outline-none focus:border-[#0F7A5C]"
+                className="flex-1 px-3 py-2 text-xs font-mono bg-white border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#2563EB]"
               />
               <button
                 type="button"
@@ -815,15 +815,15 @@ export const BackupManager: React.FC = () => {
             </div>
 
             {/* Rolling 10-backup limit notice */}
-            <div className="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200 text-xs text-emerald-900 font-bold flex items-start space-x-2.5">
-              <ShieldCheck className="w-4 h-4 text-[#0F7A5C] shrink-0 mt-0.5" />
+            <div className="p-3 bg-blue-50/80 rounded-2xl border border-blue-200 text-xs text-blue-900 font-bold flex items-start space-x-2.5">
+              <ShieldCheck className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <div className="font-black text-[#0B5C45]">
+                <div className="font-black text-[#1E3A8A]">
                   {language === 'EN'
                     ? 'Automatic 10-File Rolling Retention:'
                     : 'स्वयंचलित १०-फाईल्स रोलिंग नियम:'}
                 </div>
-                <div className="text-[11px] leading-relaxed text-[#0F7A5C]">
+                <div className="text-[11px] leading-relaxed text-[#2563EB]">
                   {language === 'EN'
                     ? 'Google Drive automatically maintains a strict maximum of 10 backup files. When the 11th backup is uploaded, the 1st (oldest) backup file is automatically deleted so your Drive folder stays clean and organized.'
                     : 'गुगल ड्राईव्हवर जास्तीत जास्त १० बॅकअप फाईल्स ठेवल्या जातात. ११ वी फाईल अपलोड होताच पहिली (सर्वात जुनी) फाईल आपोआप डिलीट केली जाते, जेणेकरून ड्राईव्हवर गर्दी होत नाही.'}
@@ -836,7 +836,7 @@ export const BackupManager: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowScriptCode(!showScriptCode)}
-                className="text-xs font-black text-[#0F7A5C] hover:text-[#0B5C45] flex items-center space-x-1.5 cursor-pointer underline underline-offset-4"
+                className="text-xs font-black text-[#2563EB] hover:text-[#1E3A8A] flex items-center space-x-1.5 cursor-pointer underline underline-offset-4"
               >
                 <Code className="w-3.5 h-3.5" />
                 <span>
@@ -877,7 +877,7 @@ export const BackupManager: React.FC = () => {
       </div>
 
       {/* SECTION 2: 1-CLICK INSTANT RESTORE (NO FILE DOWNLOAD OR UPLOAD NEEDED) */}
-      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E4EAE7] shadow-xs space-y-6">
+      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E2E8F0] shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200 mb-2">
@@ -901,7 +901,7 @@ export const BackupManager: React.FC = () => {
             <button
               type="button"
               onClick={() => setPendingSnapshotRestore(latestSnapshot)}
-              className="py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
+              className="py-3.5 px-6 rounded-2xl bg-[#2563EB] hover:bg-blue-700 active:scale-[0.98] text-white font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
             >
               <RotateCcw className="w-4 h-4" />
               <span>{language === 'EN' ? 'Restore to Latest Safe Backup (1-Click)' : 'नवीनतम बॅकअपवर रिस्टोर करा (१-क्लिक)'}</span>
@@ -913,19 +913,19 @@ export const BackupManager: React.FC = () => {
         {latestSnapshot ? (
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
-                <CheckCircle2 className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-5 h-5 text-[#2563EB]" />
               </div>
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-xs font-black text-slate-900">
                     {language === 'EN' ? 'Latest Safe Backup Available' : 'नवीनतम उपलब्ध सुरक्षित बॅकअप'}
                   </span>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black">
+                  <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-black">
                     {language === 'EN' ? 'Ready to Restore' : 'रिस्टोरसाठी तयार'}
                   </span>
                 </div>
-                <div className="text-sm font-extrabold text-[#0F7A5C] mt-0.5">
+                <div className="text-sm font-extrabold text-[#2563EB] mt-0.5">
                   {formatDateTime(unifiedLatestTime)}
                 </div>
                 <div className="text-[11px] text-slate-500 font-bold mt-1 flex flex-wrap gap-x-3 gap-y-1">
@@ -943,7 +943,7 @@ export const BackupManager: React.FC = () => {
             <button
               type="button"
               onClick={() => setPendingSnapshotRestore(latestSnapshot)}
-              className="py-2.5 px-4 rounded-xl bg-white hover:bg-emerald-50 text-[#0F7A5C] border border-[#0F7A5C]/30 text-xs font-black flex items-center justify-center space-x-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs"
+              className="py-2.5 px-4 rounded-xl bg-white hover:bg-blue-50 text-[#2563EB] border border-[#2563EB]/30 text-xs font-black flex items-center justify-center space-x-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{language === 'EN' ? 'Quick Restore' : 'त्वरित रिस्टोर'}</span>
@@ -969,25 +969,25 @@ export const BackupManager: React.FC = () => {
         {localSnapshots.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center space-x-2 text-xs font-black text-slate-800">
-              <History className="w-4 h-4 text-[#0F7A5C]" />
+              <History className="w-4 h-4 text-[#2563EB]" />
               <span>{language === 'EN' ? 'Recent Automatic Restore Points (Safe History)' : 'मागील सुरक्षित बॅकअप्स (इतिहास)'}</span>
             </div>
 
-            <div className="divide-y divide-slate-100 rounded-2xl border border-[#E4EAE7] overflow-hidden bg-white">
+            <div className="divide-y divide-slate-100 rounded-2xl border border-[#E2E8F0] overflow-hidden bg-white">
               {localSnapshots.map((snap, idx) => (
                 <div
                   key={snap.id}
                   className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/70 transition-colors"
                 >
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-teal-50 text-[#0F7A5C] flex items-center justify-center font-black text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center font-black text-xs shrink-0">
                       {idx + 1}
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-black text-slate-900 flex flex-wrap items-center gap-1.5">
                         <span>{idx === 0 ? formatDateTime(unifiedLatestTime) : formatDateTime(snap.createdAt)}</span>
                         {idx === 0 && (
-                          <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-black border border-emerald-300">
+                          <span className="text-[9px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-black border border-blue-300">
                             {language === 'EN' ? 'LATEST' : 'नवीनतम'}
                           </span>
                         )}
@@ -1017,7 +1017,7 @@ export const BackupManager: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setPendingSnapshotRestore(snap)}
-                      className="py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#0F7A5C] text-xs font-black flex items-center space-x-1 transition-colors cursor-pointer border border-emerald-200"
+                      className="py-1.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#2563EB] text-xs font-black flex items-center space-x-1 transition-colors cursor-pointer border border-blue-200"
                     >
                       <RotateCcw className="w-3 h-3" />
                       <span>{language === 'EN' ? 'Restore This' : 'हे रिस्टोर करा'}</span>
@@ -1041,7 +1041,7 @@ export const BackupManager: React.FC = () => {
       </div>
 
       {/* SECTION 3: NEW DEVICE RESTORE (FOR PHONE SWITCH / TECHNICIAN RESTORE) */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E4EAE7] shadow-xs space-y-4">
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E2E8F0] shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center space-x-2.5">
             <Smartphone className="w-5 h-5 text-slate-600" />
@@ -1102,16 +1102,16 @@ export const BackupManager: React.FC = () => {
       </div>
 
       {/* SECTION 4: CLEAR ENGLISH EXPLANATION GUIDE */}
-      <div className="bg-[#F8FAF9] p-5 sm:p-6 rounded-3xl border border-[#E4EAE7] space-y-4">
+      <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-[#E2E8F0] space-y-4">
         <div className="flex items-center space-x-2 text-xs font-black text-[#10241E]">
-          <HelpCircle className="w-4 h-4 text-[#0F7A5C]" />
+          <HelpCircle className="w-4 h-4 text-[#2563EB]" />
           <span>{language === 'EN' ? 'Everything Explained in Simple English: How Backup & Restore Works' : 'सविस्तर स्पष्टीकरण: बॅकअप व रिस्टोर कसे काम करते?'}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {/* Card 1 */}
-          <div className="p-4 rounded-2xl bg-white border border-[#E4EAE7] space-y-2 shadow-2xs">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 text-[#0B5C45] font-black text-xs flex items-center justify-center">
+          <div className="p-4 rounded-2xl bg-white border border-[#E2E8F0] space-y-2 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#1E3A8A] font-black text-xs flex items-center justify-center">
               1
             </div>
             <h4 className="text-xs font-black text-slate-900">
@@ -1125,8 +1125,8 @@ export const BackupManager: React.FC = () => {
           </div>
 
           {/* Card 2 */}
-          <div className="p-4 rounded-2xl bg-white border border-[#E4EAE7] space-y-2 shadow-2xs">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 text-[#0B5C45] font-black text-xs flex items-center justify-center">
+          <div className="p-4 rounded-2xl bg-white border border-[#E2E8F0] space-y-2 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#1E3A8A] font-black text-xs flex items-center justify-center">
               2
             </div>
             <h4 className="text-xs font-black text-slate-900">
@@ -1140,8 +1140,8 @@ export const BackupManager: React.FC = () => {
           </div>
 
           {/* Card 3 */}
-          <div className="p-4 rounded-2xl bg-white border border-[#E4EAE7] space-y-2 shadow-2xs">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 text-[#0B5C45] font-black text-xs flex items-center justify-center">
+          <div className="p-4 rounded-2xl bg-white border border-[#E2E8F0] space-y-2 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#1E3A8A] font-black text-xs flex items-center justify-center">
               3
             </div>
             <h4 className="text-xs font-black text-slate-900">
@@ -1162,7 +1162,7 @@ export const BackupManager: React.FC = () => {
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-hidden no-print">
             <div className="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl my-auto animate-in fade-in zoom-in duration-150 overflow-hidden">
               <div className="overflow-y-auto flex-1 space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#0F7A5C] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-[#2563EB] flex items-center justify-center">
                   <RotateCcw className="w-6 h-6" />
                 </div>
                 <div>
@@ -1221,14 +1221,14 @@ export const BackupManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPendingSnapshotRestore(null)}
-                  className="px-4 py-2.5 rounded-xl border border-[#E4EAE7] text-xs font-black text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-xs font-black text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   {language === 'EN' ? 'Cancel' : 'रद्द करा'}
                 </button>
                 <button
                   type="button"
                   onClick={handleExecuteSnapshotRestore}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center space-x-1.5"
+                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center space-x-1.5"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>{language === 'EN' ? 'Yes, Restore Now (1-Click)' : 'होय, आताच रिस्टोर करा (१-क्लिक)'}</span>
@@ -1245,7 +1245,7 @@ export const BackupManager: React.FC = () => {
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-hidden no-print">
             <div className="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl my-auto animate-in fade-in zoom-in duration-150 overflow-hidden">
               <div className="overflow-y-auto flex-1 space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-teal-100 text-[#0F7A5C] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-[#2563EB] flex items-center justify-center">
                   <FileCheck className="w-6 h-6" />
                 </div>
                 <div>
@@ -1265,7 +1265,7 @@ export const BackupManager: React.FC = () => {
                     <span className="text-[11px] font-mono text-slate-700 truncate max-w-[220px]" title={pendingFileRestore.filename}>
                       {pendingFileRestore.filename}
                     </span>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-black">
+                    <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-black">
                       ~{pendingFileRestore.sizeKb} KB
                     </span>
                   </div>
@@ -1273,7 +1273,7 @@ export const BackupManager: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div className="p-2 bg-white rounded-xl border border-slate-200">
                       <span className="text-slate-500 block text-[10px]">{language === 'EN' ? 'Customers' : 'खातेदार'}</span>
-                      <span className="text-sm font-black text-emerald-800">{pendingFileRestore.data.customers?.length || 0}</span>
+                      <span className="text-sm font-black text-blue-900">{pendingFileRestore.data.customers?.length || 0}</span>
                     </div>
                     <div className="p-2 bg-white rounded-xl border border-slate-200">
                       <span className="text-slate-500 block text-[10px]">{language === 'EN' ? 'Installments' : 'हप्ते'}</span>
@@ -1285,7 +1285,7 @@ export const BackupManager: React.FC = () => {
                     </div>
                     <div className="p-2 bg-white rounded-xl border border-slate-200">
                       <span className="text-slate-500 block text-[10px]">{language === 'EN' ? 'Loan Payments' : 'कर्ज हप्ते'}</span>
-                      <span className="text-sm font-black text-teal-800">{pendingFileRestore.data.loanPayments?.length || 0}</span>
+                      <span className="text-sm font-black text-indigo-800">{pendingFileRestore.data.loanPayments?.length || 0}</span>
                     </div>
                   </div>
 
@@ -1311,14 +1311,14 @@ export const BackupManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPendingFileRestore(null)}
-                  className="px-4 py-2.5 rounded-xl border border-[#E4EAE7] text-xs font-black text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-[#E2E8F0] text-xs font-black text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   {language === 'EN' ? 'Cancel' : 'रद्द करा'}
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmFileRestore}
-                  className="px-5 py-2.5 rounded-xl bg-[#0F7A5C] hover:bg-[#0B5C45] text-white text-xs font-black shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-xs transition-colors cursor-pointer"
                 >
                   {language === 'EN' ? 'Confirm & Restore' : 'खात्री करा व रिस्टोर करा'}
                 </button>

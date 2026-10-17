@@ -16,7 +16,7 @@ export const BottomNav: React.FC = () => {
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
-      className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#E4EAE7] shadow-[0_-4px_16px_rgba(11,92,69,0.08)] lg:hidden no-print pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#E2E8F0] shadow-[0_-4px_16px_rgba(30,58,138,0.08)] lg:hidden no-print pb-[env(safe-area-inset-bottom)]"
     >
       <div className="grid grid-cols-4 h-16 max-w-md mx-auto px-1">
         {navItems.map((item) => {
@@ -28,8 +28,8 @@ export const BottomNav: React.FC = () => {
               className={({ isActive }) =>
                 `group relative flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition-all duration-200 select-none ${
                   isActive
-                    ? 'text-[#0B5C45] font-extrabold'
-                    : 'text-[#64748B] hover:text-[#0B5C45] font-semibold'
+                    ? 'text-[#2563EB] font-extrabold'
+                    : 'text-[#64748B] hover:text-[#2563EB] font-semibold'
                 }`
               }
             >
@@ -37,12 +37,12 @@ export const BottomNav: React.FC = () => {
                 <>
                   {/* Active top indicator pill */}
                   {isActive && (
-                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-b-full bg-[#0B5C45]" />
+                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-b-full bg-[#2563EB]" />
                   )}
                   <div
                     className={`flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 ${
                       isActive
-                        ? 'bg-[#EAF5F0] text-[#0B5C45] scale-105'
+                        ? 'bg-[#EFF6FF] text-[#2563EB] scale-105'
                         : 'group-hover:bg-slate-100'
                     }`}
                   >

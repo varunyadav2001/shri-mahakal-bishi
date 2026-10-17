@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { RequestType } from '../types';
 import { PlusCircle, Send, CheckCircle2, HelpCircle, ArrowRight, Calendar, Sparkles } from 'lucide-react';
@@ -71,12 +71,11 @@ export const NewRequestScreen: React.FC<NewRequestScreenProps> = ({ onSuccess })
     },
   ];
 
-  // Fetch active Bishi schemes from Firestore
+  // Real-time synchronization of active Bishi schemes from Firestore
   useEffect(() => {
-    const fetchSchemes = async () => {
-      try {
-        const snap = await getDocs(collection(db, 'bishi')).catch(() => null);
-        if (snap && !snap.empty) {
+    try {
+      const unsub = onSnapshot(collection(db, 'bishi'), (snap) => {
+        if (!snap.empty) {
           const list: SchemeOption[] = [];
           snap.forEach((d) => {
             const data = d.data();
@@ -90,15 +89,26 @@ export const NewRequestScreen: React.FC<NewRequestScreenProps> = ({ onSuccess })
           });
           if (list.length > 0) {
             setAvailableSchemes(list);
-            setSelectedSchemeId(list[0].id);
-            setSelectedModality(list[0].modality);
+            setSelectedSchemeId((prev) => {
+              if (list.some((s) => s.id === prev)) return prev;
+              return list[0].id;
+            });
+            setSelectedModality((prev) => {
+              const matched = list.find((s) => s.id === selectedSchemeId) || list[0];
+              return matched ? matched.modality : prev;
+            });
           }
+        } else {
+          setAvailableSchemes(DEFAULT_SCHEMES);
         }
-      } catch (e) {
-        console.warn('Failed to load schemes from Firestore, using defaults:', e);
-      }
-    };
-    fetchSchemes();
+      }, (err) => {
+        console.warn('Schemes snapshot listener error:', err);
+      });
+
+      return () => unsub();
+    } catch (e) {
+      console.warn('Failed to bind schemes listener:', e);
+    }
   }, []);
 
   const handleSchemeChange = (schemeId: string) => {

@@ -856,5 +856,29 @@ service cloud.firestore {
     match /deletions/{id} {
       allow read, write: if isAdmin();
     }
+
+    // 16. Shri Mahakal Finance: 20% Return Payouts
+    match /payouts/{id} {
+      allow read: if isAdmin() || (isAuthenticated() && isMemberWithPhone(resource.data.mobile));
+      allow write: if isAdmin();
+    }
+
+    // 17. Shri Mahakal Finance: 10% First Installment Referrals
+    match /referrals/{id} {
+      allow read: if isAdmin() || (isAuthenticated() && (isMemberWithPhone(resource.data.referrerMobile) || isMemberWithPhone(resource.data.referredCustomerMobile)));
+      allow write: if isAdmin();
+    }
+
+    // 18. Staff & Roles Access
+    match /staff/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 19. Member Broadcast Alerts
+    match /broadcast_alerts/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
   }
 }

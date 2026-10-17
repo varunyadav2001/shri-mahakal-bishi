@@ -284,14 +284,14 @@ export const Dashboard: React.FC = () => {
   }, [filteredCollections, isFilterActive, todayStr, stats.todaysPenalty]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-12 font-marathi min-h-screen flex flex-col justify-between bg-[#F4F6F5]">
+    <div className="space-y-4 sm:space-y-6 pb-12 font-marathi min-h-screen flex flex-col justify-between bg-[#F8FAFC]">
       <div className="space-y-3.5 sm:space-y-6">
 
         {/* Hero Welcome Banner Card */}
         <WelcomeBanner />
 
         {/* TOP QUICK DAILY ACTION BAR - Easy Access for Daily Collection & Request Approvals */}
-        <div className="bg-gradient-to-r from-[#0B5C45] via-[#0F7A5C] to-[#10241E] p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl shadow-md border border-[#0B5C45]/20 flex flex-col md:flex-row items-center justify-between gap-3.5 sm:gap-4 text-white">
+        <div className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2563EB] p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl shadow-md border border-[#1E3A8A]/20 flex flex-col md:flex-row items-center justify-between gap-3.5 sm:gap-4 text-white">
           <div className="flex items-center space-x-3 sm:space-x-3.5 w-full md:w-auto">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-300 font-black text-xl sm:text-2xl shadow-inner shrink-0">
               <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300" />
@@ -305,7 +305,7 @@ export const Dashboard: React.FC = () => {
               <h2 className="text-sm sm:text-lg font-black tracking-tight text-white mt-0.5 truncate">
                 {t.heroTitle}
               </h2>
-              <p className="text-[11px] sm:text-xs text-emerald-100 font-bold truncate sm:whitespace-normal">
+              <p className="text-[11px] sm:text-xs text-blue-100 font-bold truncate sm:whitespace-normal">
                 {t.heroDesc}
               </p>
             </div>
@@ -316,10 +316,10 @@ export const Dashboard: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/requests')}
-              className="w-full sm:w-auto min-h-[44px] px-4 sm:px-5 py-3 sm:py-3.5 bg-emerald-800/80 hover:bg-emerald-800 active:bg-emerald-900 text-white font-extrabold rounded-xl sm:rounded-2xl border border-emerald-400/30 hover:border-emerald-300 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 shrink-0 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer backdrop-blur-xs"
+              className="w-full sm:w-auto min-h-[44px] px-4 sm:px-5 py-3 sm:py-3.5 bg-blue-800/80 hover:bg-blue-800 active:bg-blue-900 text-white font-extrabold rounded-xl sm:rounded-2xl border border-blue-400/30 hover:border-blue-300 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 shrink-0 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer backdrop-blur-xs"
               title={language === 'EN' ? 'Request Approvals' : 'अर्ज व विनंत्या मंजुरी'}
             >
-              <FileCheck className="w-5 h-5 text-emerald-300" />
+              <FileCheck className="w-5 h-5 text-cyan-300" />
               <span className="text-sm tracking-tight font-black whitespace-nowrap">
                 {language === 'EN' ? 'Request Approvals' : 'अर्ज मंजुरी'}
               </span>
@@ -337,23 +337,23 @@ export const Dashboard: React.FC = () => {
                 setCollectCustId(undefined);
                 setIsQuickCollectOpen(true);
               }}
-              className="w-full sm:w-auto min-h-[44px] px-5 sm:px-6 py-3 sm:py-3.5 bg-amber-400 hover:bg-amber-500 text-[#10241E] font-black rounded-xl sm:rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 shrink-0 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              className="w-full sm:w-auto min-h-[44px] px-5 sm:px-6 py-3 sm:py-3.5 bg-amber-400 hover:bg-amber-500 text-[#0F172A] font-black rounded-xl sm:rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 shrink-0 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
-              <Wallet className="w-5 h-5 text-[#10241E]" />
+              <Wallet className="w-5 h-5 text-[#0F172A]" />
               <span className="text-sm tracking-tight font-black whitespace-nowrap">{t.heroButton}</span>
             </button>
           </div>
         </div>
 
         {/* DASHBOARD QUICK CUSTOMER SEARCH BAR */}
-        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-[#E4EAE7] shadow-xs space-y-3">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-3">
           <div className="relative">
-            <Search className="w-5 h-5 text-[#0F7A5C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+            <Search className="w-5 h-5 text-[#2563EB] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
             <MarathiTextInput
               value={dashboardSearch}
               onChange={(val) => setDashboardSearch(val)}
               placeholder={language === 'EN' ? 'Search customer by Name or Account No (e.g. 101 / Suraj / 9822)...' : 'खातेदाराचे नाव किंवा खाते क्रमांक टाकून शोधा (उदा. 101, सुरज, मोबाईल)...'}
-              className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] bg-[#F4F6F5]/50 transition-all"
+              className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] bg-[#F8FAFC]/50 transition-all"
             />
             {dashboardSearch && (
               <button
@@ -381,11 +381,11 @@ export const Dashboard: React.FC = () => {
                   {dashboardSearchResults.map((cust) => (
                     <div
                       key={cust.id}
-                      className="p-3 bg-white hover:bg-emerald-50/60 rounded-xl border border-[#E4EAE7] hover:border-emerald-300 transition-all flex items-center justify-between shadow-2xs"
+                      className="p-3 bg-white hover:bg-blue-50/60 rounded-xl border border-[#E2E8F0] hover:border-blue-300 transition-all flex items-center justify-between shadow-2xs"
                     >
                       <div className="min-w-0 pr-2">
                         <div className="flex items-center space-x-2">
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-black text-xs shrink-0">
+                          <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 font-black text-xs shrink-0">
                             #{cust.accountNumber}
                           </span>
                           <span className="font-extrabold text-slate-900 text-xs truncate">{cust.name}</span>
@@ -404,7 +404,7 @@ export const Dashboard: React.FC = () => {
                             setCollectCustId(cust.id);
                             setIsQuickCollectOpen(true);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-emerald-700 text-white font-extrabold text-xs hover:bg-emerald-800 transition-all flex items-center space-x-1 shadow-2xs cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#2563EB] text-white font-extrabold text-xs hover:bg-blue-700 transition-all flex items-center space-x-1 shadow-2xs cursor-pointer"
                           title={language === 'EN' ? 'Record Collection' : 'हप्ता / जमा करा'}
                         >
                           <Wallet className="w-3.5 h-3.5" />
@@ -428,10 +428,10 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Filter Dropdown Bar */}
-        <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E4EAE7] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3">
+        <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E2E8F0] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3">
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
-            <div className="flex items-center space-x-1.5 text-xs font-black text-[#0B5C45] bg-[#e6f4f0] px-3 py-2 rounded-xl border border-emerald-200/50 shrink-0 self-start sm:self-auto">
-              <Filter className="w-3.5 h-3.5 text-[#0F7A5C]" />
+            <div className="flex items-center space-x-1.5 text-xs font-black text-[#1E3A8A] bg-[#EFF6FF] px-3 py-2 rounded-xl border border-blue-200/50 shrink-0 self-start sm:self-auto">
+              <Filter className="w-3.5 h-3.5 text-[#2563EB]" />
               <span>{language === 'EN' ? 'Filter' : 'फिल्टर'}:</span>
             </div>
 
@@ -474,9 +474,9 @@ export const Dashboard: React.FC = () => {
               }}
               disabled={isRefreshingStats || isRefreshing}
               title={language === 'EN' ? 'Refresh Dashboard (0 reads if unchanged)' : 'डॅशबोर्ड डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-              className="h-10 px-3.5 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+              className="h-10 px-3.5 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshingStats || isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshingStats || isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
             </button>
           </div>
@@ -522,7 +522,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Card 2: Today's Collection */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#0f7a5c] to-[#09543f] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#2563EB] to-[#1E3A8A] p-3 sm:p-4 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group">
             <div className="absolute -top-3 -right-3 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 pointer-events-none group-hover:scale-125 transition-transform duration-300" />
             <div className="flex items-center justify-between relative z-10">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-xs text-white flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
@@ -533,7 +533,7 @@ export const Dashboard: React.FC = () => {
                   setCollectCustId(undefined);
                   setIsQuickCollectOpen(true);
                 }}
-                className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/25 hover:bg-white text-white hover:text-[#0f7a5c] hover:scale-105 active:scale-95 text-[10px] sm:text-xs font-black transition-all shadow-2xs cursor-pointer"
+                className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/25 hover:bg-white text-white hover:text-[#2563EB] hover:scale-105 active:scale-95 text-[10px] sm:text-xs font-black transition-all shadow-2xs cursor-pointer"
               >
                 <span>{t.btnCollect}</span>
               </button>
@@ -701,8 +701,8 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Bottom Section: Daily Pending Box */}
-        <div className="w-full bg-white rounded-2xl sm:rounded-3xl border border-[#E4EAE7] shadow-xs overflow-hidden flex flex-col justify-between">
-          <div className="p-3.5 sm:p-6 border-b border-[#E4EAE7] flex items-center justify-between">
+        <div className="w-full bg-white rounded-2xl sm:rounded-3xl border border-[#E2E8F0] shadow-xs overflow-hidden flex flex-col justify-between">
+          <div className="p-3.5 sm:p-6 border-b border-[#E2E8F0] flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-[#C4525B]/10 text-[#C4525B] flex items-center justify-center font-bold">
                 <Clock className="w-4 h-4" />
@@ -720,10 +720,10 @@ export const Dashboard: React.FC = () => {
 
           {todaysPendingList.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-[#F4F6F5] text-[#0F7A5C] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] text-[#2563EB] flex items-center justify-center">
                 <FileText className="w-7 h-7" />
               </div>
-              <p className="text-xs font-bold text-[#5F6E68]">
+              <p className="text-xs font-bold text-[#64748B]">
                 {t.noPendingText}
               </p>
             </div>
@@ -738,7 +738,7 @@ export const Dashboard: React.FC = () => {
                   >
                     <div className="min-w-0">
                       <div className="flex items-center space-x-2">
-                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 text-xs font-black">
+                        <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 text-xs font-black">
                           {item.accountNumber || item.accountNo || '-'}
                         </span>
                         <span className="font-bold text-slate-900 text-xs truncate">
@@ -761,7 +761,7 @@ export const Dashboard: React.FC = () => {
                         setCollectCustId(item.customerId);
                         setIsQuickCollectOpen(true);
                       }}
-                      className="px-3.5 py-2 min-h-[44px] bg-[#0F7A5C] hover:bg-emerald-800 text-white rounded-xl text-xs font-extrabold transition-colors shadow-xs shrink-0 cursor-pointer touch-target flex items-center justify-center"
+                      className="px-3.5 py-2 min-h-[44px] bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition-colors shadow-xs shrink-0 cursor-pointer touch-target flex items-center justify-center"
                     >
                       {t.btnCollect}
                     </button>
@@ -772,7 +772,7 @@ export const Dashboard: React.FC = () => {
               {/* Desktop Table View (>= md screens) */}
               <div className="hidden md:block overflow-x-auto p-4">
                 <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-[#F4F6F5] text-[#10241E] font-extrabold border-b border-[#E4EAE7]">
+                  <thead className="bg-[#F8FAFC] text-[#0F172A] font-extrabold border-b border-[#E2E8F0]">
                     <tr>
                       <th className="p-3 pl-4">{t.colAccountNo}</th>
                       <th className="p-3">{t.colCustomerName}</th>
@@ -781,9 +781,9 @@ export const Dashboard: React.FC = () => {
                       <th className="p-3 text-center">{t.colActions}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E4EAE7] font-medium">
+                  <tbody className="divide-y divide-[#E2E8F0] font-medium">
                     {todaysPendingList.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#F4F6F5]">
+                      <tr key={item.id} className="hover:bg-[#F8FAFC]">
                         <td className="p-3 pl-4 font-bold">{item.accountNumber || item.accountNo || '-'}</td>
                         <td className="p-3 font-bold">{item.customerName || 'Customer'}</td>
                         <td className="p-3 font-semibold text-slate-700">
@@ -805,7 +805,7 @@ export const Dashboard: React.FC = () => {
                               setCollectCustId(item.customerId);
                               setIsQuickCollectOpen(true);
                             }}
-                            className="px-3 py-1 bg-[#0F7A5C] hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer"
+                            className="px-3 py-1 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer"
                           >
                             {t.btnCollect}
                           </button>
@@ -822,13 +822,13 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Page Bottom Copyright & Trust Footer */}
-      <div className="pt-6 border-t border-[#E4EAE7] flex flex-col sm:flex-row items-center justify-between text-xs font-bold text-[#5F6E68] gap-2">
+      <div className="pt-6 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between text-xs font-bold text-[#64748B] gap-2">
         <div className="flex items-center space-x-2">
-          <span className="text-[#10241E] font-black">{t.appName}</span>
+          <span className="text-[#0F172A] font-black">{t.appName}</span>
           <span>|</span>
-          <span className="text-[#5F6E68] font-semibold">{t.tagline}</span>
+          <span className="text-[#64748B] font-semibold">{t.tagline}</span>
         </div>
-        <div className="flex items-center space-x-1.5 text-[#0F7A5C] font-extrabold">
+        <div className="flex items-center space-x-1.5 text-[#2563EB] font-extrabold">
           <ShieldCheck className="w-4 h-4" />
           <span>{t.secureSystem}</span>
         </div>

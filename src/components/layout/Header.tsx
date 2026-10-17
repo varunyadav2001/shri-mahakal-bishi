@@ -23,11 +23,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const todayStr = new Date().toISOString().split('T')[0];
 
   return (
-    <header className="h-16 sm:h-20 bg-white border-b border-[#E4EAE7] sticky top-0 z-30 px-3 sm:px-8 flex items-center justify-between no-print gap-2 shadow-2xs">
+    <header className="h-16 sm:h-20 bg-white border-b border-[#E2E8F0] sticky top-0 z-30 px-3 sm:px-8 flex items-center justify-between no-print gap-2 shadow-2xs">
       <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
         <button
           onClick={onMenuToggle}
-          className="p-2 min-w-[44px] min-h-[44px] rounded-xl text-[#10241E] hover:bg-emerald-50 hover:text-[#0F7A5C] hover:scale-105 active:scale-95 transition-all duration-150 lg:hidden flex-shrink-0 cursor-pointer flex items-center justify-center touch-target"
+          className="p-2 min-w-[44px] min-h-[44px] rounded-xl text-[#0F172A] hover:bg-blue-50 hover:text-[#2563EB] hover:scale-105 active:scale-95 transition-all duration-150 lg:hidden flex-shrink-0 cursor-pointer flex items-center justify-center touch-target"
           aria-label={language === 'EN' ? 'Open menu' : 'मेनू उघडा'}
         >
           <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -39,16 +39,16 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           className="w-8 h-8 rounded-lg object-cover border border-amber-400/40 lg:hidden flex-shrink-0 shadow-2xs"
         />
 
-        {/* Welcome Greeting with Accent Green Vertical Bar */}
+        {/* Welcome Greeting with Accent Blue Vertical Bar */}
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-          <div className="w-1.5 h-5 sm:h-8 bg-[#0F7A5C] rounded-full flex-shrink-0"></div>
+          <div className="w-1.5 h-5 sm:h-8 bg-[#2563EB] rounded-full flex-shrink-0"></div>
           <div className="min-w-0">
-            <h2 className="text-xs sm:text-xl font-black text-[#10241E] tracking-tight truncate">
+            <h2 className="text-xs sm:text-xl font-black text-[#0F172A] tracking-tight truncate">
               <span className="sm:hidden">{currentAdmin?.name || t.appName}</span>
               <span className="hidden sm:inline">{t.welcomeGreeting} {currentAdmin?.name || t.adminDefault}</span>
             </h2>
-            <div className="hidden sm:flex items-center space-x-1 text-xs text-[#5F6E68] font-bold">
-              <CalendarIcon className="w-3.5 h-3.5 text-[#0F7A5C] flex-shrink-0" />
+            <div className="hidden sm:flex items-center space-x-1 text-xs text-[#64748B] font-bold">
+              <CalendarIcon className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
               <span className="truncate">{formatDateMarathi(todayStr, language)}</span>
             </div>
           </div>
@@ -66,9 +66,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               { value: 'MR', label: 'मराठी' },
               { value: 'EN', label: 'English' },
             ]}
-            prefixIcon={<Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0F7A5C]" />}
+            prefixIcon={<Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#2563EB]" />}
             size="sm"
-            triggerClassName="h-9 sm:h-10 bg-[#F4F6F5]"
+            triggerClassName="h-9 sm:h-10 bg-[#F8FAFC]"
           />
         </div>
 
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         <div className="relative">
           <button
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            className="h-9 sm:h-10 min-h-[44px] min-w-[44px] px-2 sm:px-2.5 rounded-xl bg-white text-[#0F7A5C] flex items-center justify-center space-x-1 border border-[#E4EAE7] shadow-2xs hover:border-[#0F7A5C] hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0 cursor-pointer touch-target"
+            className="h-9 sm:h-10 min-h-[44px] min-w-[44px] px-2 sm:px-2.5 rounded-xl bg-white text-[#2563EB] flex items-center justify-center space-x-1 border border-[#E2E8F0] shadow-2xs hover:border-[#2563EB] hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0 cursor-pointer touch-target"
           >
             {currentAdmin?.photoURL ? (
               <img
@@ -85,21 +85,21 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover"
               />
             ) : (
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 flex items-center justify-center text-[#0F7A5C]">
-                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0F7A5C]" />
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-100 flex items-center justify-center text-[#2563EB]">
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#2563EB]" />
               </div>
             )}
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
           {isProfileMenuOpen && (
-            <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#E4EAE7] p-2 z-50 animate-in fade-in zoom-in duration-100">
+            <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-2 z-50 animate-in fade-in zoom-in duration-100">
               {/* Language Switcher for compact screens */}
-              <div className="min-[440px]:hidden p-2 mb-1 bg-slate-50 rounded-xl border border-[#E4EAE7] flex items-center justify-between">
+              <div className="min-[440px]:hidden p-2 mb-1 bg-slate-50 rounded-xl border border-[#E2E8F0] flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-600">भाषा:</span>
                 <button
                   onClick={() => setLanguage(language === 'MR' ? 'EN' : 'MR')}
-                  className="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-xs font-black"
+                  className="px-2 py-1 rounded-lg bg-blue-100 text-blue-900 text-xs font-black"
                 >
                   {language === 'MR' ? 'मराठी (Switch EN)' : 'English (मराठी)'}
                 </button>
@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   setIsProfileMenuOpen(false);
                   navigate('/profile');
                 }}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-xs font-extrabold text-[#10241E] hover:bg-emerald-50 hover:text-[#0F7A5C] hover:translate-x-1 transition-all cursor-pointer"
+                className="w-full text-left px-4 py-2.5 rounded-xl text-xs font-extrabold text-[#0F172A] hover:bg-blue-50 hover:text-[#2563EB] hover:translate-x-1 transition-all cursor-pointer"
               >
                 {t.profileMenu}
               </button>

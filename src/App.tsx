@@ -17,6 +17,8 @@ import { InterestManager } from './pages/Interest/InterestManager';
 import { PenaltyManager } from './pages/Penalty/PenaltyManager';
 import { ReportManager } from './pages/Reports/ReportManager';
 import { RequestsManager } from './pages/Requests/RequestsManager';
+import { PayoutManager } from './pages/Payouts/PayoutManager';
+import { ReferralManager } from './pages/Referrals/ReferralManager';
 import { BackupManager } from './pages/Backup/BackupManager';
 import { ProfileManager } from './pages/Profile/ProfileManager';
 import { SettingsManager } from './pages/Settings/SettingsManager';
@@ -105,6 +107,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/customers/:id" element={<CustomerDetail />} />
               <Route path="/collections" element={<CollectionManager />} />
               <Route path="/bishi" element={<BishiManager />} />
+              <Route path="/payouts" element={<PayoutManager />} />
+              <Route path="/referrals" element={<ReferralManager />} />
               <Route path="/loans" element={<LoanManager />} />
               <Route path="/interest" element={<InterestManager />} />
               <Route path="/penalty" element={<PenaltyManager />} />

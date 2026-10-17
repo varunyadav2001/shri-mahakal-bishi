@@ -447,15 +447,15 @@ export const BishiManager: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Bishi Schemes (0 reads if unchanged)' : 'भिशी योजना डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="w-full sm:w-auto min-h-[44px] px-3.5 py-2.5 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="w-full sm:w-auto min-h-[44px] px-3.5 py-2.5 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-700 text-white font-extrabold text-sm hover:bg-emerald-800 transition-colors shadow-md flex items-center justify-center space-x-2 touch-target cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-[#2563EB] text-white font-extrabold text-sm hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center space-x-2 touch-target cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             <span>{language === 'EN' ? 'Add Bishi Scheme' : 'नवीन भिशी योजना जोडा'}</span>
@@ -530,7 +530,7 @@ export const BishiManager: React.FC = () => {
                             value={editingName}
                             onChange={(val) => setEditingName(val)}
                             placeholder={language === 'EN' ? 'Enter scheme name' : 'योजनेचे नाव इंग्रजीत टाईप करा'}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#2563EB]"
                           />
                         </div>
 
@@ -543,7 +543,7 @@ export const BishiManager: React.FC = () => {
                             min={1}
                             value={startAccountNumber || ''}
                             onChange={(e) => setStartAccountNumber(Number(e.target.value) || 1)}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#2563EB]"
                             placeholder={language === 'EN' ? 'e.g. 1 or 801' : 'उदा. 1 किंवा 801'}
                           />
                         </div>
@@ -586,7 +586,7 @@ export const BishiManager: React.FC = () => {
                             type="date"
                             value={startDate}
                             onChange={(e) => handleStartDateChange(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#2563EB]"
                           />
                         </div>
 
@@ -595,7 +595,7 @@ export const BishiManager: React.FC = () => {
                             <label className="block text-xs font-bold text-slate-700">
                               {language === 'EN' ? 'End Date:' : 'शेवटची तारीख:'}
                             </label>
-                            <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                            <span className="text-[10px] text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">
                               {language === 'EN' ? 'Auto-synced' : 'आपोआप अपडेट होते'}
                             </span>
                           </div>
@@ -603,7 +603,7 @@ export const BishiManager: React.FC = () => {
                             type="date"
                             value={endDate}
                             onChange={(e) => handleEndDateChange(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#2563EB]"
                           />
                         </div>
 
@@ -614,7 +614,7 @@ export const BishiManager: React.FC = () => {
                                 ? language === 'EN' ? 'Total Months (Editable):' : 'एकूण महिने (Edit करा):'
                                 : language === 'EN' ? 'Total Weeks (Editable):' : 'एकूण आठवडे (Edit करा):'}
                             </label>
-                            <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                            <span className="text-[10px] text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">
                               {language === 'EN' ? 'Auto-calculates dates' : 'तारीख आपोआप बदलते'}
                             </span>
                           </div>
@@ -624,7 +624,7 @@ export const BishiManager: React.FC = () => {
                             max={200}
                             value={installments || ''}
                             onChange={(e) => handleInstallmentsChange(e.target.value === '' ? '' : Number(e.target.value))}
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#2563EB]"
                           />
                           <div className="text-[11px] font-bold text-emerald-800 mt-1 flex items-center space-x-1">
                             <span>💡</span>
@@ -705,7 +705,7 @@ export const BishiManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSave(config.id)}
-                          className="w-1/2 py-2.5 rounded-xl bg-[#0F7A5C] hover:bg-[#0B5C45] text-white font-extrabold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors cursor-pointer"
+                          className="w-1/2 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1E3A8A] text-white font-extrabold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors cursor-pointer"
                         >
                           <Save className="w-4 h-4" />
                           <span>{language === 'EN' ? 'Save' : 'जतन करा'}</span>
@@ -833,7 +833,7 @@ export const BishiManager: React.FC = () => {
                     required
                     value={newStartAccountNumber || ''}
                     onChange={(e) => setNewStartAccountNumber(Number(e.target.value) || 1)}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#2563EB]"
                     placeholder={language === 'EN' ? 'e.g. 1 for August, 801 for Dasara' : 'उदा. ऑगस्टसाठी 1, दसरासाठी 801'}
                   />
                   <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -851,7 +851,7 @@ export const BishiManager: React.FC = () => {
                       required
                       value={newStartDate}
                       onChange={(e) => handleNewStartDateChange(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#2563EB]"
                     />
                   </div>
 
@@ -860,7 +860,7 @@ export const BishiManager: React.FC = () => {
                       <label className="block text-xs font-bold text-slate-700">
                         {language === 'EN' ? 'End Date' : 'शेवटची तारीख'}
                       </label>
-                      <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                      <span className="text-[10px] text-blue-800 font-bold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
                         {language === 'EN' ? 'Auto' : 'आपोआप'}
                       </span>
                     </div>
@@ -869,7 +869,7 @@ export const BishiManager: React.FC = () => {
                       required
                       value={newEndDate}
                       onChange={(e) => handleNewEndDateChange(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-[#2563EB]"
                     />
                   </div>
                 </div>
@@ -881,7 +881,7 @@ export const BishiManager: React.FC = () => {
                         ? language === 'EN' ? 'Total Months (Editable)' : 'एकूण महिने (Edit करा)'
                         : language === 'EN' ? 'Total Weeks (Editable)' : 'एकूण आठवडे (Edit करा)'}
                     </label>
-                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                    <span className="text-[10px] text-blue-800 font-bold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
                       {language === 'EN' ? 'Auto-calculates dates' : 'तारीख आपोआप बदलते'}
                     </span>
                   </div>
@@ -892,9 +892,9 @@ export const BishiManager: React.FC = () => {
                     max={200}
                     value={newInstallments || ''}
                     onChange={(e) => handleNewInstallmentsChange(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm font-black text-brand-900 bg-white focus:ring-2 focus:ring-[#2563EB]"
                   />
-                  <div className="text-[11px] font-bold text-emerald-800 mt-1 flex items-center space-x-1">
+                  <div className="text-[11px] font-bold text-blue-800 mt-1 flex items-center space-x-1">
                     <span>💡</span>
                     <span>
                       {newModality === 'M'
@@ -915,7 +915,7 @@ export const BishiManager: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-extrabold shadow-md hover:bg-emerald-800 min-h-[44px] flex items-center justify-center cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-extrabold shadow-md hover:bg-blue-700 min-h-[44px] flex items-center justify-center cursor-pointer"
                 >
                   {language === 'EN' ? 'Save Scheme' : 'योजना जतन करा'}
                 </button>

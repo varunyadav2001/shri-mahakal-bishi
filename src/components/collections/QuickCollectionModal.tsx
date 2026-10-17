@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CollectionEntry, Customer } from '../../types';
 import { StorageService } from '../../services/db';
@@ -51,17 +51,26 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
   const todayStr = new Date().toISOString().split('T')[0];
   const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Helper to check customer payment status (only consider items due on or before today)
+  // Helper to check customer payment status
   const getCustomerStatusInfo = (custId: string) => {
     const cust = customers.find((c) => c.id === custId || c.accountNumber === custId);
     const targetInstallments = Number(cust?.totalInstallments) || (cust?.modality === 'W' ? 40 : 10);
     const custColl = collections
       .filter((item) => (item.customerId === custId || (cust?.accountNumber && item.accountNumber === cust.accountNumber)) && (item.periodIndex <= targetInstallments || item.status === 'PAID' || (item.collectedAmount || 0) > 0))
       .sort((a, b) => a.periodIndex - b.periodIndex);
-    const duePending = custColl.find((item) => item.status !== 'PAID' && item.dueDate <= todayStr);
-    const nextUpcoming = custColl.find((item) => item.status !== 'PAID' && item.dueDate > todayStr);
-    const isFullyPaid = !duePending;
-    return { isFullyPaid, pendingEntry: duePending, nextUpcomingEntry: nextUpcoming, allEntries: custColl };
+    const unpaidEntries = custColl.filter((item) => item.status !== 'PAID' && (item.remainingAmount === undefined || item.remainingAmount > 0));
+    const duePending = unpaidEntries.find((item) => item.dueDate <= todayStr);
+    const nextUpcoming = unpaidEntries.find((item) => item.dueDate > todayStr);
+    const isFullyPaid = custColl.length > 0 && unpaidEntries.length === 0;
+    const isCurrentDatePaid = !duePending && unpaidEntries.length > 0;
+    return {
+      isFullyPaid,
+      isCurrentDatePaid,
+      pendingEntry: duePending,
+      nextUpcomingEntry: nextUpcoming,
+      allEntries: custColl,
+      unpaidEntries,
+    };
   };
 
   // State to filter only pending customers by default
@@ -75,7 +84,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
   const isSearching = Boolean(customerSearch.trim());
 
   // Filtered customers (pending vs all + search)
-  const displayedCustomers = (isSearching ? customers.filter((c) => c.status === 'ACTIVE') : officeCustomers).filter((c) => {
+  const rawDisplayedCustomers = (isSearching ? customers.filter((c) => c.status === 'ACTIVE') : officeCustomers).filter((c) => {
     // If user typed a search query, match account number, name, or mobile (supports Devanagari numerals)
     if (isSearching) {
       return matchesCustomerSearch(c, customerSearch);
@@ -89,13 +98,24 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
     return true;
   });
 
+  // Deduplicate by account number/customer ID so no customer ever appears twice in dropdown
+  const displayedCustomers = useMemo(() => {
+    const seen = new Set<string>();
+    return rawDisplayedCustomers.filter((c: Customer) => {
+      const key = String(c.accountNumber || c.id).trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [rawDisplayedCustomers]);
+
   // Auto-select when search query matches
   useEffect(() => {
     if (customerSearch.trim() && displayedCustomers.length > 0) {
       const qNum = toEnglishDigits(customerSearch.trim()).replace(/\D/g, '');
       // If numbers typed, look for exact account number match first
       const exactAcc = qNum
-        ? displayedCustomers.find((c) => toEnglishDigits(String(c.accountNumber)).replace(/\D/g, '') === qNum)
+        ? displayedCustomers.find((c: Customer) => toEnglishDigits(String(c.accountNumber)).replace(/\D/g, '') === qNum)
         : undefined;
       const target = exactAcc || (displayedCustomers.length === 1 ? displayedCustomers[0] : undefined);
       if (target && target.id !== selectedCustomerId) {
@@ -200,13 +220,13 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
       return;
     }
 
-    const { isFullyPaid, pendingEntry, allEntries } = getCustomerStatusInfo(customerId);
+    const { isFullyPaid, pendingEntry, nextUpcomingEntry, allEntries, unpaidEntries } = getCustomerStatusInfo(customerId);
     
     // If a specific collection ID was passed, prefer that entry
     const specificEntry = initialCollectionId ? allEntries.find((c) => c.id === initialCollectionId) : undefined;
-    const targetEntry = specificEntry || pendingEntry;
+    const targetEntry = specificEntry || pendingEntry || nextUpcomingEntry || unpaidEntries[0];
 
-    if (!targetEntry || (isFullyPaid && !specificEntry)) {
+    if (!targetEntry || isFullyPaid) {
       setSelectedEntryId('');
       setCollectedInput('');
       setPenaltyInput('');
@@ -353,7 +373,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
       <ModalPortal>
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs no-print overflow-hidden">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center animate-in fade-in zoom-in duration-150 my-auto max-h-[90vh] overflow-y-auto">
-          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+          <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
             <CheckCircle2 className="w-12 h-12 stroke-[2.5]" />
           </div>
 
@@ -377,7 +397,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-slate-500 font-medium">{language === 'EN' ? 'Total Collected Amount:' : 'एकूण जमा रक्कम:'}</span>
-              <span className="font-black text-emerald-700 text-base">₹{successDeposit.collectedAmount} ({paymentMode === 'ONLINE' ? (language === 'EN' ? 'Online' : 'ऑनलाइन') : (language === 'EN' ? 'Cash' : 'रोख')})</span>
+              <span className="font-black text-blue-700 text-base">₹{successDeposit.collectedAmount} ({paymentMode === 'ONLINE' ? (language === 'EN' ? 'Online' : 'ऑनलाइन') : (language === 'EN' ? 'Cash' : 'रोख')})</span>
             </div>
             {successDeposit.penaltyAmount > 0 && (
               <div className="flex justify-between items-center text-xs text-rose-700 font-bold bg-rose-50/70 px-2.5 py-1 rounded-lg border border-rose-200">
@@ -391,7 +411,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
             </div>
             <div className="flex justify-between items-center text-sm pt-1 border-t border-slate-200">
               <span className="text-slate-500 font-medium">{t.colStatus}:</span>
-              <span className="font-black text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="font-black text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                 {successDeposit.statusText}
               </span>
             </div>
@@ -428,7 +448,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                 if (onSuccess) onSuccess();
                 onClose();
               }}
-              className="flex-1 py-3 px-4 rounded-xl bg-emerald-700 text-white font-extrabold text-xs hover:bg-emerald-800 transition-colors shadow-md"
+              className="flex-1 py-3 px-4 rounded-xl bg-[#2563EB] text-white font-extrabold text-xs hover:bg-blue-700 transition-colors shadow-md"
             >
               {language === 'EN' ? 'OK' : 'ठीक आहे (OK)'}
             </button>
@@ -446,7 +466,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 shadow-xs shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-800 shadow-xs shrink-0">
               <Wallet className="w-5 h-5" />
             </div>
             <div>
@@ -475,7 +495,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowOnlyPending(!showOnlyPending)}
-                className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline"
+                className="text-[11px] font-bold text-blue-700 hover:text-blue-900 underline"
               >
                 {showOnlyPending ? (language === 'EN' ? 'Show All Customers' : 'सर्व खातेदार दाखवा') : (language === 'EN' ? 'Show Pending Only' : 'फक्त बाकी असलेले दाखवा')}
               </button>
@@ -487,7 +507,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                   value={customerSearch}
                   onChange={(val) => setCustomerSearch(val)}
                   placeholder={language === 'EN' ? 'Search Acc No, Name or Mobile (e.g. 101 / Suraj)...' : 'खाते क्र, नाव किंवा मोबाईल शोधा (उदा. 101 / सुरज)...'}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-xs sm:text-sm font-bold text-slate-900 bg-[#F4F6F5]/50 focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-xs sm:text-sm font-bold text-slate-900 bg-[#F8FAFC]/50 focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition-all"
                 />
               </div>
             )}
@@ -495,7 +515,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
             <CustomDropdown<string>
               value={selectedCustomerId}
               onChange={(val) => handleCustomerChange(val)}
-              options={displayedCustomers.map((c) => ({
+              options={displayedCustomers.map((c: Customer) => ({
                 value: c.id,
                 label: `#${c.accountNumber} - ${c.name}`,
                 subLabel: c.bishiType === 'LOAN_ONLY' ? (language === 'EN' ? 'Loan Only' : 'फक्त कर्जदार') : `${getBishiNameMarathi(c.bishiType, language)} - ₹${c.amount}`,
@@ -520,7 +540,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                 onClick={() => setPaymentMode('CASH')}
                 className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 border transition-all touch-target cursor-pointer ${
                   paymentMode === 'CASH'
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
@@ -531,7 +551,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                 onClick={() => setPaymentMode('ONLINE')}
                 className={`py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 border transition-all touch-target cursor-pointer ${
                   paymentMode === 'ONLINE'
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
@@ -543,7 +563,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100 mt-2">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center space-x-1">
-                  <Calendar className="w-3.5 h-3.5 text-[#0F7A5C]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#2563EB]" />
                   <span>{language === 'EN' ? 'Payment Date (Editable):' : 'जमा दिनांक (तारीख बदला):'}</span>
                 </label>
                 <input
@@ -557,19 +577,19 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                       setLoanInterestInput(newInt);
                     }
                   }}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-[#2563EB]"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center space-x-1">
-                  <Clock className="w-3.5 h-3.5 text-[#0F7A5C]" />
+                  <Clock className="w-3.5 h-3.5 text-[#2563EB]" />
                   <span>{language === 'EN' ? 'Payment Time (Editable):' : 'जमा वेळ (वेळ बदला):'}</span>
                 </label>
                 <input
                   type="time"
                   value={paymentTime || currentTimeStr}
                   onChange={(e) => setPaymentTime(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-[#0F7A5C]"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-[#2563EB]"
                 />
               </div>
             </div>
@@ -582,32 +602,32 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
             <div className="space-y-2">
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* Card 1: Mobile */}
-                <div className="bg-[#F4F6F5] p-2.5 sm:p-3 rounded-2xl border border-[#E4EAE7] flex flex-col items-center justify-center text-center shadow-2xs">
-                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#5F6E68] uppercase tracking-wider mb-0.5">
-                    <Phone className="w-3 h-3 text-[#0F7A5C]" />
+                <div className="bg-[#F8FAFC] p-2.5 sm:p-3 rounded-2xl border border-[#E2E8F0] flex flex-col items-center justify-center text-center shadow-2xs">
+                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">
+                    <Phone className="w-3 h-3 text-[#2563EB]" />
                     <span>{t.colMobile}</span>
                   </div>
-                  <span className="text-xs font-black text-[#10241E] truncate w-full">{selectedCustomer.mobile}</span>
+                  <span className="text-xs font-black text-[#0F172A] truncate w-full">{selectedCustomer.mobile}</span>
                 </div>
 
                 {/* Card 2: Due Date */}
-                <div className="bg-[#F4F6F5] p-2.5 sm:p-3 rounded-2xl border border-[#E4EAE7] flex flex-col items-center justify-center text-center shadow-2xs">
-                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#5F6E68] uppercase tracking-wider mb-0.5">
-                    <Calendar className="w-3 h-3 text-[#0F7A5C]" />
+                <div className="bg-[#F8FAFC] p-2.5 sm:p-3 rounded-2xl border border-[#E2E8F0] flex flex-col items-center justify-center text-center shadow-2xs">
+                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">
+                    <Calendar className="w-3 h-3 text-[#2563EB]" />
                     <span>{t.colDueDate}</span>
                   </div>
-                  <span className="text-xs font-black text-[#0B5C45] truncate w-full">
+                  <span className="text-xs font-black text-[#1E3A8A] truncate w-full">
                     {selectedEntry ? formatDateMarathi(selectedEntry.dueDate, language) : '-'}
                   </span>
                 </div>
 
                 {/* Card 3: Regular Installment */}
-                <div className="bg-[#F4F6F5] p-2.5 sm:p-3 rounded-2xl border border-[#E4EAE7] flex flex-col items-center justify-center text-center shadow-2xs">
-                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#5F6E68] uppercase tracking-wider mb-0.5">
-                    <Wallet className="w-3 h-3 text-[#0F7A5C]" />
+                <div className="bg-[#F8FAFC] p-2.5 sm:p-3 rounded-2xl border border-[#E2E8F0] flex flex-col items-center justify-center text-center shadow-2xs">
+                  <div className="flex items-center space-x-1 text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">
+                    <Wallet className="w-3 h-3 text-[#2563EB]" />
                     <span>{t.colInstallmentAmount}</span>
                   </div>
-                  <span className="text-xs sm:text-sm font-black text-[#0F7A5C] truncate w-full">
+                  <span className="text-xs sm:text-sm font-black text-[#2563EB] truncate w-full">
                     {isLoanOnly ? (language === 'EN' ? '₹0 (Loan Account)' : '₹0 (कर्ज खाते)') : `₹${selectedCustomer.amount}`}
                   </span>
                 </div>
@@ -650,35 +670,72 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
               {!isLoanOnly && (
                 <div className="sm:col-span-2">
                   {selectedCustomerStatus?.isFullyPaid ? (
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-                      <p className="text-xs font-black text-emerald-800 flex items-center justify-center space-x-1">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 inline mr-1" />
-                        <span>{language === 'EN' ? 'Installment for current date is fully paid!' : 'चालू तारखेचा हप्ता पूर्ण भरलेला आहे!'}</span>
+                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+                      <p className="text-sm font-black text-emerald-800 flex items-center justify-center space-x-1.5">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 inline mr-1" />
+                        <span>{language === 'EN' ? 'All installments for this Bishi are fully paid!' : 'या भिशीचे सर्व हप्ते पूर्ण जमा झाले आहेत!'}</span>
                       </p>
-                      {selectedCustomerStatus?.nextUpcomingEntry ? (
-                        <p className="text-[11px] text-emerald-700 mt-1 font-medium">
-                          {language === 'EN' ? (
-                            <>⏳ Next installment date: <strong className="font-extrabold">{formatDateMarathi(selectedCustomerStatus.nextUpcomingEntry.dueDate, language)}</strong>. (Deposit option will be active on that date)</>
-                          ) : (
-                            <>⏳ पुढील हप्ता तारीख: <strong className="font-extrabold">{formatDateMarathi(selectedCustomerStatus.nextUpcomingEntry.dueDate, language)}</strong> रोजी आहे. (त्या तारखेलाच जमा पर्याय सुरू होईल)</>
-                          )}
-                        </p>
-                      ) : (
-                        <p className="text-[11px] text-emerald-700 mt-1 font-medium">
-                          {language === 'EN' ? 'All installments for this Bishi are fully paid.' : 'या भिशीचे सर्व हप्ते पूर्ण जमा झाले आहेत.'}
-                        </p>
-                      )}
+                      <p className="text-xs text-emerald-700 mt-1 font-medium">
+                        {language === 'EN' ? 'Total scheme amount collected successfully.' : 'या भिशी योजनेची संपूर्ण रक्कम वसूल झाली आहे.'}
+                      </p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="space-y-3">
+                      {/* Notice if paying advance installment when current date is already paid */}
+                      {selectedCustomerStatus?.isCurrentDatePaid && selectedEntry && (
+                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center space-x-2 text-blue-900">
+                            <span className="text-base">⏳</span>
+                            <span className="font-bold">
+                              {language === 'EN'
+                                ? `Current date paid. Depositing upcoming installment #${selectedEntry.periodIndex}:`
+                                : `चालू तारखेचा हप्ता भरलेला आहे. पुढील हप्ता आगाऊ जमा (Advance): #${selectedEntry.periodIndex}`}
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-black px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 border border-blue-300 self-start sm:self-auto">
+                            {language === 'EN' ? 'Due Date: ' : 'हप्ता तारीख: '}{formatDateMarathi(selectedEntry.dueDate, language)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Optional Installment Selector Dropdown if customer has multiple unpaid installments */}
+                      {selectedCustomerStatus && selectedCustomerStatus.unpaidEntries.length > 1 && (
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                          <label className="block text-[11px] font-extrabold text-slate-700 mb-1 flex items-center justify-between">
+                            <span>{language === 'EN' ? 'Select Installment Period:' : 'जमा करावयाचा हप्ता निवडा:'}</span>
+                            <span className="text-[10px] text-blue-700 font-bold">
+                              {selectedCustomerStatus.unpaidEntries.length} {language === 'EN' ? 'pending' : 'हप्ते शिल्लक'}
+                            </span>
+                          </label>
+                          <select
+                            value={selectedEntryId}
+                            onChange={(e) => {
+                              const newId = e.target.value;
+                              setSelectedEntryId(newId);
+                              const entry = collections.find((c) => c.id === newId);
+                              if (entry) {
+                                setCollectedInput(entry.remainingAmount > 0 ? entry.remainingAmount : entry.expectedAmount);
+                              }
+                            }}
+                            className="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-blue-500"
+                          >
+                            {selectedCustomerStatus.unpaidEntries.map((entry) => (
+                              <option key={entry.id} value={entry.id}>
+                                {entry.periodLabel || `हप्ता ${entry.periodIndex}`} — तारीख: {formatDateMarathi(entry.dueDate, language)} (बाकी: ₹{entry.remainingAmount > 0 ? entry.remainingAmount : entry.expectedAmount})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                           <div className="flex justify-between items-center mb-1">
-                            <label className="block text-xs font-extrabold text-emerald-900">
-                              {language === 'EN' ? '1. Bishi Installment (₹)' : '१. भिशी हप्ता जमा (₹)'} <span className="text-emerald-700 font-normal text-[10px]">({language === 'EN' ? 'Regular Installment' : 'नियमित हप्ता'})</span>
+                            <label className="block text-xs font-extrabold text-blue-900">
+                              {language === 'EN' ? '1. Bishi Installment (₹)' : '१. भिशी हप्ता जमा (₹)'} <span className="text-blue-700 font-normal text-[10px]">({selectedEntry?.periodLabel || (language === 'EN' ? 'Regular' : 'हप्ता')})</span>
                             </label>
                             <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-900 font-black text-[10px] border border-rose-200">
-                              {language === 'EN' ? 'Due: ' : 'येणे बाकी: '}{formatCurrency(selectedCustomerStatus?.pendingEntry?.remainingAmount || selectedCustomer?.amount || 0, language)}
+                              {language === 'EN' ? 'Due: ' : 'येणे बाकी: '}{formatCurrency(selectedEntry?.remainingAmount || selectedCustomerStatus?.pendingEntry?.remainingAmount || selectedCustomer?.amount || 0, language)}
                             </span>
                           </div>
                           <input
@@ -687,7 +744,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                             value={collectedInput}
                             onChange={(e) => setCollectedInput(e.target.value ? Number(e.target.value) : '')}
                             placeholder={language === 'EN' ? 'e.g. 500' : 'उदा. 500'}
-                            className="w-full px-3.5 py-2 rounded-xl border border-emerald-400 text-sm font-black text-emerald-900 bg-white focus:ring-2 focus:ring-emerald-500"
+                            className="w-full px-3.5 py-2 rounded-xl border border-blue-400 text-sm font-black text-blue-900 bg-white focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
 
@@ -727,7 +784,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                       {(extraVal > 0 || bishiPenaltyVal > 0) && (
                         <div className="text-[11px] font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 flex justify-between items-center">
                           <span>{language === 'EN' ? `Bishi: ₹${bishiVal}${extraVal > 0 ? ` + Extra: ₹${extraVal}` : ''}${bishiPenaltyVal > 0 ? ` + Penalty: ₹${bishiPenaltyVal}` : ''}` : `हप्ता: ₹${bishiVal}${extraVal > 0 ? ` + अतिरिक्त: ₹${extraVal}` : ''}${bishiPenaltyVal > 0 ? ` + दंड: ₹${bishiPenaltyVal}` : ''}`}</span>
-                          <span className="font-extrabold text-emerald-800">{language === 'EN' ? `Total Bishi Deposit: ₹${bishiVal + extraVal + bishiPenaltyVal}` : `एकूण भिशी भरणा: ₹${bishiVal + extraVal + bishiPenaltyVal}`}</span>
+                          <span className="font-extrabold text-blue-800">{language === 'EN' ? `Total Bishi Deposit: ₹${bishiVal + extraVal + bishiPenaltyVal}` : `एकूण भिशी भरणा: ₹${bishiVal + extraVal + bishiPenaltyVal}`}</span>
                         </div>
                       )}
                     </div>
@@ -784,8 +841,8 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                   {/* Option 4: Loan Discount / Suit (Optional) */}
                   <div className="sm:col-span-2 pt-1 border-t border-slate-200/80">
                     <div className="flex items-center justify-between">
-                      <label className="block text-[11px] font-extrabold text-emerald-900">
-                        {language === 'EN' ? '4. Loan Discount (₹)' : '४. कर्ज डिस्काउंट / सूट (Discount ₹)'} <span className="text-emerald-700 font-normal text-[10px]">({language === 'EN' ? 'Optional discount' : 'पर्यायी / जर सूट द्यायची असल्यास'})</span>
+                      <label className="block text-[11px] font-extrabold text-blue-900">
+                        {language === 'EN' ? '4. Loan Discount (₹)' : '४. कर्ज डिस्काउंट / सूट (Discount ₹)'} <span className="text-blue-700 font-normal text-[10px]">({language === 'EN' ? 'Optional discount' : 'पर्यायी / जर सूट द्यायची असल्यास'})</span>
                       </label>
                       <input
                         type="number"
@@ -793,7 +850,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
                         value={loanDiscountInput}
                         onChange={(e) => setLoanDiscountInput(e.target.value ? Number(e.target.value) : '')}
                         placeholder={language === 'EN' ? 'e.g. 300' : 'उदा. 300'}
-                        className="w-48 px-3 py-1.5 rounded-xl border border-emerald-400 text-xs font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 bg-emerald-50/40 text-right"
+                        className="w-48 px-3 py-1.5 rounded-xl border border-blue-400 text-xs font-bold text-blue-950 focus:ring-2 focus:ring-blue-500 bg-blue-50/40 text-right"
                       />
                     </div>
                   </div>
@@ -828,7 +885,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
           <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700">
               <span>{t.modalTotalCollected}:</span>
-              <span className="text-emerald-800 font-black text-base">₹{totalDepositVal}</span>
+              <span className="text-blue-800 font-black text-base">₹{totalDepositVal}</span>
             </div>
             {bishiPenaltyVal > 0 && (
               <div className="flex justify-between items-center text-[11px] font-bold text-rose-700 pt-1 border-t border-slate-200">
@@ -859,7 +916,7 @@ export const QuickCollectionModal: React.FC<QuickCollectionModalProps> = ({
               className={`w-2/3 py-3 min-h-[44px] rounded-xl font-extrabold text-xs transition-colors shadow-md flex items-center justify-center space-x-2 cursor-pointer ${
                 !selectedCustomerId || totalDepositVal <= 0
                   ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
-                  : 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                  : 'bg-[#2563EB] hover:bg-blue-700 text-white'
               }`}
             >
               <CheckCircle2 className="w-4 h-4" />

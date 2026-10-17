@@ -3,8 +3,8 @@ export type Language = 'MR' | 'EN';
 export const translations = {
   MR: {
     // Brand & App
-    appName: 'नारायण भिशी',
-    tagline: 'विश्वास आणि पारदर्शकता',
+    appName: 'श्री महाकाल फायनान्स',
+    tagline: 'विश्वास, सुरक्षितता आणि समृद्धी',
     trustSecurity: 'Trust • Security',
     secureSystem: 'सुरक्षित आणि विश्वसनीय प्रणाली',
     
@@ -22,16 +22,19 @@ export const translations = {
     navDashboard: 'मुख्य पान',
     navCustomers: 'खातेदार',
     navCollections: 'जमा',
-    navBishi: 'भिशी',
+    navBishi: 'भिशी योजना',
+    navPayouts: 'पेआउट्स (२०% परतावा)',
+    navReferrals: 'रेफरल (१०% कमिशन)',
     navLoans: 'कर्ज',
     navInterest: 'व्याज',
     navPenalty: 'दंड',
     navRequests: 'सदस्य अर्ज (Approvals)',
+    navThakbaki: 'थकबाकी',
     navReports: 'अहवाल',
     navSms: 'एसएमएस',
     navBackup: 'बॅकअप',
     navProfile: 'माझी माहिती',
-    navSettings: 'सेटिंग',
+    navSettings: 'सेटिंग व स्टाफ',
     navLogout: 'बाहेर पडा',
 
     // Dashboard
@@ -159,7 +162,6 @@ export const translations = {
     modalTotalCollected: 'आत्ता जमा होणारी एकूण रक्कम',
 
     // Thakbaki (थकबाकी)
-    navThakbaki: 'थकबाकी',
     thakbakiTitle: 'थकबाकी व्यवस्थापन',
     thakbakiSub: 'जुन्या खातेदारांची थकबाकी नोंद व वसुली व्यवस्थापन',
     addThakbaki: 'नवीन थकबाकी नोंदवा',
@@ -196,7 +198,7 @@ export const translations = {
 
   EN: {
     // Brand & App
-    appName: 'Narayan Bishi',
+    appName: 'Shri Mahakal Finance',
     tagline: 'Trust, Security & Prosperity',
     trustSecurity: 'Trust • Security',
     secureSystem: 'Secure & Reliable System',
@@ -216,15 +218,18 @@ export const translations = {
     navCustomers: 'Customers',
     navCollections: 'Collections',
     navBishi: 'Bishi Schemes',
+    navPayouts: 'Payouts (20% Return)',
+    navReferrals: 'Referrals (10% Comm.)',
     navLoans: 'Loans',
     navInterest: 'Interest',
     navPenalty: 'Penalty',
     navRequests: 'Member Requests (Approvals)',
+    navThakbaki: 'Arrears (Thakbaki)',
     navReports: 'Reports',
     navSms: 'SMS Logs',
     navBackup: 'Backup',
     navProfile: 'Profile',
-    navSettings: 'Settings',
+    navSettings: 'Settings & Staff',
     navLogout: 'Logout',
 
     // Dashboard
@@ -352,7 +357,6 @@ export const translations = {
     modalTotalCollected: 'Total Amount Being Deposited',
 
     // Thakbaki
-    navThakbaki: 'Thak Baki',
     thakbakiTitle: 'Thak Baki Management',
     thakbakiSub: 'Record and manage outstanding dues for old customers',
     addThakbaki: 'Add Thak Baki',

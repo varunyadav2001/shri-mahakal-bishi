@@ -292,9 +292,9 @@ export const LoanManager: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Loans (0 reads if unchanged)' : 'कर्ज डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="w-full sm:w-auto min-h-[44px] px-3.5 py-2.5 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="w-full sm:w-auto min-h-[44px] px-3.5 py-2.5 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 
@@ -308,14 +308,14 @@ export const LoanManager: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E4EAE7] shadow-xs">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] shadow-xs">
         <div className="relative">
-          <Search className="w-5 h-5 text-[#0F7A5C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+          <Search className="w-5 h-5 text-[#2563EB] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
           <MarathiTextInput
             value={searchTerm}
             onChange={(val) => setSearchTerm(val)}
             placeholder={language === 'EN' ? 'Search borrowers (Acc No / Name / Item e.g. 101)...' : 'कर्जधारक शोधा (खाते क्रमांक / नाव / कारण उदा. 101)...'}
-            className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] bg-[#F4F6F5]/50 transition-all"
+            className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] bg-[#F8FAFC]/50 transition-all"
           />
           {searchTerm && (
             <button

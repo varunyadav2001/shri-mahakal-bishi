@@ -29,6 +29,10 @@ import {
   InAppNotification,
   AuditLog,
   Modality,
+  Payout,
+  Referral,
+  StaffMember,
+  BroadcastAlert,
 } from '../types';
 import {
   calculateLoanTotalAccruedInterest,
@@ -62,6 +66,10 @@ export const STORAGE_KEYS = {
   REQUESTS: 'nb_requests',
   NOTIFICATIONS: 'nb_notifications',
   AUDIT_LOGS: 'nb_audit_logs',
+  PAYOUTS: 'nb_payouts',
+  REFERRALS: 'nb_referrals',
+  STAFF: 'nb_staff',
+  BROADCAST_ALERTS: 'nb_broadcast_alerts',
 };
 
 // ── Native IndexedDB Backing for Unlimited Local Storage ──
@@ -1367,7 +1375,7 @@ export const StorageService = {
         await batch.commit();
       }
 
-      console.log(`[Firestore] Purged customer ${id} and ${docRefsToDelete.length} related documents with 0 server reads.`);
+      console.log(`[Firestore] Purged customer ${id} and ${docRefsToDelete.length} related documents.`);
       invalidateStatsCache();
       recordDeletion('customers', targetId, { accountNumber: targetAcc, name: customerToDelete?.name });
       if (toDeleteLoans.length > 0) {
@@ -1380,6 +1388,45 @@ export const StorageService = {
         toDeleteColls.forEach((c) => recordDeletion('collections', c.id, { accountNumber: targetAcc }));
       }
       touchSyncOnCustomerDelete(targetAcc);
+
+      // Clean up or mark member_requests for this customer in Firestore
+      const cleanPhone = (customerToDelete?.mobile || '').replace(/\D/g, '');
+      if (cleanPhone || targetAcc || targetId) {
+        const reqs = StorageService.getRequests();
+        let reqsChanged = false;
+        for (const r of reqs) {
+          const rPhone = (r.mobile || (r as any).customerPhone || (r as any).userPhone || '').replace(/\D/g, '');
+          if ((cleanPhone && rPhone === cleanPhone) || r.customerId === targetId || (targetAcc && r.accountNumber === targetAcc)) {
+            r.status = 'REJECTED';
+            r.reviewNote = 'सभासद खाते अॅडमिनकडून हटवले गेले आहे (Customer removed by Admin)';
+            r.updatedAt = new Date().toISOString();
+            reqsChanged = true;
+            syncToFirestore('requests', r.id, r).catch(() => {});
+            syncToFirestore('member_requests', r.id, r).catch(() => {});
+          }
+        }
+        if (reqsChanged) {
+          StorageService.saveRequests(reqs);
+          notifyDataChange(STORAGE_KEYS.REQUESTS);
+        }
+
+        // Reset user record in Firestore
+        if (cleanPhone) {
+          setDoc(
+            doc(db, 'users', cleanPhone),
+            {
+              isApproved: false,
+              status: 'removed',
+              customerId: null,
+              accountNumber: null,
+              rejectionReason: 'सभासद खाते अॅडमिनकडून हटवले गेले आहे (Customer removed by Admin)',
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          ).catch(() => {});
+        }
+      }
+
       endSyncOp(true);
     } catch (err) {
       console.warn('Firestore customer purge note:', err);
@@ -1394,7 +1441,10 @@ export const StorageService = {
     const nowIso = new Date().toISOString();
     const stamped = configs.map((c) => ({ ...c, updatedAt: nowIso }));
     setStoredData(STORAGE_KEYS.BISHI_CONFIGS, stamped);
-    stamped.forEach((c) => syncToFirestore('bishi', c.id, c));
+    stamped.forEach((c) => {
+      syncToFirestore('bishi', c.id, c);
+      syncToFirestore('bishi_configs', c.id, c);
+    });
     touchSyncTimestamp();
   },
 
@@ -1403,7 +1453,42 @@ export const StorageService = {
     const toDelete = configs.find((c) => c.id === id);
     const updated = configs.filter((c) => c.id !== id);
     setStoredData(STORAGE_KEYS.BISHI_CONFIGS, updated);
+
+    // Also mark or update any active customer registered under this deleted scheme to 'CLOSED'
+    const schemeName = toDelete?.name || id;
+    const allCustomers = StorageService.getCustomers();
+    const updatedCustomers = allCustomers.map((cust) => {
+      if (cust.bishiType === schemeName || cust.bishiType === id) {
+        const closedCust = { ...cust, status: 'CLOSED' as const, updatedAt: new Date().toISOString() };
+        syncToFirestore('customers', cust.id, closedCust);
+        return closedCust;
+      }
+      return cust;
+    });
+    setStoredData(STORAGE_KEYS.CUSTOMERS, updatedCustomers);
+
+    // Also update any pending member requests for this deleted scheme
+    const allRequests = StorageService.getRequests();
+    let reqsChanged = false;
+    for (const req of allRequests) {
+      if ((req.schemeId === id || req.schemeName === schemeName) && req.status === 'PENDING') {
+        req.status = 'REJECTED';
+        req.reviewNote = 'ही योजना अॅडमिनकडून बंद / डिलीट करण्यात आली आहे (Scheme deleted by Admin)';
+        req.updatedAt = new Date().toISOString();
+        reqsChanged = true;
+        syncToFirestore('requests', req.id, req).catch(() => {});
+        syncToFirestore('member_requests', req.id, req).catch(() => {});
+      }
+    }
+    if (reqsChanged) {
+      StorageService.saveRequests(allRequests);
+      notifyDataChange(STORAGE_KEYS.REQUESTS);
+    }
+
+    // Delete scheme from 'bishi', 'bishi_configs', and 'bishi_schemes' collections
     await deleteFromFirestore('bishi', id, toDelete);
+    await deleteFromFirestore('bishi_configs', id, toDelete);
+    await deleteFromFirestore('bishi_schemes', id, toDelete).catch(() => {});
     await recordDeletion('bishi', id, toDelete);
     await touchSyncTimestamp();
     notifyDataChange(STORAGE_KEYS.BISHI_CONFIGS);
@@ -1490,16 +1575,133 @@ export const StorageService = {
       });
     }
 
+    const nowIso = new Date().toISOString();
+
+    const findTargetCustomer = (cId?: string, accNo?: string, bishi?: string): Customer | undefined => {
+      const cleanAcc = String(accNo || '').trim().toLowerCase();
+      if (cId) {
+        const found = StorageService.getCustomerById(cId);
+        if (found) return found;
+      }
+      if (cleanAcc) {
+        return StorageService.getCustomers().find(
+          (c) => String(c.accountNumber || '').trim().toLowerCase() === cleanAcc &&
+                 (!bishi || c.bishiType === bishi)
+        );
+      }
+      return undefined;
+    };
+
+    const syncCustomerInstallmentData = (cust: Customer | undefined, entry: CollectionEntry) => {
+      if (!cust) return;
+
+      if (Array.isArray(cust.installments)) {
+        const instIdx = cust.installments.findIndex((inst: any) =>
+          Number(inst.periodIndex || inst.installmentNo) === Number(entry.periodIndex) ||
+          inst.id === entry.id ||
+          inst.id === id
+        );
+        if (instIdx !== -1) {
+          const prev = cust.installments[instIdx];
+          cust.installments[instIdx] = {
+            ...prev,
+            status: entry.status,
+            collectedAmount: Number(entry.collectedAmount || 0),
+            remainingAmount: Number(entry.remainingAmount || 0),
+            paymentDate: entry.paymentDate || nowIso.split('T')[0],
+            paidDate: entry.paymentDate || nowIso.split('T')[0],
+            paymentTime: entry.paymentTime || '',
+            paymentMode: entry.paymentMode || 'CASH',
+            totalPaid: Number(entry.totalPaid || entry.collectedAmount || 0),
+            totalWithPenalty: Number(entry.totalWithPenalty || entry.collectedAmount || 0),
+            penaltyAmount: Number(entry.penaltyAmount || 0),
+            extraAmount: Number(entry.extraAmount || 0),
+            note: entry.note || prev.note || '',
+            updatedAt: nowIso,
+          };
+        }
+      }
+
+      // Recalculate customer summary metrics
+      let paidCount = 0;
+      let totalCol = 0;
+      let totalExtra = 0;
+      let totalPen = 0;
+      let totalColWithPen = 0;
+
+      if (Array.isArray(cust.installments) && cust.installments.length > 0) {
+        cust.installments.forEach((inst: any) => {
+          const isPaid = inst.status === 'PAID' || inst.status === 'CLEARED' || (Number(inst.collectedAmount) >= Number(inst.expectedAmount) && Number(inst.expectedAmount) > 0);
+          if (isPaid) paidCount++;
+          totalCol += Number(inst.collectedAmount || 0);
+          totalExtra += Number(inst.extraAmount || 0);
+          totalPen += Number(inst.penaltyAmount || 0);
+          totalColWithPen += Number(inst.totalWithPenalty || inst.totalPaid || inst.collectedAmount || 0);
+        });
+      }
+
+      const totalInstCount = Number(cust.totalInstallments) || (Array.isArray(cust.installments) ? cust.installments.length : 52);
+      const expectedInstAmt = Number(cust.amount) || 0;
+      const totalExp = Number(cust.summary?.totalExpected) || (expectedInstAmt * totalInstCount);
+      const totalRem = Math.max(0, totalExp - totalCol);
+
+      cust.summary = {
+        totalExpected: totalExp,
+        totalCollected: totalCol,
+        totalExtraAmount: totalExtra,
+        totalPenalty: totalPen,
+        totalCollectedWithPenalty: totalColWithPen,
+        totalRemaining: totalRem,
+        paidInstallments: paidCount,
+        completedInstallments: paidCount,
+        pendingInstallments: Math.max(0, totalInstCount - paidCount),
+        totalInstallments: totalInstCount,
+      };
+      cust.updatedAt = nowIso;
+
+      // Update local customers cache
+      const allCust = StorageService.getCustomers();
+      const cIdx = allCust.findIndex((c) => c.id === cust.id);
+      if (cIdx !== -1) {
+        allCust[cIdx] = cust;
+        setStoredData(STORAGE_KEYS.CUSTOMERS, allCust);
+      }
+
+      // Sync customer doc to Firestore so Android App receives it in real-time
+      syncToFirestore('customers', cust.id, cust);
+
+      // Sync user doc in Firestore
+      if (cust.mobile) {
+        const cleanMobile = cust.mobile.replace(/\D/g, '');
+        if (cleanMobile) {
+          try {
+            setDoc(
+              doc(db, 'users', cleanMobile),
+              {
+                lastPaymentDate: nowIso,
+                paidInstallments: paidCount,
+                totalCollected: totalCol,
+                totalRemaining: totalRem,
+                updatedAt: nowIso,
+              },
+              { merge: true }
+            ).catch(() => {});
+          } catch (_) {}
+        }
+      }
+    };
+
     if (index === -1) {
       console.warn(`[StorageService] Collection entry ${id} not found to update, inserting new.`);
-      const nowIso = new Date().toISOString();
+      const cust = findTargetCustomer(updates.customerId, updates.accountNumber, updates.bishiType);
       const newEntry: CollectionEntry = {
         id,
-        customerId: updates.customerId || '',
-        customerName: updates.customerName || '',
-        accountNumber: updates.accountNumber || '',
-        officeId: updates.officeId || 'MAIN',
-        bishiType: (updates.bishiType || '15_AUGUST') as any,
+        customerId: updates.customerId || cust?.id || '',
+        customerName: updates.customerName || cust?.name || '',
+        accountNumber: updates.accountNumber || cust?.accountNumber || '',
+        customerMobile: cust?.mobile,
+        officeId: updates.officeId || cust?.officeId || 'MAIN',
+        bishiType: (updates.bishiType || cust?.bishiType || '15_AUGUST') as any,
         periodIndex: updates.periodIndex || 1,
         periodLabel: updates.periodLabel || `हप्ता ${updates.periodIndex || 1}`,
         dueDate: updates.dueDate || new Date().toISOString().split('T')[0],
@@ -1519,6 +1721,9 @@ export const StorageService = {
       const combined = deduplicateCollections([...collections, newEntry]);
       setStoredData(STORAGE_KEYS.COLLECTIONS, combined);
       syncToFirestore('collections', id, newEntry);
+      syncCustomerInstallmentData(cust, newEntry);
+      invalidateStatsCache();
+      touchSyncTimestamp();
       return newEntry;
     }
 
@@ -1526,11 +1731,14 @@ export const StorageService = {
     const targetPeriod = updates.periodIndex ?? target.periodIndex;
     const targetCustId = updates.customerId || target.customerId;
     const targetAcc = String(updates.accountNumber || target.accountNumber || '').trim().toLowerCase();
-    const nowIso = new Date().toISOString();
+
+    const cust = findTargetCustomer(targetCustId, targetAcc, target.bishiType);
 
     const updatedEntry: CollectionEntry = {
       ...target,
       ...updates,
+      customerMobile: cust?.mobile || (target as any).customerMobile,
+      accountNumber: cust?.accountNumber || target.accountNumber,
       updatedAt: nowIso,
     };
 
@@ -1542,7 +1750,7 @@ export const StorageService = {
       const isSameCustomer = (cCustId && cCustId === targetCustId) ||
                              (targetAcc && cAcc === targetAcc && (!target.bishiType || c.bishiType === target.bishiType));
       if (c.id === id || (isSameCustomer && isSamePeriod)) {
-        return { ...c, ...updates, updatedAt: nowIso };
+        return { ...c, ...updates, customerMobile: cust?.mobile || (c as any).customerMobile, updatedAt: nowIso };
       }
       return c;
     });
@@ -1551,17 +1759,7 @@ export const StorageService = {
     setStoredData(STORAGE_KEYS.COLLECTIONS, dedupedList);
 
     syncToFirestore('collections', target.id || id, updatedEntry);
-
-    const cust = targetCustId
-      ? StorageService.getCustomerById(targetCustId)
-      : StorageService.getCustomers().find(
-          (c) => String(c.accountNumber || '').trim().toLowerCase() === targetAcc &&
-                 (!target.bishiType || c.bishiType === target.bishiType)
-        );
-    if (cust) {
-      cust.updatedAt = nowIso;
-      syncToFirestore('customers', cust.id, cust);
-    }
+    syncCustomerInstallmentData(cust, updatedEntry);
 
     if (updatedEntry.status === 'PAID' || Number(updatedEntry.collectedAmount) >= Number(updatedEntry.expectedAmount)) {
       markInstallmentAsPaid(updatedEntry.customerId, updatedEntry.periodIndex, 'bishi', updatedEntry.paymentDate || nowIso);
@@ -2678,9 +2876,10 @@ export const StorageService = {
 
   fetchRequestsFromFirestore: async (): Promise<MemberRequest[]> => {
     try {
-      const [reqSnap, memberReqSnap] = await Promise.all([
+      const [reqSnap, memberReqSnap, userSnap] = await Promise.all([
         getDocs(collection(db, 'requests')).catch(() => null),
         getDocs(collection(db, 'member_requests')).catch(() => null),
+        getDocs(collection(db, 'users')).catch(() => null),
       ]);
       const remoteRequests: MemberRequest[] = [];
       if (reqSnap && !reqSnap.empty) {
@@ -2691,6 +2890,35 @@ export const StorageService = {
       if (memberReqSnap && !memberReqSnap.empty) {
         memberReqSnap.forEach((d: any) => {
           remoteRequests.push(normalizeMemberRequest(d.data(), d.id));
+        });
+      }
+      if (userSnap && !userSnap.empty) {
+        const existingMobiles = new Set(
+          remoteRequests.map((r) => String(r.mobile || (r as any).userPhone || r.userId || '').replace(/\D/g, ''))
+        );
+        const existingCustMobiles = new Set(
+          StorageService.getCustomers().map((c) => String(c.mobile || '').replace(/\D/g, ''))
+        );
+        userSnap.forEach((d: any) => {
+          const u = d.data();
+          const phone = String(u.phone || u.userId || d.id || '').replace(/\D/g, '');
+          if (phone && !existingMobiles.has(phone) && !existingCustMobiles.has(phone)) {
+            remoteRequests.push({
+              id: `REQ_${phone}`,
+              userId: phone,
+              customerName: u.name || 'ॲप सभासद',
+              mobile: phone,
+              type: 'new_member',
+              schemeId: u.activeSchemeId || '',
+              schemeName: u.activeSchemeName || 'नवीन ॲप नोंदणी (New App Registration)',
+              status: (u.isApproved || u.status === 'active' || u.status === 'approved') && u.activeSchemeId ? 'APPROVED' : 'PENDING',
+              amount: 1000,
+              message: 'Android ॲपवरून नवीन सभासद नोंदणी झाली आहे.',
+              createdAt: u.createdAtString || new Date().toISOString(),
+              updatedAt: u.updatedAt || u.createdAtString || new Date().toISOString(),
+            });
+            existingMobiles.add(phone);
+          }
         });
       }
       const localRequests = StorageService.getRequests();
@@ -2993,10 +3221,12 @@ export const StorageService = {
           id: requestId,
           status,
           accountNumber: updatedReq.accountNumber || '',
+          assignedAccountNo: updatedReq.accountNumber || '',
           customerId: updatedReq.customerId || '',
           reviewedBy: adminName,
           reviewedAt: now,
           reviewNote: reviewNote.trim() || null,
+          adminRemarks: reviewNote.trim() || null,
           updatedAt: now,
         },
         { merge: true }
@@ -3013,7 +3243,11 @@ export const StorageService = {
           {
             customerId: updatedReq.customerId || '',
             accountNumber: updatedReq.accountNumber || '',
-            bishiType: (req as any).schemeId || (req as any).payload?.schemeId || 'DASARA',
+            assignedAccountNo: updatedReq.accountNumber || '',
+            bishiType: finalSchemeId,
+            isApproved: status === 'APPROVED',
+            status: status === 'APPROVED' ? 'active' : 'rejected',
+            rejectionReason: status === 'REJECTED' ? (reviewNote.trim() || null) : null,
             updatedAt: now,
           },
           { merge: true }
@@ -3087,6 +3321,180 @@ export const StorageService = {
       setStoredData(STORAGE_KEYS.NOTIFICATIONS, list);
       await syncToFirestore('notifications', notifId, list[idx]);
     }
+  },
+
+  // ── Shri Mahakal Finance: Payouts (20% Return) ───────────────────────────
+  getPayouts: (): Payout[] => {
+    return getStoredData<Payout[]>(STORAGE_KEYS.PAYOUTS, []);
+  },
+
+  savePayout: (payoutData: Omit<Payout, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Payout => {
+    const list = getStoredData<Payout[]>(STORAGE_KEYS.PAYOUTS, []);
+    const id = payoutData.id || `payout_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const nowIso = new Date().toISOString();
+    const newPayout: Payout = {
+      ...payoutData,
+      id,
+      returnPercentage: payoutData.returnPercentage ?? 20,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    list.unshift(newPayout);
+    setStoredData(STORAGE_KEYS.PAYOUTS, list);
+    syncToFirestore('payouts', id, newPayout);
+    notifyDataChange();
+    return newPayout;
+  },
+
+  updatePayout: (payoutId: string, updates: Partial<Payout>): Payout | null => {
+    const list = getStoredData<Payout[]>(STORAGE_KEYS.PAYOUTS, []);
+    const idx = list.findIndex((p) => p.id === payoutId);
+    if (idx === -1) return null;
+    const updated: Payout = {
+      ...list[idx],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    list[idx] = updated;
+    setStoredData(STORAGE_KEYS.PAYOUTS, list);
+    syncToFirestore('payouts', payoutId, updated);
+    notifyDataChange();
+    return updated;
+  },
+
+  // ── Shri Mahakal Finance: Referrals (10% Commission) ──────────────────────
+  getReferrals: (): Referral[] => {
+    return getStoredData<Referral[]>(STORAGE_KEYS.REFERRALS, []);
+  },
+
+  saveReferral: (refData: Omit<Referral, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Referral => {
+    const list = getStoredData<Referral[]>(STORAGE_KEYS.REFERRALS, []);
+    const id = refData.id || `ref_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const nowIso = new Date().toISOString();
+    const newRef: Referral = {
+      ...refData,
+      id,
+      commissionPercentage: refData.commissionPercentage ?? 10,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    list.unshift(newRef);
+    setStoredData(STORAGE_KEYS.REFERRALS, list);
+    syncToFirestore('referrals', id, newRef);
+    notifyDataChange();
+    return newRef;
+  },
+
+  updateReferral: (referralId: string, updates: Partial<Referral>): Referral | null => {
+    const list = getStoredData<Referral[]>(STORAGE_KEYS.REFERRALS, []);
+    const idx = list.findIndex((r) => r.id === referralId);
+    if (idx === -1) return null;
+    const updated: Referral = {
+      ...list[idx],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    list[idx] = updated;
+    setStoredData(STORAGE_KEYS.REFERRALS, list);
+    syncToFirestore('referrals', referralId, updated);
+    notifyDataChange();
+    return updated;
+  },
+
+  // ── Staff & Roles Management ──────────────────────────────────────────────
+  getStaffMembers: (): StaffMember[] => {
+    const defaultStaff: StaffMember[] = [
+      {
+        id: 'staff_admin_1',
+        name: 'मुख्य व्यवस्थापक (Super Admin)',
+        mobile: '9876543210',
+        email: 'admin@shrimahakal.com',
+        role: 'SUPER_ADMIN',
+        active: true,
+        canCollect: true,
+        canApproveRequests: true,
+        canViewReports: true,
+        canManageLoans: true,
+        createdAt: new Date().toISOString(),
+      },
+    ];
+    return getStoredData<StaffMember[]>(STORAGE_KEYS.STAFF, defaultStaff);
+  },
+
+  saveStaffMember: (staffData: Omit<StaffMember, 'id' | 'createdAt'> & { id?: string }): StaffMember => {
+    const list = getStoredData<StaffMember[]>(STORAGE_KEYS.STAFF, []);
+    const id = staffData.id || `staff_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const newStaff: StaffMember = {
+      ...staffData,
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    list.unshift(newStaff);
+    setStoredData(STORAGE_KEYS.STAFF, list);
+    syncToFirestore('staff', id, newStaff);
+    notifyDataChange();
+    return newStaff;
+  },
+
+  updateStaffMember: (staffId: string, updates: Partial<StaffMember>): StaffMember | null => {
+    const list = getStoredData<StaffMember[]>(STORAGE_KEYS.STAFF, []);
+    const idx = list.findIndex((s) => s.id === staffId);
+    if (idx === -1) return null;
+    const updated: StaffMember = {
+      ...list[idx],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    list[idx] = updated;
+    setStoredData(STORAGE_KEYS.STAFF, list);
+    syncToFirestore('staff', staffId, updated);
+    notifyDataChange();
+    return updated;
+  },
+
+  deleteStaffMember: (staffId: string): void => {
+    const list = getStoredData<StaffMember[]>(STORAGE_KEYS.STAFF, []);
+    const filtered = list.filter((s) => s.id !== staffId);
+    setStoredData(STORAGE_KEYS.STAFF, filtered);
+    deleteFromFirestore('staff', staffId);
+    notifyDataChange();
+  },
+
+  // ── Broadcast Alerts (To All Members / Schemes) ───────────────────────────
+  getBroadcastAlerts: (): BroadcastAlert[] => {
+    return getStoredData<BroadcastAlert[]>(STORAGE_KEYS.BROADCAST_ALERTS, []);
+  },
+
+  saveBroadcastAlert: (alertData: Omit<BroadcastAlert, 'id' | 'sentAt'> & { id?: string }): BroadcastAlert => {
+    const list = getStoredData<BroadcastAlert[]>(STORAGE_KEYS.BROADCAST_ALERTS, []);
+    const id = alertData.id || `alert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const nowIso = new Date().toISOString();
+    const newAlert: BroadcastAlert = {
+      ...alertData,
+      id,
+      sentAt: nowIso,
+    };
+    list.unshift(newAlert);
+    setStoredData(STORAGE_KEYS.BROADCAST_ALERTS, list);
+    syncToFirestore('broadcast_alerts', id, newAlert);
+
+    // Also inject into member notifications collection for in-app display!
+    const notif: InAppNotification = {
+      id: `notif_${id}`,
+      mobile: '', // Broadcast to all
+      title: alertData.title,
+      titleMr: alertData.titleMr || alertData.title,
+      body: alertData.message,
+      message: alertData.message,
+      messageMr: alertData.messageMr || alertData.message,
+      type: 'GENERAL',
+      read: false,
+      createdAt: nowIso,
+    };
+    StorageService.saveNotification(notif);
+    notifyDataChange();
+    return newAlert;
   },
 
   // Real-time synchronization listeners with Firebase Firestore across all collections
@@ -3416,6 +3824,76 @@ export const StorageService = {
         (err: any) => console.warn('Firestore notifications listener error:', err?.message || err)
       );
       unsubscribes.push(unsubNotifs);
+    } catch (e) {}
+
+    // 12. Listen for payouts (20% Return)
+    try {
+      const unsubPayouts = onSnapshot(
+        collection(db, 'payouts'),
+        (snapshot: any) => {
+          if (snapshot.metadata?.hasPendingWrites) return;
+          const remoteList: Payout[] = [];
+          snapshot.forEach((d: any) => {
+            const raw = d.data();
+            remoteList.push({
+              ...raw,
+              id: raw.id || d.id,
+            });
+          });
+          remoteList.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+          setStoredData(STORAGE_KEYS.PAYOUTS, remoteList);
+          debouncedUpdate();
+        },
+        (err: any) => console.warn('Firestore payouts listener error:', err?.message || err)
+      );
+      unsubscribes.push(unsubPayouts);
+    } catch (e) {}
+
+    // 13. Listen for referrals (10% Commission)
+    try {
+      const unsubRefs = onSnapshot(
+        collection(db, 'referrals'),
+        (snapshot: any) => {
+          if (snapshot.metadata?.hasPendingWrites) return;
+          const remoteList: Referral[] = [];
+          snapshot.forEach((d: any) => {
+            const raw = d.data();
+            remoteList.push({
+              ...raw,
+              id: raw.id || d.id,
+            });
+          });
+          remoteList.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+          setStoredData(STORAGE_KEYS.REFERRALS, remoteList);
+          debouncedUpdate();
+        },
+        (err: any) => console.warn('Firestore referrals listener error:', err?.message || err)
+      );
+      unsubscribes.push(unsubRefs);
+    } catch (e) {}
+
+    // 14. Listen for staff members
+    try {
+      const unsubStaff = onSnapshot(
+        collection(db, 'staff'),
+        (snapshot: any) => {
+          if (snapshot.metadata?.hasPendingWrites) return;
+          const remoteList: StaffMember[] = [];
+          snapshot.forEach((d: any) => {
+            const raw = d.data();
+            remoteList.push({
+              ...raw,
+              id: raw.id || d.id,
+            });
+          });
+          if (remoteList.length > 0) {
+            setStoredData(STORAGE_KEYS.STAFF, remoteList);
+            debouncedUpdate();
+          }
+        },
+        (err: any) => console.warn('Firestore staff listener error:', err?.message || err)
+      );
+      unsubscribes.push(unsubStaff);
     } catch (e) {}
 
 

@@ -257,9 +257,9 @@ export const CustomerList: React.FC = () => {
             onClick={() => refreshAllData()}
             disabled={isRefreshing}
             title={language === 'EN' ? 'Refresh Customers (0 reads if unchanged)' : 'ग्राहक डेटा रिफ्रेश करा (बदल नसल्यास ० रीड्स)'}
-            className="h-10 px-3.5 bg-white hover:bg-emerald-50 text-[#0F7A5C] font-extrabold text-xs rounded-xl border border-[#E4EAE7] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
+            className="h-10 px-3.5 bg-white hover:bg-blue-50 text-[#2563EB] font-extrabold text-xs rounded-xl border border-[#E2E8F0] shadow-2xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 active:scale-95 transition-all"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0F7A5C] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#2563EB] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{language === 'EN' ? 'Refresh' : 'रिफ्रेश'}</span>
           </button>
 
@@ -277,15 +277,15 @@ export const CustomerList: React.FC = () => {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E4EAE7] shadow-xs space-y-4">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-4">
         {/* Instant Search Box */}
         <div className="relative">
-          <Search className="w-5 h-5 text-[#0F7A5C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+          <Search className="w-5 h-5 text-[#2563EB] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
           <MarathiTextInput
             value={searchTerm}
             onChange={(val) => setSearchTerm(val)}
             placeholder={language === 'EN' ? 'Search Acc No / Name / Mobile (e.g. 101 / Suraj)...' : 'खाते क्रमांक / नाव / मोबाईल क्रमांक शोधा (उदा. 101 / नारायण)...'}
-            className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E4EAE7] hover:border-[#0F7A5C]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#0F7A5C] focus:border-[#0F7A5C] bg-[#F4F6F5]/50 transition-all"
+            className="w-full pl-11 pr-10 py-3 rounded-xl border border-[#E2E8F0] hover:border-[#2563EB]/60 text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] bg-[#F8FAFC]/50 transition-all"
           />
           {searchTerm && (
             <button
@@ -409,7 +409,7 @@ export const CustomerList: React.FC = () => {
                 return (
                   <div
                     key={cust.id}
-                    className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 hover:shadow-md hover:border-emerald-300 transition-all duration-200"
+                    className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 hover:shadow-md hover:border-blue-300 transition-all duration-200"
                   >
                     {/* Header Row */}
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -419,7 +419,7 @@ export const CustomerList: React.FC = () => {
                         </span>
                         <Link
                           to={`/customers/${cust.id}`}
-                          className="font-black text-slate-900 text-sm hover:text-emerald-700"
+                          className="font-black text-slate-900 text-sm hover:text-[#2563EB]"
                         >
                           {cust.name}
                         </Link>
@@ -529,7 +529,7 @@ export const CustomerList: React.FC = () => {
                       {!isPaid && (
                         <button
                           onClick={() => setCollectCustomer(cust)}
-                          className="px-3.5 py-2 min-h-[44px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs flex items-center space-x-1 shadow-xs cursor-pointer touch-target"
+                          className="px-3.5 py-2 min-h-[44px] rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-extrabold text-xs flex items-center space-x-1 shadow-xs cursor-pointer touch-target"
                         >
                           <Wallet className="w-3.5 h-3.5" />
                           <span>{t.btnCollect}</span>
@@ -599,7 +599,7 @@ export const CustomerList: React.FC = () => {
                     const isPaid = financials.isCurrentDuePaid;
 
                     return (
-                      <tr key={cust.id} className="hover:bg-emerald-50/40 transition-colors group">
+                      <tr key={cust.id} className="hover:bg-blue-50/40 transition-colors group">
                         <td className="p-3.5 pl-5 font-bold text-slate-900">
                           <Link
                             to={`/customers/${cust.id}`}
@@ -694,7 +694,7 @@ export const CustomerList: React.FC = () => {
                               <button
                                 onClick={() => setCollectCustomer(cust)}
                                 title={t.btnCollect}
-                                className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                                className="p-1.5 rounded-lg bg-blue-50 text-[#2563EB] hover:bg-blue-100 transition-colors"
                               >
                                 <Wallet className="w-4 h-4" />
                               </button>
@@ -733,11 +733,11 @@ export const CustomerList: React.FC = () => {
                     type="button"
                     onClick={handleLoadMore}
                     disabled={isLoadingMore || isLoadingAll}
-                    className="px-4 py-2 rounded-xl bg-white border border-[#E4EAE7] hover:border-[#0F7A5C] text-[#0F7A5C] font-extrabold text-xs sm:text-sm shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#2563EB] text-[#2563EB] font-extrabold text-xs sm:text-sm shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
                   >
                     {isLoadingMore ? (
                       <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#0F7A5C]" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#2563EB]" />
                         <span>{language === 'EN' ? 'Loading...' : 'लोड होत आहे...'}</span>
                       </>
                     ) : (
@@ -749,7 +749,7 @@ export const CustomerList: React.FC = () => {
                     type="button"
                     onClick={handleLoadAll}
                     disabled={isLoadingMore || isLoadingAll}
-                    className="px-4 py-2 rounded-xl bg-[#0F7A5C] hover:bg-[#0B5C45] text-white font-extrabold text-xs sm:text-sm shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1E3A8A] text-white font-extrabold text-xs sm:text-sm shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
                   >
                     {isLoadingAll ? (
                       <>

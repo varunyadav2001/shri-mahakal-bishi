@@ -22,12 +22,12 @@ export interface BrandConfig {
     EN: string;
   };
   colors: {
-    primary: string;       // Deep Forest Green
-    primaryDark: string;   // Sidebar & Badge Dark Green
-    primaryLight: string;  // Header Gradient Green
-    accent: string;        // Emerald Accent
-    accentLight: string;   // Pastel Green
-    background: string;    // Main Canvas Background
+    primary: string;       // Deep Royal Navy Blue
+    primaryDark: string;   // Slate 900
+    primaryLight: string;  // Vibrant Blue 600
+    accent: string;        // Cyan 500
+    accentLight: string;   // Soft Blue Tint
+    background: string;    // Main Canvas Background (Slate 50)
     surface: string;       // Card Surface
   };
   assets: {
@@ -53,25 +53,25 @@ export interface BrandConfig {
 
 export const brandConfig: BrandConfig = {
   name: {
-    MR: 'नारायण भिशी',
-    EN: 'Narayan Bhishi',
+    MR: 'श्री महाकाल फायनान्स',
+    EN: 'Shri Mahakal Finance',
   },
-  shortName: 'Narayan',
+  shortName: 'Mahakal',
   tagline: {
-    MR: 'विश्वास आणि पारदर्शकता',
+    MR: 'विश्वास, सुरक्षितता आणि समृद्धी',
     EN: 'Trust, Security & Prosperity',
   },
   subTagline: {
-    MR: 'समृद्धीची नवी वाट',
-    EN: 'Financial Growth & Community Trust',
+    MR: 'डिजिटल भिशी व्यवस्थापन प्रणाली',
+    EN: 'Digital Bhishi Management Platform',
   },
   colors: {
-    primary: '#0B5C45',
-    primaryDark: '#0F4A3C',
-    primaryLight: '#0F7A5C',
-    accent: '#2F9E6E',
-    accentLight: '#E8F5E9',
-    background: '#F4F6F5',
+    primary: '#1E3A8A',       // Deep Royal Navy Blue (#1E3A8A)
+    primaryDark: '#0F172A',   // Slate 900 (#0F172A)
+    primaryLight: '#2563EB',  // Vibrant Blue 600 (#2563EB)
+    accent: '#06B6D4',        // Cyan 500 (#06B6D4)
+    accentLight: '#EFF6FF',   // Soft Blue Tint (#EFF6FF)
+    background: '#F8FAFC',    // Slate 50 (#F8FAFC)
     surface: '#FFFFFF',
   },
   assets: {
@@ -82,8 +82,8 @@ export const brandConfig: BrandConfig = {
     manifest: '/manifest.json',
   },
   backup: {
-    filePrefix: 'Narayan_Bhishi',
-    driveFolderName: 'Narayan_Bhishi_Backups',
+    filePrefix: 'Shri_Mahakal_Finance',
+    driveFolderName: 'Shri_Mahakal_Finance_Backups',
     maxRollingFiles: 10,
   },
   defaults: {

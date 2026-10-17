@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#F4F6F5] flex items-center justify-center p-4 font-marathi">
+        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-marathi">
           <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-red-100 text-center space-y-5">
             <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl mx-auto flex items-center justify-center shadow-inner">
               <AlertTriangle className="w-8 h-8" />
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={this.handleReload}
-                className="flex-1 min-h-[44px] px-4 py-3 bg-[#0B5C45] hover:bg-[#0F7A5C] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                className="flex-1 min-h-[44px] px-4 py-3 bg-[#2563EB] hover:bg-[#1E3A8A] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>पुन्हा लोड करा (Reload)</span>

@@ -13,6 +13,10 @@ import {
   ThakbakiEntry,
   MemberRequest,
   InAppNotification,
+  Payout,
+  Referral,
+  StaffMember,
+  BroadcastAlert,
 } from '../types';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -57,6 +61,10 @@ interface AppContextType {
   requests: MemberRequest[];
   pendingRequestsCount: number;
   notifications: InAppNotification[];
+  payouts: Payout[];
+  referrals: Referral[];
+  staffMembers: StaffMember[];
+  broadcastAlerts: BroadcastAlert[];
   refreshData: () => void;
   toasts: Toast[];
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
@@ -122,6 +130,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [thakbakiList, setThakbakiList] = useState<ThakbakiEntry[]>(StorageService.getThakbakiList);
   const [requests, setRequests] = useState<MemberRequest[]>(StorageService.getRequests);
   const [notifications, setNotifications] = useState<InAppNotification[]>(StorageService.getNotifications);
+  const [payouts, setPayouts] = useState<Payout[]>(StorageService.getPayouts);
+  const [referrals, setReferrals] = useState<Referral[]>(StorageService.getReferrals);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>(StorageService.getStaffMembers);
+  const [broadcastAlerts, setBroadcastAlerts] = useState<BroadcastAlert[]>(StorageService.getBroadcastAlerts);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
 
   const pendingRequestsCount = requests.filter((r) => r.status === 'PENDING').length;
@@ -140,6 +152,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setThakbakiList(StorageService.getThakbakiList());
     setRequests(StorageService.getRequests());
     setNotifications(StorageService.getNotifications());
+    setPayouts(StorageService.getPayouts());
+    setReferrals(StorageService.getReferrals());
+    setStaffMembers(StorageService.getStaffMembers());
+    setBroadcastAlerts(StorageService.getBroadcastAlerts());
   };
 
   const syncWithFirebase = async () => {
@@ -504,6 +520,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('[AppContext] Requests listener setup note:', e);
     }
 
+    // Realtime Users listener - automatically receives new registered users from Member Android App
+    let unsubUsers: (() => void) | null = null;
+    try {
+      unsubUsers = onSnapshot(
+        collection(db, 'users'),
+        () => {
+          StorageService.fetchRequestsFromFirestore().then((remoteReqs) => {
+            if (remoteReqs && remoteReqs.length > 0) {
+              setRequests(remoteReqs);
+            }
+          });
+        },
+        (err: any) => console.warn('[AppContext] Users listener error:', err?.message || err)
+      );
+    } catch (e) {
+      console.warn('[AppContext] Users listener setup note:', e);
+    }
+
     // Proactively pull member requests from Firestore on app load
     StorageService.fetchRequestsFromFirestore()
       .then((remoteReqs) => {
@@ -549,6 +583,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (unsubBishi) unsubBishi();
       if (unsubRequests) unsubRequests();
       if (unsubMemberRequests) unsubMemberRequests();
+      if (unsubUsers) unsubUsers();
     };
   }, [currentAdmin]);
 
@@ -634,6 +669,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         requests,
         pendingRequestsCount,
         notifications,
+        payouts,
+        referrals,
+        staffMembers,
+        broadcastAlerts,
         refreshData,
         toasts,
         showToast,
