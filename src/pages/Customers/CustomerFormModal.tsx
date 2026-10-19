@@ -213,8 +213,8 @@ export const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
             </h2>
             <p className="text-xs text-slate-500 font-medium mb-6">
               {language === 'EN'
-                ? 'New customer record has been saved in Narayan Bhishi system.'
-                : 'नारायण भिशी सिस्टीममध्ये नवीन खातेदाराची नोंद जतन झाली आहे.'}
+                ? 'New customer record has been saved in Shri Mahakal Finance system.'
+                : 'श्री महाकाल फायनान्स सिस्टीममध्ये नवीन खातेदाराची नोंद जतन झाली आहे.'}
             </p>
 
             {/* Details Summary Card */}

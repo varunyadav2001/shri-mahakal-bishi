@@ -74,7 +74,7 @@ function getTargetDailySlotDate(now = new Date()) {
 async function runCloudBackup() {
   const startTime = Date.now();
   console.log('====================================================');
-  console.log('🚀 नारायण भिशी (Narayan Bhishi) - Automated Cloud 11 PM Backup');
+  console.log('🚀 श्री महाकाल फायनान्स (Shri Mahakal Finance) - Automated Cloud 11 PM Backup');
   console.log(`⏰ Started at: ${new Date().toISOString()}`);
   console.log('====================================================');
 
@@ -129,7 +129,7 @@ async function runCloudBackup() {
 
   const backupData = {
     version: '2.0.0',
-    brand: 'Narayan Bhishi',
+    brand: 'Shri Mahakal Finance',
     exportedAt: new Date().toISOString(),
     customers,
     collections,

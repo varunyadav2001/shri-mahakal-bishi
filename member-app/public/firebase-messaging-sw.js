@@ -14,7 +14,7 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message: ', payload);
-  const notificationTitle = payload.notification?.title || 'नारायण भिशी सूचना';
+  const notificationTitle = payload.notification?.title || 'श्री महाकाल फायनान्स सूचना';
   const notificationOptions = {
     body: payload.notification?.body || '',
     icon: '/logo.svg',

@@ -29,6 +29,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedAdminSession) {
         try {
           const adminObj = JSON.parse(savedAdminSession);
+          if (
+            !adminObj.name ||
+            adminObj.name.includes('नारायण') ||
+            adminObj.name.includes('भिषी') ||
+            adminObj.name.includes('भिशी') ||
+            adminObj.name.toLowerCase().includes('narayan')
+          ) {
+            adminObj.name = 'श्री महाकाल फायनान्स व्यवस्थापक';
+          }
+          if (adminObj.email === 'admin@narayanbishi.com' || adminObj.email?.includes('narayan')) {
+            adminObj.email = 'admin@shreemahakalfinance.com';
+          }
+          localStorage.setItem('nb_active_session', JSON.stringify(adminObj));
           setCurrentAdmin(adminObj);
         } catch {
           localStorage.removeItem('nb_active_session');
@@ -47,9 +60,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const primaryAdmin = admins[0] || {
       id: 'admin_primary',
-      name: 'नारायण भिशी व्यवस्थापक',
+      name: 'श्री महाकाल फायनान्स व्यवस्थापक',
       mobile: '9876543210',
-      email: 'admin@narayanbishi.com',
+      email: 'admin@shreemahakalfinance.com',
       role: 'SUPER_ADMIN',
     };
 
@@ -57,8 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isMatchedIdentifier =
       cleanInput === 'admin' ||
       cleanInput === 'admin_primary' ||
+      cleanInput === 'mahakal' ||
+      cleanInput === 'shri' ||
       cleanInput === 'narayan' ||
       cleanInput === '9876543210' ||
+      cleanInput === 'admin@shreemahakalfinance.com' ||
       cleanInput === 'admin@narayanbishi.com' ||
       cleanInput === 'narayan@gmail.com' ||
       admins.some(

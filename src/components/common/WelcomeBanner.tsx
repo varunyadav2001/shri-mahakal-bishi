@@ -14,7 +14,7 @@ export const WelcomeBanner: React.FC = () => {
           <div className="flex items-center space-x-3 min-w-0">
             <img
               src="/logo.png"
-              alt="Narayan Bhishi Logo"
+              alt="Shri Mahakal Finance Logo"
               className="w-10 h-10 rounded-xl object-cover shadow-sm border border-amber-400/40 shrink-0"
             />
             <div className="min-w-0">
@@ -59,7 +59,7 @@ export const WelcomeBanner: React.FC = () => {
         <div className="flex items-center space-x-4 bg-gradient-to-br from-[#0F172A] to-[#1E3A8A] text-white p-4 sm:p-4.5 rounded-2xl shadow-sm shrink-0 w-full sm:w-auto">
           <img
             src="/logo.png"
-            alt="Narayan Bhishi Logo"
+            alt="Shri Mahakal Finance Logo"
             className="w-12 h-12 rounded-xl object-cover shadow-sm border border-amber-400/40 shrink-0"
           />
           <div>

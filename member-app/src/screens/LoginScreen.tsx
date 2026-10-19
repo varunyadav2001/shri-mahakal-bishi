@@ -56,7 +56,7 @@ export const LoginScreen: React.FC = () => {
       <div className="flex justify-between items-center pt-2">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-5 h-5 text-emerald-400" />
-          <span className="text-xs font-black tracking-wider text-emerald-200">NARAYAN BHISHI</span>
+          <span className="text-xs font-black tracking-wider text-emerald-200">SHRI MAHAKAL FINANCE</span>
         </div>
         <button
           onClick={toggleLanguage}
@@ -72,9 +72,9 @@ export const LoginScreen: React.FC = () => {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-400/40 rounded-3xl mx-auto flex items-center justify-center mb-4 shadow-xl shadow-emerald-950/50 backdrop-blur-sm p-3">
-            <img src="/logo.svg" alt="Narayan Bhishi" className="w-full h-full object-contain" />
+            <img src="/logo.svg" alt="Shri Mahakal Finance" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-white mb-1.5">नारायण भिशी</h1>
+          <h1 className="text-3xl font-black tracking-tight text-white mb-1.5">श्री महाकाल फायनान्स</h1>
           <p className="text-xs font-bold text-emerald-300 tracking-wide uppercase">
             {language === 'EN' ? 'Member Portal & Passbook' : 'खातेदार सदस्य पोर्टल व पासबुक'}
           </p>
@@ -187,7 +187,7 @@ export const LoginScreen: React.FC = () => {
 
       {/* Footer */}
       <div className="text-center text-[11px] font-bold text-emerald-300/60 pb-2">
-        {language === 'EN' ? 'Secured by Narayan Bhishi Core System' : 'नारायण भिशी व्यवस्थापन प्रणाली द्वारे सुरक्षित'}
+        {language === 'EN' ? 'Secured by Shri Mahakal Finance Core System' : 'श्री महाकाल फायनान्स व्यवस्थापन प्रणाली द्वारे सुरक्षित'}
       </div>
     </div>
   );

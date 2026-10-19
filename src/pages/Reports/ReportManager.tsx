@@ -826,7 +826,7 @@ export const ReportManager: React.FC = () => {
               {/* Header Box */}
               <div className="flex flex-col sm:flex-row justify-between items-center border-b-2 border-amber-900/40 pb-3 gap-2">
                 <div>
-                  <h2 className="text-sm font-black text-amber-900">{language === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h2>
+                  <h2 className="text-sm font-black text-amber-900">{language === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h2>
                   <h1 className="text-lg sm:text-xl font-black text-amber-950 tracking-tight">
                     {language === 'EN' ? 'Member Ledger Card' : 'खातेदार खाते उतारा (Member Ledger Card)'}
                   </h1>
@@ -1116,7 +1116,7 @@ export const ReportManager: React.FC = () => {
           <div className="print-only mb-6 border-b-2 border-emerald-900 pb-4">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-2xl font-black text-emerald-900 tracking-tight">{language === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h1>
+                <h1 className="text-2xl font-black text-emerald-900 tracking-tight">{language === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h1>
                 <h2 className="text-base font-extrabold text-slate-800">{customReportNote ? `${reportTitle} - ${customReportNote}` : reportTitle}</h2>
               </div>
               <div className="text-right text-xs font-bold text-slate-600 leading-relaxed">
@@ -1683,7 +1683,7 @@ export const ReportManager: React.FC = () => {
             <div className="flex justify-between items-end">
               <div>
                 <div>{language === 'EN' ? 'Report Generation Date: ' : 'अहवाल निर्मिती दिनांक: '}{formatDateMarathi(new Date().toISOString().split('T')[0], language)}</div>
-                <div className="text-[10px] text-slate-500">• {language === 'EN' ? 'Computer Generated Copy: Narayan Bhishi Management System' : 'संगणकीकृत प्रत: नारायण भिशी व्यवस्थापन प्रणाली'}</div>
+                <div className="text-[10px] text-slate-500">• {language === 'EN' ? 'Computer Generated Copy: Shri Mahakal Finance Management System' : 'संगणकीकृत प्रत: श्री महाकाल फायनान्स व्यवस्थापन प्रणाली'}</div>
               </div>
               <div className="text-center pr-4">
                 <div className="h-10"></div>
@@ -1740,7 +1740,7 @@ export const ReportManager: React.FC = () => {
             {/* Table */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden print:rounded-none print:border-none print:shadow-none">
               <div className="bg-amber-700 px-5 py-3 print:py-4">
-                <h3 className="text-white font-extrabold text-sm">{language === 'EN' ? 'Narayan Bhishi - ' : 'नारायण भिशी - '}{t.thakbakiReportTitle}</h3>
+                <h3 className="text-white font-extrabold text-sm">{language === 'EN' ? 'Shri Mahakal Finance - ' : 'श्री महाकाल फायनान्स - '}{t.thakbakiReportTitle}</h3>
                 <p className="text-amber-200 text-[10px] font-medium">
                   {formatDateMarathi(new Date().toISOString().split('T')[0], language)} | {language === 'EN' ? 'Records: ' : 'एकूण नोंदी: '}{totalCustomers}
                 </p>

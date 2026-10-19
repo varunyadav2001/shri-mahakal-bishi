@@ -1,9 +1,9 @@
 /**
  * ==============================================================================
- * NARAYAN BHISHI - GOOGLE DRIVE AUTO-BACKUP WEBHOOK (GOOGLE APPS SCRIPT)
+ * SHRI MAHAKAL FINANCE - GOOGLE DRIVE AUTO-BACKUP WEBHOOK (GOOGLE APPS SCRIPT)
  * ==============================================================================
- * Automatically saves Narayan Bhishi database backup files into the Google Drive
- * folder "Narayan_Bhishi_Backups".
+ * Automatically saves Shri Mahakal Finance database backup files into the Google Drive
+ * folder "Shri_Mahakal_Finance_Backups".
  * 
  * ROLLING BACKUP FEATURE (STRICT 10 FILES LIMIT):
  * - Keeps only the latest 10 backup files in Google Drive.
@@ -17,11 +17,11 @@
  * 3. Replace all existing code in the editor with this entire file.
  * 4. Click "Deploy" (top right) -> "New deployment".
  * 5. Select type: "Web app".
- * 6. Set Description: "Narayan Bhishi Backup Webhook (10-file rolling prune)".
+ * 6. Set Description: "Shri Mahakal Finance Backup Webhook (10-file rolling prune)".
  * 7. Execute as: "Me (your Google account)".
  * 8. Who has access: "Anyone".
  * 9. Click "Deploy", review permissions, and copy the Web App URL.
- * 10. Paste the Web App URL into Narayan Bhishi App -> Backup & Restore -> Drive Webhook Settings.
+ * 10. Paste the Web App URL into Shri Mahakal Finance App -> Backup & Restore -> Drive Webhook Settings.
  * ==============================================================================
  */
 
@@ -44,10 +44,10 @@ function doPost(e) {
 
     // Format backup filename
     var timestampStr = Utilities.formatDate(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd_HHmm');
-    var filename = payload.filename || ('Narayan_Bhishi_CloudDriveBackup_' + timestampStr + '.json');
+    var filename = payload.filename || ('Shri_Mahakal_Finance_CloudDriveBackup_' + timestampStr + '.json');
 
     // 1. Locate or create the backup folder
-    var folderName = 'Narayan_Bhishi_Backups';
+    var folderName = 'Shri_Mahakal_Finance_Backups';
     var folders = DriveApp.getFoldersByName(folderName);
     var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
 
@@ -63,7 +63,7 @@ function doPost(e) {
       var f = fileIterator.next();
       var fName = f.getName();
       // Match backup files by prefix or extension
-      if (fName.indexOf('Narayan_Bhishi_') !== -1 || fName.toLowerCase().endsWith('.json')) {
+      if (fName.indexOf('Shri_Mahakal_') !== -1 || fName.indexOf('Narayan_Bhishi_') !== -1 || fName.toLowerCase().endsWith('.json')) {
         backupFiles.push({
           file: f,
           id: f.getId(),
@@ -124,9 +124,9 @@ function doGet(e) {
   return respondJson({
     status: 'ok',
     success: true,
-    service: 'Narayan Bhishi Google Drive Backup Webhook',
+    service: 'Shri Mahakal Finance Google Drive Backup Webhook',
     version: '2.0.0',
-    folderName: 'Narayan_Bhishi_Backups',
+    folderName: 'Shri_Mahakal_Finance_Backups',
     maxBackupsLimit: 10,
     policy: 'Strict rolling 10-backup limit. Automatically deletes the 1st (oldest) backup file after uploading the 11th file.'
   });

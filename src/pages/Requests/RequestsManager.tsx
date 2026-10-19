@@ -289,8 +289,8 @@ export const RequestsManager: React.FC = () => {
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 font-medium">
                 {language === 'EN'
-                  ? 'Review, verify and approve member requests from the Narayan Member App'
-                  : 'नारायण सदस्य ॲपमधून आलेले नवीन अर्ज, कर्ज विनंत्या आणि जमा पावत्यांची तपासणी व मान्यता'}
+                  ? 'Review, verify and approve member requests from the Shri Mahakal Finance Member App'
+                  : 'श्री महाकाल फायनान्स सदस्य ॲपमधून आलेले नवीन अर्ज, कर्ज विनंत्या आणि जमा पावत्यांची तपासणी व मान्यता'}
               </p>
             </div>
           </div>

@@ -90,7 +90,7 @@ export const LoginRegister: React.FC = () => {
           <div className="flex items-center space-x-4">
             <img
               src="/logo.png"
-              alt="Narayan Bhishi Logo"
+              alt="Shri Mahakal Finance Logo"
               className="w-14 h-14 rounded-2xl object-cover shadow-md border border-amber-400/40 flex-shrink-0"
             />
             <div>
@@ -219,7 +219,7 @@ export const LoginRegister: React.FC = () => {
             <div className="text-center mb-6">
               <img
                 src="/logo.png"
-                alt="Narayan Bhishi Logo"
+                alt="Shri Mahakal Finance Logo"
                 className="w-16 h-16 rounded-2xl object-cover shadow-lg border border-amber-400/40 mx-auto mb-3"
               />
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t.appName}</h3>
@@ -265,7 +265,7 @@ export const LoginRegister: React.FC = () => {
                     required
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder={language === 'EN' ? 'e.g. 9876543210 or narayan@gmail.com' : 'उदा. ९८७६५४३२१० किंवा narayan@gmail.com'}
+                    placeholder={language === 'EN' ? 'e.g. 9876543210 or admin@shreemahakalfinance.com' : 'उदा. ९८७६५४३२१० किंवा admin@shreemahakalfinance.com'}
                     className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-[#2563EB] focus:outline-none bg-slate-50/40"
                   />
                 </div>

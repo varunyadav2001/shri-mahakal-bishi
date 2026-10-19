@@ -1,1 +1,1 @@
-﻿# Narayan Bhishi Management App
+# Shri Mahakal Finance Management App

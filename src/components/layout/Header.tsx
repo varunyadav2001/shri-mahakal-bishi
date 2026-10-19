@@ -22,6 +22,17 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
+  const rawAdminName = currentAdmin?.name || t.adminDefault;
+  const isDefaultOrOldName =
+    !rawAdminName ||
+    rawAdminName.includes('नारायण') ||
+    rawAdminName.includes('भिषी') ||
+    rawAdminName.includes('भिशी') ||
+    rawAdminName.toLowerCase().includes('narayan');
+  const adminDisplayName = isDefaultOrOldName
+    ? (language === 'EN' ? 'Shri Mahakal Finance Admin' : 'श्री महाकाल फायनान्स व्यवस्थापक')
+    : rawAdminName;
+
   return (
     <header className="h-16 sm:h-20 bg-white border-b border-[#E2E8F0] sticky top-0 z-30 px-3 sm:px-8 flex items-center justify-between no-print gap-2 shadow-2xs">
       <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
@@ -35,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 
         <img
           src="/logo.png"
-          alt="Narayan Bhishi"
+          alt="Shri Mahakal Finance"
           className="w-8 h-8 rounded-lg object-cover border border-amber-400/40 lg:hidden flex-shrink-0 shadow-2xs"
         />
 
@@ -44,8 +55,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           <div className="w-1.5 h-5 sm:h-8 bg-[#2563EB] rounded-full flex-shrink-0"></div>
           <div className="min-w-0">
             <h2 className="text-xs sm:text-xl font-black text-[#0F172A] tracking-tight truncate">
-              <span className="sm:hidden">{currentAdmin?.name || t.appName}</span>
-              <span className="hidden sm:inline">{t.welcomeGreeting} {currentAdmin?.name || t.adminDefault}</span>
+              <span className="sm:hidden">{adminDisplayName || t.appName}</span>
+              <span className="hidden sm:inline">{t.welcomeGreeting} {adminDisplayName}</span>
             </h2>
             <div className="hidden sm:flex items-center space-x-1 text-xs text-[#64748B] font-bold">
               <CalendarIcon className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />

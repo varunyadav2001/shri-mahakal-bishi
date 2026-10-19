@@ -549,7 +549,7 @@ export const reviewRequest = onCall<ReviewRequestPayload>(async (request) => {
       await admin.messaging().send({
         token: reqData.fcmToken,
         notification: {
-          title: `नारायण भिशी: ${titleMr}`,
+          title: `श्री महाकाल फायनान्स: ${titleMr}`,
           body: messageMr,
         },
         data: {

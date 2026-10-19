@@ -447,7 +447,7 @@ exports.reviewRequest = (0, https_1.onCall)(async (request) => {
             await admin.messaging().send({
                 token: reqData.fcmToken,
                 notification: {
-                    title: `नारायण भिशी: ${titleMr}`,
+                    title: `श्री महाकाल फायनान्स: ${titleMr}`,
                     body: messageMr,
                 },
                 data: {

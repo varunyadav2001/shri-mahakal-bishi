@@ -215,8 +215,8 @@ export const NewRequestScreen: React.FC<NewRequestScreenProps> = ({ onSuccess })
         </h2>
         <p className="text-xs font-bold text-slate-500 max-w-xs mx-auto leading-relaxed">
           {language === 'EN'
-            ? 'Your application has been delivered to the Narayan Bhishi admin portal. You will receive an alert once accepted.'
-            : 'तुमचा अर्ज नारायण भिशी प्रशासकाकडे पाठवला आहे. प्रशासकाने मान्यता दिल्यावर तुम्हाला थेट सूचना मिळेल.'}
+            ? 'Your application has been delivered to the Shri Mahakal Finance admin portal. You will receive an alert once accepted.'
+            : 'तुमचा अर्ज श्री महाकाल फायनान्स प्रशासकाकडे पाठवला आहे. प्रशासकाने मान्यता दिल्यावर तुम्हाला थेट सूचना मिळेल.'}
         </p>
 
         <div className="pt-4">

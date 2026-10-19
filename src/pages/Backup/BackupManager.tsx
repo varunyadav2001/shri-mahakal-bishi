@@ -33,8 +33,8 @@ import {
 import { ModalPortal } from '../../components/common/ModalPortal';
 
 const APPS_SCRIPT_CODE = `/**
- * NARAYAN BHISHI - GOOGLE DRIVE AUTO-BACKUP SCRIPT
- * - Automatically saves database backups in folder: Narayan_Bhishi_Backups
+ * SHRI MAHAKAL FINANCE - GOOGLE DRIVE AUTO-BACKUP SCRIPT
+ * - Automatically saves database backups in folder: Shri_Mahakal_Finance_Backups
  * - STRICT 10-FILE ROLLING LIMIT: Deletes the 1st (oldest) backup file
  *   automatically when the 11th backup is uploaded!
  */
@@ -47,9 +47,9 @@ function doPost(e) {
     var data = payload.data || {};
     var maxBackups = Number(payload.maxBackups) || 10;
     var timestampStr = Utilities.formatDate(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd_HHmm');
-    var filename = payload.filename || ('Narayan_Bhishi_CloudDriveBackup_' + timestampStr + '.json');
+    var filename = payload.filename || ('Shri_Mahakal_Finance_CloudDriveBackup_' + timestampStr + '.json');
 
-    var folderName = 'Narayan_Bhishi_Backups';
+    var folderName = 'Shri_Mahakal_Finance_Backups';
     var folders = DriveApp.getFoldersByName(folderName);
     var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
 
@@ -62,7 +62,7 @@ function doPost(e) {
     while (fileIterator.hasNext()) {
       var f = fileIterator.next();
       var fName = f.getName();
-      if (fName.indexOf('Narayan_Bhishi_') !== -1 || fName.toLowerCase().endsWith('.json')) {
+      if (fName.indexOf('Shri_Mahakal_') !== -1 || fName.indexOf('Narayan_Bhishi_') !== -1 || fName.toLowerCase().endsWith('.json')) {
         backupFiles.push({ file: f, name: fName, created: f.getDateCreated().getTime() });
       }
     }
@@ -101,7 +101,7 @@ function doPost(e) {
 function doGet(e) {
   return respondJson({
     status: 'ok',
-    service: 'Narayan Bhishi Google Drive Backup Webhook',
+    service: 'Shri Mahakal Finance Google Drive Backup Webhook',
     maxBackupsLimit: 10,
     policy: 'Strict rolling 10-backup limit. Deletes 1st (oldest) backup file after uploading 11th file.'
   });
@@ -182,7 +182,7 @@ export const BackupManager: React.FC = () => {
           const filename =
             config.lastDriveBackupFilename ||
             config.lastBackupFilename ||
-            AutoBackupService.generateBackupFilename('Narayan_Bhishi_Backup', new Date(configTime));
+            AutoBackupService.generateBackupFilename('Shri_Mahakal_Finance_Backup', new Date(configTime));
           AutoBackupService.saveSnapshotLocally(currentData, filename, configTime);
           setLocalSnapshots(AutoBackupService.getLocalSnapshots());
         } catch (err) {
@@ -282,7 +282,7 @@ export const BackupManager: React.FC = () => {
       const isoNow = new Date(now).toISOString();
       const data = StorageService.exportBackup();
       data.exportedAt = isoNow;
-      const filename = AutoBackupService.generateBackupFilename('Narayan_Bhishi_CloudDriveBackup', new Date(now));
+      const filename = AutoBackupService.generateBackupFilename('Shri_Mahakal_Finance_CloudDriveBackup', new Date(now));
 
       // 1. Immediately save a local snapshot with the exact current timestamp
       AutoBackupService.saveSnapshotLocally(data, filename, now);
@@ -430,8 +430,8 @@ export const BackupManager: React.FC = () => {
         if (!parsed || (!parsed.version && !parsed.customers && !parsed.collections)) {
           throw new Error(
             language === 'EN'
-              ? 'Invalid backup format. The selected file does not contain valid Narayan Bhishi database collections.'
-              : 'अवैध बॅकअप फाईल. निवडलेली JSON फाईल नारायण भिशी डेटाबेसशी जुळत नाही.'
+              ? 'Invalid backup format. The selected file does not contain valid Shri Mahakal Finance database collections.'
+              : 'अवैध बॅकअप फाईल. निवडलेली JSON फाईल श्री महाकाल फायनान्स डेटाबेसशी जुळत नाही.'
           );
         }
 
@@ -646,8 +646,8 @@ export const BackupManager: React.FC = () => {
 
             <p className="text-xs sm:text-sm text-[#5F6E68] font-bold max-w-2xl leading-relaxed">
               {language === 'EN'
-                ? 'Your complete database (all customers, collection receipts, loans, loan payments, configs) is saved automatically into the "Narayan_Bhishi_Backups" folder in Google Drive. You do NOT need to download or upload anything manually!'
-                : 'सर्व खातेदार, भिशी हप्ते, कर्ज आणि नोंदी आपोआप गुगल ड्राईव्हमधील "Narayan_Bhishi_Backups" फोल्डरमध्ये सेव्ह होतात. तुम्हाला मॅन्युअली कोणतीही फाईल डाऊनलोड किंवा अपलोड करण्याची गरज नाही!'}
+                ? 'Your complete database (all customers, collection receipts, loans, loan payments, configs) is saved automatically into the "Shri_Mahakal_Finance_Backups" folder in Google Drive. You do NOT need to download or upload anything manually!'
+                : 'सर्व खातेदार, भिशी हप्ते, कर्ज आणि नोंदी आपोआप गुगल ड्राईव्हमधील "Shri_Mahakal_Finance_Backups" फोल्डरमध्ये सेव्ह होतात. तुम्हाला मॅन्युअली कोणतीही फाईल डाऊनलोड किंवा अपलोड करण्याची गरज नाही!'}
             </p>
 
             {/* Status Details */}
@@ -724,7 +724,7 @@ export const BackupManager: React.FC = () => {
                     {language === 'EN' ? 'Google Drive Folder' : 'गुगल ड्राईव्ह फोल्डर'}
                   </div>
                   <div className="text-xs font-black text-[#10241E] truncate">
-                    Narayan_Bhishi_Backups
+                    Shri_Mahakal_Finance_Backups
                   </div>
                   <div className="text-[10px] text-blue-700 font-bold truncate">
                     {language === 'EN' ? 'Max 10 Backups (Rolling)' : 'कमाल १० बॅकअप (रोलिंग)'}
@@ -1074,7 +1074,7 @@ export const BackupManager: React.FC = () => {
                 <span>{language === 'EN' ? 'How to set up a new phone for your client:' : 'नवीन फोन कसा सेट करावा:'}</span>
               </div>
               <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
-                <li>{language === 'EN' ? 'Open drive.google.com and go to the "Narayan_Bhishi_Backups" folder.' : 'drive.google.com उघडा आणि "Narayan_Bhishi_Backups" फोल्डरमध्ये जा.'}</li>
+                <li>{language === 'EN' ? 'Open drive.google.com and go to the "Shri_Mahakal_Finance_Backups" folder.' : 'drive.google.com उघडा आणि "Shri_Mahakal_Finance_Backups" फोल्डरमध्ये जा.'}</li>
                 <li>{language === 'EN' ? 'Download the latest backup file to the new phone or computer.' : 'नवीनतम फाईल डाऊनलोड करा.'}</li>
                 <li>{language === 'EN' ? 'Click the button below and select that downloaded file.' : 'खालील बटणावर क्लिक करून ती फाईल निवडा.'}</li>
               </ol>
@@ -1119,8 +1119,8 @@ export const BackupManager: React.FC = () => {
             </h4>
             <p className="text-[11px] text-[#5F6E68] font-medium leading-relaxed">
               {language === 'EN'
-                ? 'The software automatically saves your full database directly to Google Drive folder "Narayan_Bhishi_Backups" every night at 11:00 PM. It automatically retains only the 10 most recent backups — deleting the 1st (oldest) backup file whenever the 11th is uploaded so Google Drive stays clean and organized.'
-                : 'सॉफ्टवेअर दररोज रात्री ११:०० वाजता आपोआप संपूर्ण डेटा गुगल ड्राईव्हवर "Narayan_Bhishi_Backups" फोल्डरमध्ये सेव्ह करते. गुगल ड्राईव्हवर नेहमी फक्त १० नवीनतम बॅकअप राहतात — ११ वी फाईल आल्यावर पहिली जुनी फाईल आपोआप डिलीट होते.'}
+                ? 'The software automatically saves your full database directly to Google Drive folder "Shri_Mahakal_Finance_Backups" every night at 11:00 PM. It automatically retains only the 10 most recent backups — deleting the 1st (oldest) backup file whenever the 11th is uploaded so Google Drive stays clean and organized.'
+                : 'सॉफ्टवेअर दररोज रात्री ११:०० वाजता आपोआप संपूर्ण डेटा गुगल ड्राईव्हवर "Shri_Mahakal_Finance_Backups" फोल्डरमध्ये सेव्ह करते. गुगल ड्राईव्हवर नेहमी फक्त १० नवीनतम बॅकअप राहतात — ११ वी फाईल आल्यावर पहिली जुनी फाईल आपोआप डिलीट होते.'}
             </p>
           </div>
 

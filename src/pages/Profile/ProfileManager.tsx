@@ -8,11 +8,48 @@ export const ProfileManager: React.FC = () => {
   const { currentAdmin, updateAdminProfile, changePassword } = useAuth();
   const { showToast, language } = useApp();
 
+  const getInitialName = () => {
+    const raw = currentAdmin?.name || '';
+    if (!raw || raw === 'नारायण भिशी व्यवस्थापक' || raw.includes('नारायण')) {
+      return 'श्री महाकाल फायनान्स व्यवस्थापक';
+    }
+    return raw;
+  };
+
+  const getInitialEmail = () => {
+    const raw = currentAdmin?.email || '';
+    if (!raw || raw === 'admin@narayanbishi.com') {
+      return 'admin@shreemahakalfinance.com';
+    }
+    return raw;
+  };
+
   // Profile info state
-  const [name, setName] = useState(currentAdmin?.name || '');
+  const [name, setName] = useState(getInitialName);
   const [mobile, setMobile] = useState(currentAdmin?.mobile || '');
-  const [email, setEmail] = useState(currentAdmin?.email || '');
+  const [email, setEmail] = useState(getInitialEmail);
   const [saving, setSaving] = useState(false);
+
+  // Automatically update and migrate session state if old name is present
+  React.useEffect(() => {
+    if (currentAdmin) {
+      const rawName = currentAdmin.name || '';
+      const finalName = (!rawName || rawName === 'नारायण भिशी व्यवस्थापक' || rawName.includes('नारायण'))
+        ? 'श्री महाकाल फायनान्स व्यवस्थापक'
+        : rawName;
+      setName(finalName);
+
+      const rawEmail = currentAdmin.email || '';
+      const finalEmail = (!rawEmail || rawEmail === 'admin@narayanbishi.com')
+        ? 'admin@shreemahakalfinance.com'
+        : rawEmail;
+      setEmail(finalEmail);
+
+      if (rawName !== finalName || rawEmail !== finalEmail) {
+        updateAdminProfile({ name: finalName, email: finalEmail }).catch(() => {});
+      }
+    }
+  }, [currentAdmin?.name, currentAdmin?.email]);
 
   // Change password state
   const [newPassword, setNewPassword] = useState('');
@@ -148,7 +185,7 @@ export const ProfileManager: React.FC = () => {
                   required
                   value={name}
                   onChange={(val) => setName(val)}
-                  placeholder={language === 'EN' ? 'Admin Name (e.g. Narayan)' : 'प्रशासकाचे नाव (उदा. narayan -> नारायण)'}
+                  placeholder={language === 'EN' ? 'Admin Name (e.g. Mahakal)' : 'प्रशासकाचे नाव (उदा. श्री महाकाल)'}
                   className="w-full pl-4 pr-20 py-2.5 rounded-xl border border-slate-300 text-sm font-bold"
                 />
               </div>
@@ -165,7 +202,7 @@ export const ProfileManager: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="narayan@gmail.com"
+                  placeholder="admin@shreemahakalfinance.com"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold"
                 />
               </div>

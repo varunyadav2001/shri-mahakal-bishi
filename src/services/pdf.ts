@@ -153,7 +153,7 @@ export const generateThakbakiReportPDF = async (
   lang: Language = 'MR'
 ): Promise<void> => {
   const todayStr = new Date().toISOString().split('T')[0];
-  const title = lang === 'EN' ? 'Narayan Bhishi - Thak Baki Report' : 'नारायण भिशी - थकबाकी अहवाल';
+  const title = lang === 'EN' ? 'Shri Mahakal Finance - Thak Baki Report' : 'श्री महाकाल फायनान्स - थकबाकी अहवाल';
   const dateFormatted = formatDateMarathi(todayStr, lang);
 
   const totalInitial = entries.reduce((s, e) => s + (e.initialAmount || 0), 0);
@@ -227,7 +227,7 @@ export const generateThakbakiReportPDF = async (
       ? `
         <div style="border-bottom: 2px solid #78350f; padding-bottom: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h2 style="margin: 0; font-size: 14px; font-weight: 900; color: #78350f;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h2>
+            <h2 style="margin: 0; font-size: 14px; font-weight: 900; color: #78350f;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h2>
             <h1 style="margin: 2px 0 0 0; font-size: 18px; font-weight: 900; color: #451a03;">${title}</h1>
           </div>
           <div style="text-align: right; font-size: 11px; font-weight: 800; color: #78350f; line-height: 1.4;">
@@ -263,7 +263,7 @@ export const generateThakbakiReportPDF = async (
       : `
         <div style="border-bottom: 2px solid #78350f; padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <span style="font-size: 14px; font-weight: 900; color: #78350f;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</span>
+            <span style="font-size: 14px; font-weight: 900; color: #78350f;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</span>
             <span style="font-size: 14px; font-weight: 800; color: #451a03; margin-left: 8px;">- ${title} (${lang === 'EN' ? 'Page' : 'पान'} ${pageIdx + 1} / ${totalPages})</span>
           </div>
           <div style="font-size: 10.5px; font-weight: 800; color: #78350f;">
@@ -278,7 +278,7 @@ export const generateThakbakiReportPDF = async (
         <div style="margin-top: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: 700; color: #64748b;">
             <div>
-              <div>${lang === 'EN' ? 'Generated: ' : 'निर्मिती दिनांक: '} ${dateFormatted} &nbsp;|&nbsp; ${lang === 'EN' ? 'Computer Generated — Narayan Bhishi Management System' : 'संगणकीकृत प्रत — नारायण भिशी व्यवस्थापन प्रणाली'}</div>
+              <div>${lang === 'EN' ? 'Generated: ' : 'निर्मिती दिनांक: '} ${dateFormatted} &nbsp;|&nbsp; ${lang === 'EN' ? 'Computer Generated — Shri Mahakal Finance System' : 'संगणकीकृत प्रत — श्री महाकाल फायनान्स व्यवस्थापन प्रणाली'}</div>
             </div>
             <div style="text-align: center;">
               <div style="height: 25px;"></div>
@@ -289,7 +289,7 @@ export const generateThakbakiReportPDF = async (
       `
       : `
         <div style="display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 700; color: #94a3b8; border-top: 1px dashed #e5e7eb; padding-top: 6px;">
-          <span>${lang === 'EN' ? 'Narayan Bhishi Thak Baki Report' : 'नारायण भिशी थकबाकी अहवाल'}</span>
+          <span>${lang === 'EN' ? 'Shri Mahakal Finance Thak Baki Report' : 'श्री महाकाल फायनान्स थकबाकी अहवाल'}</span>
           <span>${lang === 'EN' ? 'Page ' : 'पान '}${pageIdx + 1} / ${totalPages}</span>
         </div>
       `;
@@ -604,7 +604,7 @@ export const generateReportPDF = async (
       ? `
         <div style="border-bottom: 2px solid #064e3b; padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h2 style="margin: 0; font-size: 13px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h2>
+            <h2 style="margin: 0; font-size: 13px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h2>
             <h1 style="margin: 2px 0 0 0; font-size: 17px; font-weight: 900; color: #0f172a;">${title}</h1>
           </div>
           <div style="text-align: right; font-size: 10.5px; font-weight: 800; color: #334155; line-height: 1.35;">
@@ -641,7 +641,7 @@ export const generateReportPDF = async (
       : `
         <div style="border-bottom: 2px solid #064e3b; padding-bottom: 5px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <span style="font-size: 13px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</span>
+            <span style="font-size: 13px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</span>
             <span style="font-size: 13px; font-weight: 800; color: #0f172a; margin-left: 8px;">- ${title} (${lang === 'EN' ? 'Page' : 'पान'} ${pageIdx + 1} / ${totalPages})</span>
           </div>
           <div style="font-size: 10px; font-weight: 800; color: #334155;">
@@ -690,7 +690,7 @@ export const generateReportPDF = async (
           }
           <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: 700; color: #475569;">
             <div>
-              <div>${lang === 'EN' ? 'Generated: ' : 'अहवाल निर्मिती: '} ${todayStr} &nbsp;|&nbsp; ${lang === 'EN' ? 'Computer Generated Copy: Narayan Bhishi Management' : 'संगणकीकृत प्रत: नारायण भिशी व्यवस्थापन'}</div>
+              <div>${lang === 'EN' ? 'Generated: ' : 'अहवाल निर्मिती: '} ${todayStr} &nbsp;|&nbsp; ${lang === 'EN' ? 'Computer Generated Copy: Shri Mahakal Finance Management' : 'संगणकीकृत प्रत: श्री महाकाल फायनान्स व्यवस्थापन'}</div>
             </div>
             <div style="text-align: center;">
               <div style="height: 25px;"></div>
@@ -827,7 +827,7 @@ export const generateMemberLedgerPDF = async (
       ? `
         <div style="border-bottom: 2px solid #8B4513; padding-bottom: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h2 style="margin: 0; font-size: 14px; font-weight: 900; color: #8B4513;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h2>
+            <h2 style="margin: 0; font-size: 14px; font-weight: 900; color: #8B4513;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h2>
             <h1 style="margin: 2px 0 0 0; font-size: 18px; font-weight: 900; color: #5c3a21;">${lang === 'EN' ? 'Member Ledger Card Register' : 'खातेदार खाते उतारा (Member Ledger Card Register)'}</h1>
           </div>
           <div style="text-align: right; font-size: 11px; font-weight: 800; color: #5c3a21; line-height: 1.4;">
@@ -863,7 +863,7 @@ export const generateMemberLedgerPDF = async (
       : `
         <div style="border-bottom: 2px solid #8B4513; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <span style="font-size: 14px; font-weight: 900; color: #8B4513;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</span>
+            <span style="font-size: 14px; font-weight: 900; color: #8B4513;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</span>
             <span style="font-size: 13.5px; font-weight: 800; color: #5c3a21; margin-left: 8px;">- ${customer.accountNumber} : ${customer.name} (${lang === 'EN' ? 'Page' : 'पान'} ${pageIdx + 1} / ${totalPages})</span>
           </div>
           <div style="font-size: 10.5px; font-weight: 800; color: #5c3a21;">
@@ -1081,7 +1081,7 @@ export const generateCustomerPDF = async (
       ? `
         <div style="border-bottom: 2px solid #064e3b; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h2 style="margin: 0; font-size: 15px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</h2>
+            <h2 style="margin: 0; font-size: 15px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</h2>
             <h1 style="margin: 2px 0 0 0; font-size: 18px; font-weight: 900; color: #0f172a;">${lang === 'EN' ? 'Customer Account Statement' : 'खातेदार व्यवहार अहवाल (Customer Account Statement)'}</h1>
           </div>
           <div style="text-align: right; font-size: 11px; font-weight: 800; color: #334155; line-height: 1.4;">
@@ -1153,7 +1153,7 @@ export const generateCustomerPDF = async (
       : `
         <div style="border-bottom: 2px solid #064e3b; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <span style="font-size: 14px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'}</span>
+            <span style="font-size: 14px; font-weight: 900; color: #064e3b;">${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'}</span>
             <span style="font-size: 13px; font-weight: 800; color: #0f172a; margin-left: 8px;">- ${customer.accountNumber} : ${customer.name} (${lang === 'EN' ? 'Page' : 'पान'} ${pageIdx + 1} / ${totalPages})</span>
           </div>
           <div style="font-size: 10.5px; font-weight: 800; color: #334155;">

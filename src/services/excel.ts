@@ -284,7 +284,7 @@ export const exportGeneralReportToExcel = (
       </style>
     </head>
     <body>
-      <h2>${lang === 'EN' ? 'Narayan Bhishi' : 'नारायण भिशी'} - ${title}</h2>
+      <h2>${lang === 'EN' ? 'Shri Mahakal Finance' : 'श्री महाकाल फायनान्स'} - ${title}</h2>
       <p>${lang === 'EN' ? 'Scheme' : 'भिशी'}: ${bishiName} | ${lang === 'EN' ? 'Date' : 'तारीख'}: ${new Date().toLocaleDateString(lang === 'EN' ? 'en-IN' : 'mr-IN')}</p>
       <table>
         <thead>
@@ -351,7 +351,7 @@ export const exportThakbakiReportToExcel = (
   lang: 'MR' | 'EN' = 'MR'
 ) => {
   const todayStr = new Date().toISOString().split('T')[0];
-  const title = lang === 'EN' ? 'Narayan Bhishi - Thak Baki Report' : 'नारायण भिशी - थकबाकी अहवाल';
+  const title = lang === 'EN' ? 'Shri Mahakal Finance - Thak Baki Report' : 'श्री महाकाल फायनान्स - थकबाकी अहवाल';
   const dateLabel = lang === 'EN' ? 'Date' : 'दिनांक';
   const dateFormatted = formatDateMarathi(todayStr, lang);
 

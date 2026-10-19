@@ -38,7 +38,7 @@ export const MainApp: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white space-y-3">
         <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
-        <span className="text-xs font-bold text-emerald-200">नारायण भिशी लोड होत आहे...</span>
+        <span className="text-xs font-bold text-emerald-200">श्री महाकाल फायनान्स लोड होत आहे...</span>
       </div>
     );
   }

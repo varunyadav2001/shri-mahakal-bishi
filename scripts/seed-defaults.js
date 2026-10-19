@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * NARAYAN BHISHI - SEED DEFAULTS SCRIPT (scripts/seed-defaults.js)
+ * SHRI MAHAKAL FINANCE - SEED DEFAULTS SCRIPT (scripts/seed-defaults.js)
  * ==============================================================================
  * Starts with an isolated, empty database and seeds ONLY:
  * 1. The first administrator record (admin_primary, editable).
@@ -26,7 +26,7 @@ const firebaseConfig = {
 
 async function seedDefaults() {
   console.log('====================================================');
-  console.log('🌱 Narayan Bhishi - Seeding Default Configuration');
+  console.log('🌱 Shri Mahakal Finance - Seeding Default Configuration');
   console.log('====================================================');
 
   const app = initializeApp(firebaseConfig);
@@ -40,9 +40,9 @@ async function seedDefaults() {
   if (!adminSnap.exists()) {
     await setDoc(adminRef, {
       id: 'admin_primary',
-      name: 'नारायण भिशी व्यवस्थापक',
+      name: 'श्री महाकाल फायनान्स व्यवस्थापक',
       mobile: '9876543210',
-      email: 'admin@narayanbishi.com',
+      email: 'admin@shreemahakalfinance.com',
       password: 'admin', // initial password (editable upon first login)
       role: 'SUPER_ADMIN',
       createdAt: now,
@@ -123,7 +123,7 @@ async function seedDefaults() {
   }
 
   console.log('====================================================');
-  console.log('🎉 Narayan Bhishi default database seed completed!');
+  console.log('🎉 Shri Mahakal Finance default database seed completed!');
   console.log('====================================================');
   console.log('Next Steps for Admin:');
   console.log('1. Launch the admin panel with `npm run dev`');

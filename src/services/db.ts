@@ -840,28 +840,46 @@ const initializeDefaultConfigs = () => {
   // Set up primary admin credentials locally if uninitialized
   const PRIMARY_ADMIN: Admin = {
     id: 'admin_primary',
-    name: 'नारायण भिशी व्यवस्थापक',
+    name: 'श्री महाकाल फायनान्स व्यवस्थापक',
     mobile: '9876543210',
-    email: 'admin@narayanbishi.com',
+    email: 'admin@shreemahakalfinance.com',
     role: 'SUPER_ADMIN',
     createdAt: new Date().toISOString(),
   };
 
   try {
-    const admins = getStoredData<Admin[]>(STORAGE_KEYS.ADMINS, []);
-    const hasOnlyPrimaryAdmin =
-      Array.isArray(admins) &&
-      admins.length === 1 &&
-      admins[0]?.mobile &&
-      String(admins[0].mobile).trim() === '9876543210' &&
-      admins[0].id === 'admin_primary';
+    let admins = getStoredData<Admin[]>(STORAGE_KEYS.ADMINS, []);
+    let modified = false;
 
-    if (!hasOnlyPrimaryAdmin) {
+    if (Array.isArray(admins) && admins.length > 0) {
+      admins = admins.map((a) => {
+        let updated = { ...a };
+        if (
+          !updated.name ||
+          updated.name.includes('नारायण') ||
+          updated.name.includes('भिषी') ||
+          updated.name.includes('भिशी') ||
+          updated.name.toLowerCase().includes('narayan')
+        ) {
+          updated.name = 'श्री महाकाल फायनान्स व्यवस्थापक';
+          modified = true;
+        }
+        if (updated.email === 'admin@narayanbishi.com' || updated.email?.includes('narayan')) {
+          updated.email = 'admin@shreemahakalfinance.com';
+          modified = true;
+        }
+        return updated;
+      });
+      if (modified) {
+        setStoredData<Admin[]>(STORAGE_KEYS.ADMINS, admins);
+      }
+    } else {
       const currentPass = localStorage.getItem('nb_admin_pass') || 'admin';
       const adminWithPass = { ...PRIMARY_ADMIN, password: currentPass };
-      setStoredData(STORAGE_KEYS.ADMINS, [adminWithPass]);
+      setStoredData<Admin[]>(STORAGE_KEYS.ADMINS, [adminWithPass]);
       localStorage.setItem('nb_admin_pass', currentPass);
-    } else if (!localStorage.getItem('nb_admin_pass')) {
+    }
+    if (!localStorage.getItem('nb_admin_pass')) {
       localStorage.setItem('nb_admin_pass', 'admin');
     }
   } catch (err) {
@@ -966,9 +984,9 @@ export const StorageService = {
     const admins = StorageService.getAdmins();
     const primary = admins[0] || {
       id: 'admin_primary',
-      name: 'नारायण भिशी व्यवस्थापक',
+      name: 'श्री महाकाल फायनान्स व्यवस्थापक',
       mobile: '9876543210',
-      email: 'admin@narayanbishi.com',
+      email: 'admin@shreemahakalfinance.com',
       role: 'SUPER_ADMIN',
       createdAt: new Date().toISOString(),
     };
@@ -981,28 +999,45 @@ export const StorageService = {
     await syncToFirestore('admins', 'admin_primary', updatedAdmin);
   },
   getAdmins: (): Admin[] => {
-    const admins = getStoredData<Admin[]>(STORAGE_KEYS.ADMINS, []);
-    const hasOnlyPrimaryAdmin =
-      Array.isArray(admins) &&
-      admins.length === 1 &&
-      admins[0]?.mobile &&
-      String(admins[0].mobile).trim() === '9876543210' &&
-      admins[0].id === 'admin_primary';
+    let admins = getStoredData<Admin[]>(STORAGE_KEYS.ADMINS, []);
+    let modified = false;
 
-    if (!hasOnlyPrimaryAdmin) {
-      const PRIMARY_ADMIN: Admin = {
-        id: 'admin_primary',
-        name: 'नारायण भिशी व्यवस्थापक',
-        mobile: '9876543210',
-        email: 'admin@narayanbishi.com',
-        role: 'SUPER_ADMIN',
-        createdAt: new Date().toISOString(),
-      };
-      setStoredData(STORAGE_KEYS.ADMINS, [PRIMARY_ADMIN]);
-      localStorage.setItem('nb_admin_pass', 'admin');
-      return [PRIMARY_ADMIN];
+    if (Array.isArray(admins) && admins.length > 0) {
+      admins = admins.map((a) => {
+        let updated = { ...a };
+        if (
+          !updated.name ||
+          updated.name.includes('नारायण') ||
+          updated.name.includes('भिषी') ||
+          updated.name.includes('भिशी') ||
+          updated.name.toLowerCase().includes('narayan')
+        ) {
+          updated.name = 'श्री महाकाल फायनान्स व्यवस्थापक';
+          modified = true;
+        }
+        if (updated.email === 'admin@narayanbishi.com' || updated.email?.includes('narayan')) {
+          updated.email = 'admin@shreemahakalfinance.com';
+          modified = true;
+        }
+        return updated;
+      });
+      if (modified) {
+        setStoredData<Admin[]>(STORAGE_KEYS.ADMINS, admins);
+      }
+      return admins;
     }
-    return admins;
+
+    const PRIMARY_ADMIN: Admin = {
+      id: 'admin_primary',
+      name: 'श्री महाकाल फायनान्स व्यवस्थापक',
+      mobile: '9876543210',
+      email: 'admin@shreemahakalfinance.com',
+      role: 'SUPER_ADMIN',
+      createdAt: new Date().toISOString(),
+    };
+    setStoredData(STORAGE_KEYS.ADMINS, [PRIMARY_ADMIN]);
+    localStorage.setItem('nb_admin_pass', 'admin');
+    return [PRIMARY_ADMIN];
   },
 
   hasAdmin: (): boolean => true,
@@ -2490,7 +2525,7 @@ export const StorageService = {
     return {
       version: '1.0.0',
       exportedAt: new Date().toISOString(),
-      brand: 'Narayan Bhishi',
+      brand: 'Shri Mahakal Finance',
       admins: StorageService.getAdmins(),
       customers: StorageService.getCustomers(),
       bishiConfigs: StorageService.getBishiConfigs(),

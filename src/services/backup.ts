@@ -336,7 +336,7 @@ export const AutoBackupService = {
   },
 
   // Formats human-readable filename with current date and time
-  generateBackupFilename: (prefix: string = 'Narayan_Bhishi_AutoBackup', exactDate?: Date): string => {
+  generateBackupFilename: (prefix: string = 'Shri_Mahakal_Finance_AutoBackup', exactDate?: Date): string => {
     const now = exactDate || new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -350,7 +350,7 @@ export const AutoBackupService = {
   performBackupNow: (): { snapshot: LocalBackupSnapshot; filename: string } => {
     const now = Date.now();
     const data = StorageService.exportBackup();
-    const filename = AutoBackupService.generateBackupFilename('Narayan_Bhishi_Backup', new Date(now));
+    const filename = AutoBackupService.generateBackupFilename('Shri_Mahakal_Finance_Backup', new Date(now));
 
     // 1. Save snapshot to local device storage
     const snapshot = AutoBackupService.saveSnapshotLocally(data, filename, now, undefined, 'MANUAL');
@@ -398,7 +398,7 @@ export const AutoBackupService = {
     try {
       const now = exactTimestamp || Date.now();
       const data = providedData || StorageService.exportBackup();
-      const filename = customFilename || AutoBackupService.generateBackupFilename('Narayan_Bhishi_CloudDriveBackup', new Date(now));
+      const filename = customFilename || AutoBackupService.generateBackupFilename('Shri_Mahakal_Finance_CloudDriveBackup', new Date(now));
 
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -472,7 +472,7 @@ export const AutoBackupService = {
     // Purge accidental 06:57 AM false backup references from config
     if (config.lastBackupFilename?.includes('_0657.json') || config.lastDriveBackupFilename?.includes('_0657.json')) {
       const genuineTime = daily11pmTime || cloudTimestamp;
-      const genuineFile = cloudData.lastDaily11pmFilename || cloudData.lastDriveBackupFilename || 'Narayan_Bhishi_AutoBackup_11PM.json';
+      const genuineFile = cloudData.lastDaily11pmFilename || cloudData.lastDriveBackupFilename || 'Shri_Mahakal_Finance_AutoBackup_11PM.json';
       config.lastBackupFilename = genuineFile;
       config.lastDriveBackupFilename = genuineFile;
       config.lastBackupTimestamp = genuineTime;
@@ -514,7 +514,7 @@ export const AutoBackupService = {
       const isoDate =
         cloudData.lastDriveBackupDate || cloudData.lastBackupDate || new Date(bestTime).toISOString();
       const filename =
-        cloudData.lastDaily11pmFilename || cloudData.lastDriveBackupFilename || cloudData.lastBackupFilename || 'Narayan_Bhishi_CloudDriveBackup.json';
+        cloudData.lastDaily11pmFilename || cloudData.lastDriveBackupFilename || cloudData.lastBackupFilename || 'Shri_Mahakal_Finance_CloudDriveBackup.json';
 
       if (bestTime > (config.lastBackupTimestamp || 0) || !config.lastBackupTimestamp) {
         config.lastDriveBackupTimestamp = bestTime;
@@ -654,7 +654,7 @@ export const AutoBackupService = {
 
         const now = Date.now();
         // Distinct filename clearly indicating the scheduled daily 11 PM backup for targetSlotDate
-        const filename = `Narayan_Bhishi_AutoBackup_11PM_${targetSlotDate}_2300.json`;
+        const filename = `Shri_Mahakal_Finance_AutoBackup_11PM_${targetSlotDate}_2300.json`;
 
         // 1. Store snapshot in local memory for instant 1-click restore without needing files
         const snapshot = AutoBackupService.saveSnapshotLocally(data, filename, now, targetSlotDate, '11PM');
@@ -770,7 +770,7 @@ export const AutoBackupService = {
       }
 
       const backupTime = Date.now();
-      const filename = AutoBackupService.generateBackupFilename('Narayan_Bhishi_DailyOpen_Backup', new Date(backupTime));
+      const filename = AutoBackupService.generateBackupFilename('Shri_Mahakal_Finance_DailyOpen_Backup', new Date(backupTime));
 
       // 1. Store snapshot in local memory / IndexedDB for instant 1-click restore
       const snapshot = AutoBackupService.saveSnapshotLocally(data, filename, backupTime, todayStr, 'OPEN');

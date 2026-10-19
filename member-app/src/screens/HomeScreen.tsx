@@ -110,7 +110,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               <img src="/logo.svg" alt="Narayan" className="w-full h-full object-contain" />
             </div>
             <div>
-              <div className="text-[10px] font-bold tracking-wider text-emerald-300 uppercase">नारायण भिशी</div>
+              <div className="text-[10px] font-bold tracking-wider text-emerald-300 uppercase">श्री महाकाल फायनान्स</div>
               <div className="text-xs font-black">{customer?.name || 'खातेदार'}</div>
             </div>
           </div>

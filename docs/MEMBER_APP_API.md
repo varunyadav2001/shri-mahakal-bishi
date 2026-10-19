@@ -188,6 +188,6 @@ Admins approve or reject member requests through the secure HTTPS callable Cloud
 2. The FCM registration token is acquired via `@firebase/messaging` (`getToken`).
 3. The token is attached to every new `MemberRequest` (`fcmToken` property).
 4. When `reviewRequest` executes on Cloud Functions, `admin.messaging().send()` pushes an instant alert to the member:
-   - **Title**: `नारायण भिशी: अर्ज मंजूर झाला` or `नारायण भिशी: अर्ज नाकारला गेला`
+   - **Title**: `श्री महाकाल फायनान्स: अर्ज मंजूर झाला` or `श्री महाकाल फायनान्स: अर्ज नाकारला गेला`
    - **Body**: Custom Marathi message with the admin note.
    - **Data**: `{ requestId, status, type }`.

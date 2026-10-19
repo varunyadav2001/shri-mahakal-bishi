@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogoutClick
           <div className="flex items-center space-x-3 group cursor-pointer">
             <img
               src="/logo.png"
-              alt="Narayan Bhishi Logo"
+              alt="Shri Mahakal Finance Logo"
               className="w-10 h-10 rounded-xl object-cover shadow-md border border-amber-400/40 flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
             />
             <div>
